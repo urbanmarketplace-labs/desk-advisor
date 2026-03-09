@@ -742,89 +742,235 @@ textarea {
     }
 
     function generateAdvice() {
-      const input = document.getElementById("userInput").value.trim();
-      const response = document.getElementById("response");
+  const input = document.getElementById("userInput").value.trim();
+  const response = document.getElementById("response");
 
-      if (!input) {
-        response.style.display = "block";
-        response.innerHTML = `
-          <div class="response-shell">
-            <div class="note-box">
-              Please add a short description of your desk setup first. Include what feels inefficient, cluttered or uncomfortable, and what kind of improvement you want.
-            </div>
-          </div>
-        `;
-        return;
-      }
+  if (!input) {
+    response.style.display = "block";
+    response.innerHTML = `
+      <div class="response-shell">
+        <div class="note-box">
+          Please describe your workspace first. Mention the desk size, lighting, layout, clutter, comfort issues, and what you want to improve.
+        </div>
+      </div>
+    `;
+    return;
+  }
 
-      const lower = input.toLowerCase();
+  const lower = input.toLowerCase();
 
-      const freeTips = [];
-      const budgetTips = [];
-      const premiumTips = [];
+  const freeTips = [];
+  const budgetTips = [];
+  const premiumTips = [];
+  const detectedThemes = [];
 
-      if (lower.includes("small") || lower.includes("compact") || lower.includes("limited space")) {
-        freeTips.push("Reduce the number of permanent desk items so the available surface feels deliberate rather than congested.");
-        budgetTips.push("Introduce a compact desk organiser or under-monitor tray to recover usable surface area without making the setup feel crowded.");
-        premiumTips.push("Consider a refined desk mat to visually define the workspace and give a smaller desk a more structured, intentional appearance.");
-      }
+  function addTheme(name) {
+    if (!detectedThemes.includes(name)) detectedThemes.push(name);
+  }
 
-      if (lower.includes("cable") || lower.includes("wires") || lower.includes("messy")) {
-        freeTips.push("Route charging cables and peripherals behind the desk so visual noise is reduced immediately.");
-        budgetTips.push("Use cable clips or a simple under-desk cable solution to keep lines controlled and off the working surface.");
-        premiumTips.push("A cleaner accessory layout paired with a premium desk surface can make the whole workstation feel substantially more composed.");
-      }
+  // Small / compact desk
+  if (
+    lower.includes("small") ||
+    lower.includes("compact") ||
+    lower.includes("limited space") ||
+    lower.includes("tiny desk")
+  ) {
+    addTheme("space");
+    freeTips.push("Reduce the number of permanent desk items so the available surface feels intentional rather than crowded.");
+    freeTips.push("Keep only one or two daily-use objects on the main desk surface and move everything else off the visual field.");
+    budgetTips.push("Introduce a compact organiser or under-monitor tray to recover space without making the desk feel busier.");
+    premiumTips.push("A refined desk mat can help define the workspace and make a smaller setup look more structured and deliberate.");
+  }
 
-      if (lower.includes("lighting") || lower.includes("dark") || lower.includes("dim") || lower.includes("evening")) {
-        freeTips.push("Reposition the desk to make better use of natural light where possible and avoid relying entirely on harsh overhead lighting.");
-        budgetTips.push("Add a focused task light or monitor light bar to improve clarity and reduce visual fatigue during longer sessions.");
-        premiumTips.push("A higher-quality lighting setup will elevate both usability and atmosphere, particularly for evening work.");
-      }
+  // Cables / clutter
+  if (
+    lower.includes("cable") ||
+    lower.includes("wires") ||
+    lower.includes("messy") ||
+    lower.includes("clutter") ||
+    lower.includes("cluttered")
+  ) {
+    addTheme("clutter");
+    freeTips.push("Route visible cables behind the desk immediately to reduce visual noise and make the setup feel calmer.");
+    freeTips.push("Create clear zones for work essentials and remove anything that does not support your actual workflow.");
+    budgetTips.push("Use cable clips or a simple under-desk cable solution to keep lines controlled and off the surface.");
+    premiumTips.push("A more curated accessory layer can make the desk feel sharper, calmer and more professional.");
+  }
 
-      if (lower.includes("ergonomic") || lower.includes("comfort") || lower.includes("posture") || lower.includes("back") || lower.includes("neck")) {
-        freeTips.push("Raise the screen height so your eyeline is more neutral and your posture is not constantly being pulled downward.");
-        budgetTips.push("Introduce a laptop stand or monitor riser to create a more natural viewing position for longer working blocks.");
-        premiumTips.push("Premium ergonomic accessories become worthwhile once the basic layout is correct and your daily usage pattern is consistent.");
-      }
+  // Lighting
+  if (
+    lower.includes("lighting") ||
+    lower.includes("dark") ||
+    lower.includes("dim") ||
+    lower.includes("evening") ||
+    lower.includes("overhead")
+  ) {
+    addTheme("lighting");
+    freeTips.push("Reposition the desk to take better advantage of natural light where possible and reduce dependence on harsh overhead lighting.");
+    budgetTips.push("Add a focused task light or monitor light bar to improve clarity and reduce visual fatigue.");
+    premiumTips.push("A higher-quality lighting setup will improve both usability and atmosphere, especially for evening work.");
+  }
 
-      if (lower.includes("clutter") || lower.includes("distracting") || lower.includes("organisation") || lower.includes("storage")) {
-        freeTips.push("Create clear zones for work essentials, occasional-use items and non-work objects so the desk supports focus rather than distraction.");
-        budgetTips.push("Use a small organiser, tray or vertical storage piece to prevent frequently used items from spreading across the desk.");
-        premiumTips.push("A more curated combination of desk accessories can make the environment feel calmer, sharper and more professional.");
-      }
+  // Comfort / ergonomics
+  if (
+    lower.includes("ergonomic") ||
+    lower.includes("comfort") ||
+    lower.includes("uncomfortable") ||
+    lower.includes("posture") ||
+    lower.includes("back") ||
+    lower.includes("neck") ||
+    lower.includes("wrist")
+  ) {
+    addTheme("comfort");
+    freeTips.push("Adjust screen and keyboard position so your posture is more neutral and your shoulders are not constantly under tension.");
+    freeTips.push("Raise the screen height if your eyeline is being pulled downward for long periods.");
+    budgetTips.push("A laptop stand or monitor riser will usually create the biggest comfort improvement for the least spend.");
+    premiumTips.push("Once the basic desk layout is correct, premium ergonomic accessories become far more worthwhile.");
+  }
 
-      if (lower.includes("budget") || lower.includes("cheap") || lower.includes("affordable")) {
-        budgetTips.push("Prioritise one or two high-impact upgrades rather than several small purchases that create more clutter than value.");
-      }
+  // Aesthetics / premium feel
+  if (
+    lower.includes("aesthetic") ||
+    lower.includes("premium") ||
+    lower.includes("minimal") ||
+    lower.includes("clean") ||
+    lower.includes("luxury")
+  ) {
+    addTheme("aesthetic");
+    freeTips.push("Reduce the number of competing objects on the desk so the setup feels more intentional and visually consistent.");
+    budgetTips.push("Introduce one or two materials with visual warmth or texture rather than adding many small decorative pieces.");
+    premiumTips.push("A premium desk surface, cleaner cable treatment and more restrained accessory selection will elevate the whole environment.");
+  }
 
-      if (freeTips.length === 0) {
-        freeTips.push("Start by removing anything from the desk that does not directly support your daily workflow.");
-        freeTips.push("Review monitor and keyboard positioning so your workspace feels centred and physically easier to use.");
-      }
+  // Productivity / focus
+  if (
+    lower.includes("focus") ||
+    lower.includes("productive") ||
+    lower.includes("productivity") ||
+    lower.includes("distracting") ||
+    lower.includes("distraction")
+  ) {
+    addTheme("focus");
+    freeTips.push("Remove non-essential visual distractions from your immediate eyeline so the desk supports concentration.");
+    budgetTips.push("A small organiser or tray can stop frequently used items from spreading across the workspace.");
+    premiumTips.push("A calmer, more intentional desk layout tends to improve both focus and perceived quality of the environment.");
+  }
 
-      if (budgetTips.length === 0) {
-        budgetTips.push("A focused lighting improvement and one organisational accessory will usually create the strongest return on a modest budget.");
-        budgetTips.push("Choose upgrades that improve both function and visual order, rather than adding more standalone objects.");
-      }
+  // Budget
+  if (
+    lower.includes("budget") ||
+    lower.includes("cheap") ||
+    lower.includes("affordable") ||
+    lower.includes("low cost") ||
+    lower.includes("under £") ||
+    lower.includes("under$")
+  ) {
+    addTheme("budget");
+    budgetTips.push("Prioritise one or two high-impact upgrades rather than several low-value purchases that create more clutter.");
+    budgetTips.push("Lighting and organisation usually deliver the strongest return on a modest budget.");
+  }
 
-      if (premiumTips.length === 0) {
-        premiumTips.push("Once the fundamentals are right, add only a small number of premium pieces that elevate the feel of the setup without overwhelming it.");
-        premiumTips.push("Aim for fewer, better-quality additions that support a clean and intentional desk environment.");
-      }
+  // Work from laptop
+  if (
+    lower.includes("laptop") ||
+    lower.includes("macbook")
+  ) {
+    addTheme("laptop");
+    freeTips.push("Centre the laptop properly and avoid working from a low viewing angle for long periods.");
+    budgetTips.push("A laptop stand is one of the simplest ways to improve both posture and layout.");
+  }
 
-      const introText = `
-        Based on your description, the strongest opportunity is to improve the desk in layers rather than all at once.
-        Begin with structural changes that cost nothing, then introduce a small number of targeted upgrades that improve
-        comfort, clarity and visual cohesion.
-      `;
+  // Dual monitor / monitor setup
+  if (
+    lower.includes("monitor") ||
+    lower.includes("dual") ||
+    lower.includes("two monitors")
+  ) {
+    addTheme("monitors");
+    freeTips.push("Review monitor positioning so your primary screen sits directly in front of you rather than pulling your posture sideways.");
+    budgetTips.push("A monitor riser or cleaner under-monitor storage can improve both alignment and usable desk space.");
+  }
 
-      response.style.display = "block";
-      response.innerHTML = `
-        <div class="response-shell">
-          <div class="response-intro">
-            <h4>Your workspace assessment</h4>
-            <p>${introText}</p>
-          </div>
+  // Storage
+  if (
+    lower.includes("storage") ||
+    lower.includes("drawer") ||
+    lower.includes("no storage")
+  ) {
+    addTheme("storage");
+    freeTips.push("Move occasional-use items off the desk surface so the main area is reserved for active work.");
+    budgetTips.push("A vertical storage piece or compact organiser will usually improve order more effectively than adding more desk accessories.");
+  }
+
+  // Fallbacks if nothing useful detected
+  if (detectedThemes.length === 0) {
+    freeTips.push("Start by removing anything from the desk that does not directly support your daily workflow.");
+    freeTips.push("Review screen position, lighting and cable visibility before buying any new products.");
+    budgetTips.push("A focused lighting improvement and one organisational accessory will usually create the strongest return.");
+    budgetTips.push("Choose upgrades that improve both function and visual order rather than adding more standalone objects.");
+    premiumTips.push("Aim for fewer, better-quality additions that elevate the environment without overwhelming it.");
+    premiumTips.push("A refined desk surface and cleaner accessory layout often create the clearest premium improvement.");
+  }
+
+  // De-duplicate tips
+  const unique = arr => [...new Set(arr)];
+
+  const finalFree = unique(freeTips).slice(0, 4);
+  const finalBudget = unique(budgetTips).slice(0, 4);
+  const finalPremium = unique(premiumTips).slice(0, 4);
+
+  // Dynamic intro
+  let introText = "DeskLab recommends improving your setup in layers. Start with the highest-impact structural changes first, then add selective upgrades where they genuinely improve comfort, clarity and desk quality.";
+
+  if (detectedThemes.includes("lighting") && detectedThemes.includes("clutter")) {
+    introText = "Your strongest opportunity is to improve visual clarity. Cleaner cable management and more deliberate lighting will make the desk feel calmer, more focused and immediately more premium.";
+  } else if (detectedThemes.includes("space")) {
+    introText = "The main issue appears to be spatial efficiency. The goal should be to make the desk feel more deliberate, not more full. Prioritise surface control, layout discipline and compact upgrades.";
+  } else if (detectedThemes.includes("comfort")) {
+    introText = "The biggest improvement here is likely ergonomic rather than aesthetic. Correcting posture, screen height and daily-use positioning should come before any visual upgrades.";
+  } else if (detectedThemes.includes("aesthetic")) {
+    introText = "The setup would benefit most from restraint and visual consistency. A cleaner accessory mix and tighter material choices will create a more premium overall impression.";
+  } else if (detectedThemes.includes("budget")) {
+    introText = "Given the budget focus, the strongest approach is to avoid overbuying and instead make one or two targeted changes that improve both usability and overall desk quality.";
+  }
+
+  response.style.display = "block";
+  response.innerHTML = `
+    <div class="response-shell">
+      <div class="response-intro">
+        <h4>Your DeskLab recommendations</h4>
+        <p>${introText}</p>
+      </div>
+
+      <div class="response-grid">
+        <div class="response-card">
+          <h5>Free improvements</h5>
+          <ul>
+            ${finalFree.map(tip => `<li>${tip}</li>`).join("")}
+          </ul>
+        </div>
+
+        <div class="response-card">
+          <h5>Budget-conscious upgrades</h5>
+          <ul>
+            ${finalBudget.map(tip => `<li>${tip}</li>`).join("")}
+          </ul>
+        </div>
+
+        <div class="response-card">
+          <h5>Premium direction</h5>
+          <ul>
+            ${finalPremium.map(tip => `<li>${tip}</li>`).join("")}
+          </ul>
+        </div>
+      </div>
+
+      <div class="note-box">
+        Want better results? Include more detail about desk size, lighting, equipment, clutter, comfort issues and the kind of look you want.
+      </div>
+    </div>
+  `;
+}
 
           <div class="response-grid">
             <div class="response-card">
