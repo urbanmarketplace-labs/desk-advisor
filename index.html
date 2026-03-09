@@ -26,14 +26,42 @@
       --radius-sm: 12px;
       --max-width: 1180px;
     }
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
 .logo {
-  height: 60px;
+  height: 52px;
   width: auto;
+  display: block;
 }
 
 .brand {
   display: flex;
   align-items: center;
+}
+
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(44, 62, 148, 0.08);
+  border: 1px solid rgba(44, 62, 148, 0.18);
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  color: #2c3e94;
+  font-weight: 500;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background: #2c3e94;
+  border-radius: 50%;
 }
     * {
       box-sizing: border-box;
