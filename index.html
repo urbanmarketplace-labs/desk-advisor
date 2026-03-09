@@ -443,70 +443,61 @@ textarea {
       display: grid;
       gap: 18px;
     }
+/* DeskLab response styling override */
 
-    .response-intro {
-      padding: 22px;
-      border-radius: 20px;
-      background: linear-gradient(180deg, rgba(44, 62, 148, 0.06), rgba(255,255,255,0.9));
-      border: 1px solid rgba(44, 62, 148, 0.12);
-    }
+.response-intro {
+  background: #2c3e94;
+  border-radius: 22px;
+  padding: 26px;
+  border: 1px solid rgba(255,255,255,0.14);
+  margin-bottom: 22px;
+}
 
-    .response-intro h4 {
-      margin: 0 0 10px;
-      font-size: 1.2rem;
-      letter-spacing: -0.03em;
-    }
+.response-intro h4 {
+  color: #ffffff;
+  margin-bottom: 10px;
+}
 
-    .response-intro p {
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.8;
-    }
+.response-intro p {
+  color: rgba(255,255,255,0.88);
+}
 
-    .response-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-    }
+.response-card {
+  background: #2c3e94;
+  color: #ffffff;
+  border-radius: 22px;
+  padding: 24px;
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 14px 32px rgba(7, 12, 36, 0.25);
+}
 
-    .response-card {
-      background: rgba(255,255,255,0.95);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 22px;
-      box-shadow: 0 8px 24px rgba(16, 24, 40, 0.05);
-    }
+.response-card h5 {
+  color: #ffffff;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
 
-    .response-card h5 {
-      margin: 0 0 14px;
-      font-size: 1rem;
-      letter-spacing: -0.02em;
-    }
+.response-card ul {
+  padding-left: 22px;
+}
 
-    .response-card ul {
-      margin: 0;
-      padding-left: 18px;
-      color: #24314f;
-    }
-
-    .response-card li {
-      margin-bottom: 10px;
-      line-height: 1.7;
-      color: #334155;
-    }
-
+.response-card li {
+  color: rgba(255,255,255,0.9);
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
     .response-card li:last-child {
       margin-bottom: 0;
     }
 
     .note-box {
-      border-radius: 18px;
-      padding: 18px 20px;
-      background: rgba(255,255,255,0.9);
-      border: 1px dashed rgba(44, 62, 148, 0.24);
-      color: var(--muted);
-      line-height: 1.7;
-    }
+  border-radius: 18px;
+  padding: 18px 20px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.14);
+  color: rgba(255,255,255,0.86);
+  line-height: 1.7;
+}
 
     .features {
       display: grid;
@@ -600,7 +591,23 @@ textarea {
       .hint {
         white-space: normal;
       }
-    }
+    .response-shell,
+.response-shell * {
+  box-sizing: border-box;
+}
+
+.response-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 18px;
+}
+
+@media (max-width: 1024px) {
+  .response-grid {
+    grid-template-columns: 1fr;
+  }
+}
   </style>
 </head>
 <body>
