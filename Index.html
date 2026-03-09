@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Urban Workspace Advisor</title>
+
+<style>
+body{
+font-family:Arial;
+background:#f5f5f5;
+text-align:center;
+padding:40px;
+}
+
+.container{
+max-width:600px;
+margin:auto;
+background:white;
+padding:30px;
+border-radius:10px;
+box-shadow:0 10px 25px rgba(0,0,0,0.1);
+}
+
+textarea{
+width:100%;
+height:120px;
+padding:10px;
+margin-top:10px;
+}
+
+button{
+margin-top:10px;
+padding:12px 20px;
+background:#2C3E94;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+#response{
+margin-top:20px;
+text-align:left;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Urban Workspace Advisor</h1>
+
+<p>Describe your desk setup and get improvement tips.</p>
+
+<textarea id="input"
+placeholder="Example: small desk, laptop, messy cables, bad lighting"></textarea>
+
+<br>
+
+<button onclick="advice()">Get Advice</button>
+
+<div id="response"></div>
+
+</div>
+
+<script>
+
+function advice(){
+
+let response = `
+<h3>Workspace Suggestions</h3>
+
+<b>Free Improvements</b>
+<ul>
+<li>Clear unnecessary items to reduce visual clutter</li>
+<li>Raise your screen to eye level</li>
+<li>Route cables behind the desk</li>
+</ul>
+
+<b>Budget Improvements (£20-£50)</b>
+<ul>
+<li>Add a desk mat to organise workspace zones</li>
+<li>Use a monitor light bar instead of overhead lighting</li>
+<li>Add a small desk organiser</li>
+</ul>
+
+<b>Premium Upgrades</b>
+<ul>
+<li>Monitor Light Bar</li>
+<li>Wool Desk Mat</li>
+<li>LumoMist Diffuser</li>
+</ul>
+`;
+
+document.getElementById("response").innerHTML=response;
+
+}
+
+</script>
+
+</body>
+</html>
