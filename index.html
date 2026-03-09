@@ -1,103 +1,802 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Urban Workspace Advisor</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Urban Workspace Advisor</title>
 
-<style>
-body{
-font-family:Arial;
-background:#f5f5f5;
-text-align:center;
-padding:40px;
-}
+  <!-- Professional font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-.container{
-max-width:600px;
-margin:auto;
-background:white;
-padding:30px;
-border-radius:10px;
-box-shadow:0 10px 25px rgba(0,0,0,0.1);
-}
+  <style>
+    :root {
+      --brand: #2c3e94;
+      --brand-dark: #1f2d70;
+      --bg: #f4f6fb;
+      --surface: rgba(255, 255, 255, 0.78);
+      --surface-strong: #ffffff;
+      --text: #111827;
+      --muted: #5f6b85;
+      --border: rgba(44, 62, 148, 0.12);
+      --shadow: 0 20px 60px rgba(16, 24, 40, 0.12);
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --max-width: 1180px;
+    }
 
-textarea{
-width:100%;
-height:120px;
-padding:10px;
-margin-top:10px;
-}
+    * {
+      box-sizing: border-box;
+    }
 
-button{
-margin-top:10px;
-padding:12px 20px;
-background:#2C3E94;
-color:white;
-border:none;
-border-radius:6px;
-cursor:pointer;
-}
+    html {
+      scroll-behavior: smooth;
+    }
 
-#response{
-margin-top:20px;
-text-align:left;
-}
-</style>
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(44, 62, 148, 0.12), transparent 28%),
+        radial-gradient(circle at top right, rgba(44, 62, 148, 0.08), transparent 24%),
+        linear-gradient(180deg, #f8faff 0%, #eef2fb 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
 
+    .page-shell {
+      width: 100%;
+      padding: 32px 20px 56px;
+    }
+
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--brand), #4056c4);
+      box-shadow: 0 12px 24px rgba(44, 62, 148, 0.28);
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.05;
+    }
+
+    .brand-text small {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.68);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      backdrop-filter: blur(10px);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #2bb673;
+      box-shadow: 0 0 0 4px rgba(43, 182, 115, 0.12);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 24px;
+      align-items: stretch;
+      margin-bottom: 24px;
+    }
+
+    .hero-card,
+    .side-card,
+    .advisor-card,
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,0.55);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius-lg);
+    }
+
+    .hero-card {
+      padding: 42px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card::before {
+      content: "";
+      position: absolute;
+      top: -120px;
+      right: -80px;
+      width: 280px;
+      height: 280px;
+      background: radial-gradient(circle, rgba(44, 62, 148, 0.12), transparent 65%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(44, 62, 148, 0.08);
+      color: var(--brand);
+      border: 1px solid rgba(44, 62, 148, 0.12);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: clamp(2.2rem, 5vw, 4.25rem);
+      line-height: 0.98;
+      letter-spacing: -0.05em;
+      max-width: 760px;
+    }
+
+    .hero-copy {
+      margin: 0;
+      max-width: 700px;
+      font-size: 1.06rem;
+      line-height: 1.75;
+      color: var(--muted);
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .meta-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.78);
+      border: 1px solid var(--border);
+      color: #1f2937;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .side-card {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 22px;
+    }
+
+    .side-card h2 {
+      margin: 0 0 10px;
+      font-size: 1.1rem;
+      letter-spacing: -0.03em;
+    }
+
+    .side-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 0.97rem;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .mini-card {
+      padding: 16px;
+      background: rgba(255,255,255,0.9);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    .mini-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+      letter-spacing: -0.02em;
+    }
+
+    .mini-card span {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+
+    .advisor-card {
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+
+    .advisor-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .advisor-header h3 {
+      margin: 0;
+      font-size: 1.5rem;
+      letter-spacing: -0.04em;
+    }
+
+    .advisor-header p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 720px;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .prompt-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 18px 0 18px;
+    }
+
+    .chip {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.9);
+      color: #24314f;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .chip:hover {
+      background: rgba(44, 62, 148, 0.08);
+      border-color: rgba(44, 62, 148, 0.18);
+      transform: translateY(-1px);
+    }
+
+    .input-wrap {
+      display: grid;
+      gap: 14px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 160px;
+      resize: vertical;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.94);
+      border-radius: 18px;
+      padding: 18px 18px;
+      font: inherit;
+      font-size: 1rem;
+      line-height: 1.7;
+      color: var(--text);
+      outline: none;
+      box-shadow: inset 0 1px 2px rgba(16, 24, 40, 0.03);
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    }
+
+    textarea:focus {
+      border-color: rgba(44, 62, 148, 0.45);
+      box-shadow: 0 0 0 4px rgba(44, 62, 148, 0.10);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .primary-btn,
+    .secondary-btn {
+      appearance: none;
+      border: none;
+      border-radius: 14px;
+      padding: 14px 18px;
+      font: inherit;
+      font-weight: 700;
+      font-size: 0.97rem;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, var(--brand), #4056c4);
+      color: white;
+      box-shadow: 0 14px 26px rgba(44, 62, 148, 0.28);
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 28px rgba(44, 62, 148, 0.32);
+    }
+
+    .secondary-btn {
+      background: rgba(255,255,255,0.92);
+      color: #26324f;
+      border: 1px solid var(--border);
+    }
+
+    .secondary-btn:hover {
+      background: rgba(44, 62, 148, 0.06);
+    }
+
+    #response {
+      margin-top: 24px;
+      display: none;
+    }
+
+    .response-shell {
+      display: grid;
+      gap: 18px;
+    }
+
+    .response-intro {
+      padding: 22px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(44, 62, 148, 0.06), rgba(255,255,255,0.9));
+      border: 1px solid rgba(44, 62, 148, 0.12);
+    }
+
+    .response-intro h4 {
+      margin: 0 0 10px;
+      font-size: 1.2rem;
+      letter-spacing: -0.03em;
+    }
+
+    .response-intro p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .response-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .response-card {
+      background: rgba(255,255,255,0.95);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: 0 8px 24px rgba(16, 24, 40, 0.05);
+    }
+
+    .response-card h5 {
+      margin: 0 0 14px;
+      font-size: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .response-card ul {
+      margin: 0;
+      padding-left: 18px;
+      color: #24314f;
+    }
+
+    .response-card li {
+      margin-bottom: 10px;
+      line-height: 1.7;
+      color: #334155;
+    }
+
+    .response-card li:last-child {
+      margin-bottom: 0;
+    }
+
+    .note-box {
+      border-radius: 18px;
+      padding: 18px 20px;
+      background: rgba(255,255,255,0.9);
+      border: 1px dashed rgba(44, 62, 148, 0.24);
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .feature-card {
+      padding: 24px;
+    }
+
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: rgba(44, 62, 148, 0.10);
+      color: var(--brand);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    .feature-card h4 {
+      margin: 0 0 10px;
+      font-size: 1.02rem;
+      letter-spacing: -0.02em;
+    }
+
+    .feature-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 0.95rem;
+    }
+
+    .footer-note {
+      margin-top: 22px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 1024px) {
+      .hero,
+      .features,
+      .response-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-card,
+      .side-card,
+      .advisor-card,
+      .feature-card {
+        border-radius: 22px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .page-shell {
+        padding: 18px 14px 40px;
+      }
+
+      .topbar,
+      .advisor-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .hero-card,
+      .side-card,
+      .advisor-card,
+      .feature-card {
+        padding: 22px;
+      }
+
+      h1 {
+        font-size: 2.2rem;
+      }
+
+      .actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .primary-btn,
+      .secondary-btn {
+        width: 100%;
+      }
+
+      .hint {
+        white-space: normal;
+      }
+    }
+  </style>
 </head>
-
 <body>
+  <div class="page-shell">
+    <div class="container">
+      <div class="topbar">
+        <div class="brand">
+          <div class="brand-mark">U</div>
+          <div class="brand-text">
+            Urban Workspace Advisor
+            <small>By Urban Marketplace</small>
+          </div>
+        </div>
 
-<div class="container">
+        <div class="status-pill">
+          <span class="status-dot"></span>
+          Early access experience
+        </div>
+      </div>
 
-<h1>Urban Workspace Advisor</h1>
+      <section class="hero">
+        <div class="hero-card">
+          <div class="eyebrow">Workspace optimisation, thoughtfully guided</div>
+          <h1>Premium desk advice, tailored to how you actually work.</h1>
+          <p class="hero-copy">
+            Describe your current setup and receive clear, practical recommendations focused on organisation,
+            lighting, ergonomics and overall workspace quality. The aim is not to oversell, but to help you create
+            a calmer, more effective desk environment with improvements that feel considered and realistic.
+          </p>
 
-<p>Describe your desk setup and get improvement tips.</p>
+          <div class="hero-meta">
+            <div class="meta-pill">Free-first recommendations</div>
+            <div class="meta-pill">Budget-conscious upgrades</div>
+            <div class="meta-pill">Refined product suggestions</div>
+          </div>
+        </div>
 
-<textarea id="input"
-placeholder="Example: small desk, laptop, messy cables, bad lighting"></textarea>
+        <aside class="side-card">
+          <div>
+            <h2>How it works</h2>
+            <p>
+              Start with a brief description of your current workspace. Mention the size of your desk, the lighting,
+              any clutter, your equipment, and anything that feels inefficient or uncomfortable.
+            </p>
+          </div>
 
-<br>
+          <div class="mini-grid">
+            <div class="mini-card">
+              <strong>1. Free improvements</strong>
+              <span>Foundational changes that improve clarity, comfort and layout without requiring spend.</span>
+            </div>
+            <div class="mini-card">
+              <strong>2. Budget refinement</strong>
+              <span>Selective upgrades for users who want better function without overcomplicating the desk.</span>
+            </div>
+            <div class="mini-card">
+              <strong>3. Premium direction</strong>
+              <span>More considered additions for a cleaner, more elevated workspace experience.</span>
+            </div>
+          </div>
+        </aside>
+      </section>
 
-<button onclick="advice()">Get Advice</button>
+      <section class="advisor-card">
+        <div class="advisor-header">
+          <div>
+            <h3>Describe your workspace</h3>
+            <p>
+              Be specific. The better the input, the more relevant and articulate the recommendations will feel.
+            </p>
+          </div>
+          <div class="hint">Example: compact desk, laptop stand, poor evening lighting, visible cables, limited storage</div>
+        </div>
 
-<div id="response"></div>
+        <div class="prompt-chips">
+          <button class="chip" type="button" onclick="fillPrompt('I have a small desk with a laptop, poor lighting, visible cables and not much storage. I want it to feel cleaner and more focused.')">Small desk reset</button>
+          <button class="chip" type="button" onclick="fillPrompt('My workspace looks cluttered and distracting. I use two monitors and work long hours. I want better organisation and improved comfort.')">Clutter and comfort</button>
+          <button class="chip" type="button" onclick="fillPrompt('I want to improve my desk setup on a modest budget. It feels flat, uninspiring and not very ergonomic.')">Budget upgrade</button>
+        </div>
 
-</div>
+        <div class="input-wrap">
+          <textarea id="userInput" placeholder="Describe your workspace, current frustrations, and what you would like to improve."></textarea>
 
-<script>
+          <div class="actions">
+            <button class="primary-btn" type="button" onclick="generateAdvice()">Generate recommendations</button>
+            <button class="secondary-btn" type="button" onclick="clearAll()">Clear response</button>
+          </div>
+        </div>
 
-function advice(){
+        <div id="response"></div>
+      </section>
 
-let response = `
-<h3>Workspace Suggestions</h3>
+      <section class="features">
+        <div class="feature-card">
+          <div class="feature-icon">01</div>
+          <h4>More intelligent than generic advice</h4>
+          <p>
+            Recommendations are structured to feel more like a concise workspace consultation than a basic chatbot reply.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">02</div>
+          <h4>Built around practical improvement</h4>
+          <p>
+            The emphasis is on realistic changes, from no-cost refinements to more premium upgrades that genuinely improve the setup.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">03</div>
+          <h4>Aligned with the Urban Marketplace vision</h4>
+          <p>
+            Minimal, considered and performance-oriented, with a stronger focus on better workspaces rather than hard selling.
+          </p>
+        </div>
+      </section>
 
-<b>Free Improvements</b>
-<ul>
-<li>Clear unnecessary items to reduce visual clutter</li>
-<li>Raise your screen to eye level</li>
-<li>Route cables behind the desk</li>
-</ul>
+      <div class="footer-note">
+        Urban Workspace Advisor is an early concept experience for the Urban Marketplace relaunch.
+      </div>
+    </div>
+  </div>
 
-<b>Budget Improvements (£20-£50)</b>
-<ul>
-<li>Add a desk mat to organise workspace zones</li>
-<li>Use a monitor light bar instead of overhead lighting</li>
-<li>Add a small desk organiser</li>
-</ul>
+  <script>
+    function fillPrompt(text) {
+      document.getElementById("userInput").value = text;
+      document.getElementById("userInput").focus();
+    }
 
-<b>Premium Upgrades</b>
-<ul>
-<li>Monitor Light Bar</li>
-<li>Wool Desk Mat</li>
-<li>LumoMist Diffuser</li>
-</ul>
-`;
+    function clearAll() {
+      document.getElementById("userInput").value = "";
+      document.getElementById("response").style.display = "none";
+      document.getElementById("response").innerHTML = "";
+    }
 
-document.getElementById("response").innerHTML=response;
+    function generateAdvice() {
+      const input = document.getElementById("userInput").value.trim();
+      const response = document.getElementById("response");
 
-}
+      if (!input) {
+        response.style.display = "block";
+        response.innerHTML = `
+          <div class="response-shell">
+            <div class="note-box">
+              Please add a short description of your desk setup first. Include what feels inefficient, cluttered or uncomfortable, and what kind of improvement you want.
+            </div>
+          </div>
+        `;
+        return;
+      }
 
-</script>
+      const lower = input.toLowerCase();
 
+      const freeTips = [];
+      const budgetTips = [];
+      const premiumTips = [];
+
+      if (lower.includes("small") || lower.includes("compact") || lower.includes("limited space")) {
+        freeTips.push("Reduce the number of permanent desk items so the available surface feels deliberate rather than congested.");
+        budgetTips.push("Introduce a compact desk organiser or under-monitor tray to recover usable surface area without making the setup feel crowded.");
+        premiumTips.push("Consider a refined desk mat to visually define the workspace and give a smaller desk a more structured, intentional appearance.");
+      }
+
+      if (lower.includes("cable") || lower.includes("wires") || lower.includes("messy")) {
+        freeTips.push("Route charging cables and peripherals behind the desk so visual noise is reduced immediately.");
+        budgetTips.push("Use cable clips or a simple under-desk cable solution to keep lines controlled and off the working surface.");
+        premiumTips.push("A cleaner accessory layout paired with a premium desk surface can make the whole workstation feel substantially more composed.");
+      }
+
+      if (lower.includes("lighting") || lower.includes("dark") || lower.includes("dim") || lower.includes("evening")) {
+        freeTips.push("Reposition the desk to make better use of natural light where possible and avoid relying entirely on harsh overhead lighting.");
+        budgetTips.push("Add a focused task light or monitor light bar to improve clarity and reduce visual fatigue during longer sessions.");
+        premiumTips.push("A higher-quality lighting setup will elevate both usability and atmosphere, particularly for evening work.");
+      }
+
+      if (lower.includes("ergonomic") || lower.includes("comfort") || lower.includes("posture") || lower.includes("back") || lower.includes("neck")) {
+        freeTips.push("Raise the screen height so your eyeline is more neutral and your posture is not constantly being pulled downward.");
+        budgetTips.push("Introduce a laptop stand or monitor riser to create a more natural viewing position for longer working blocks.");
+        premiumTips.push("Premium ergonomic accessories become worthwhile once the basic layout is correct and your daily usage pattern is consistent.");
+      }
+
+      if (lower.includes("clutter") || lower.includes("distracting") || lower.includes("organisation") || lower.includes("storage")) {
+        freeTips.push("Create clear zones for work essentials, occasional-use items and non-work objects so the desk supports focus rather than distraction.");
+        budgetTips.push("Use a small organiser, tray or vertical storage piece to prevent frequently used items from spreading across the desk.");
+        premiumTips.push("A more curated combination of desk accessories can make the environment feel calmer, sharper and more professional.");
+      }
+
+      if (lower.includes("budget") || lower.includes("cheap") || lower.includes("affordable")) {
+        budgetTips.push("Prioritise one or two high-impact upgrades rather than several small purchases that create more clutter than value.");
+      }
+
+      if (freeTips.length === 0) {
+        freeTips.push("Start by removing anything from the desk that does not directly support your daily workflow.");
+        freeTips.push("Review monitor and keyboard positioning so your workspace feels centred and physically easier to use.");
+      }
+
+      if (budgetTips.length === 0) {
+        budgetTips.push("A focused lighting improvement and one organisational accessory will usually create the strongest return on a modest budget.");
+        budgetTips.push("Choose upgrades that improve both function and visual order, rather than adding more standalone objects.");
+      }
+
+      if (premiumTips.length === 0) {
+        premiumTips.push("Once the fundamentals are right, add only a small number of premium pieces that elevate the feel of the setup without overwhelming it.");
+        premiumTips.push("Aim for fewer, better-quality additions that support a clean and intentional desk environment.");
+      }
+
+      const introText = `
+        Based on your description, the strongest opportunity is to improve the desk in layers rather than all at once.
+        Begin with structural changes that cost nothing, then introduce a small number of targeted upgrades that improve
+        comfort, clarity and visual cohesion.
+      `;
+
+      response.style.display = "block";
+      response.innerHTML = `
+        <div class="response-shell">
+          <div class="response-intro">
+            <h4>Your workspace assessment</h4>
+            <p>${introText}</p>
+          </div>
+
+          <div class="response-grid">
+            <div class="response-card">
+              <h5>Free improvements</h5>
+              <ul>
+                ${freeTips.map(tip => `<li>${tip}</li>`).join("")}
+              </ul>
+            </div>
+
+            <div class="response-card">
+              <h5>Budget-conscious upgrades</h5>
+              <ul>
+                ${budgetTips.map(tip => `<li>${tip}</li>`).join("")}
+              </ul>
+            </div>
+
+            <div class="response-card">
+              <h5>Premium direction</h5>
+              <ul>
+                ${premiumTips.map(tip => `<li>${tip}</li>`).join("")}
+                <li>Suitable product directions may include a monitor light bar, a premium desk mat, or a calmer accessory layer that improves the overall workstation experience.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="note-box">
+            This version is intentionally focused and restrained. It is designed to offer higher-quality guidance in a more premium format, before evolving into a fuller AI-powered workspace tool.
+          </div>
+        </div>
+      `;
+    }
+  </script>
 </body>
 </html>
