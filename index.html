@@ -53,19 +53,19 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(44, 62, 148, 0.08);
-  border: 1px solid rgba(44, 62, 148, 0.18);
-  padding: 8px 14px;
-  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  padding: 10px 16px;
+  border-radius: 999px;
   font-size: 13px;
-  color: #2c3e94;
-  font-weight: 500;
+  color: #ffffff;
+  font-weight: 600;
 }
 
 .status-dot {
   width: 8px;
   height: 8px;
-  background: #2c3e94;
+  background: #ffffff;
   border-radius: 50%;
 }
     * {
@@ -174,19 +174,19 @@
       margin-bottom: 24px;
     }
 
-    .hero-card,
-    .side-card,
-    .advisor-card,
-    .feature-card {
-      background: var(--surface);
-      border: 1px solid rgba(255,255,255,0.55);
-      backdrop-filter: blur(18px);
-      box-shadow: var(--shadow);
-      border-radius: var(--radius-lg);
-    }
+.hero-card,
+.side-card,
+.advisor-card,
+.feature-card {
+  background: var(--surface-main);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  box-shadow: var(--shadow);
+  border-radius: var(--radius-lg);
+}
 
     .hero-card {
-      padding: 42px;
+      padding: 48px;
       position: relative;
       overflow: hidden;
     }
@@ -218,20 +218,20 @@
     }
 
     h1 {
-      margin: 0 0 16px;
-      font-size: clamp(2.2rem, 5vw, 4.25rem);
-      line-height: 0.98;
-      letter-spacing: -0.05em;
-      max-width: 760px;
-    }
+  margin: 0 0 18px;
+  font-size: clamp(2.6rem, 5vw, 5rem);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+  max-width: 820px;
+}
 
     .hero-copy {
-      margin: 0;
-      max-width: 700px;
-      font-size: 1.06rem;
-      line-height: 1.75;
-      color: var(--muted);
-    }
+  margin: 0;
+  max-width: 760px;
+  font-size: 1.08rem;
+  line-height: 1.8;
+  color: var(--muted);
+}
 
     .hero-meta {
       display: flex;
@@ -254,12 +254,13 @@
     }
 
     .side-card {
-      padding: 28px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 22px;
-    }
+  padding: 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 20px;
+  background: rgba(17, 24, 39, 0.18);
+}
 
     .side-card h2 {
       margin: 0 0 10px;
@@ -281,24 +282,26 @@
     }
 
     .mini-card {
-      padding: 16px;
-      background: rgba(255,255,255,0.9);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-    }
+  padding: 18px;
+  background: var(--surface-card);
+  border: none;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(12, 19, 52, 0.10);
+}
 
     .mini-card strong {
-      display: block;
-      margin-bottom: 6px;
-      font-size: 0.95rem;
-      letter-spacing: -0.02em;
-    }
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.98rem;
+  letter-spacing: -0.02em;
+  color: var(--text-dark);
+}
 
-    .mini-card span {
-      color: var(--muted);
-      font-size: 0.92rem;
-      line-height: 1.6;
-    }
+   .mini-card span {
+  color: var(--muted-dark);
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
 
     .advisor-card {
       padding: 28px;
@@ -406,10 +409,10 @@
     }
 
     .primary-btn {
-      background: linear-gradient(135deg, var(--brand), #4056c4);
-      color: white;
-      box-shadow: 0 14px 26px rgba(44, 62, 148, 0.28);
-    }
+  background: #ffffff;
+  color: var(--brand);
+  box-shadow: 0 14px 26px rgba(8, 15, 45, 0.24);
+}
 
     .primary-btn:hover {
       transform: translateY(-1px);
@@ -417,10 +420,10 @@
     }
 
     .secondary-btn {
-      background: rgba(255,255,255,0.92);
-      color: #26324f;
-      border: 1px solid var(--border);
-    }
+  background: rgba(255,255,255,0.10);
+  color: #ffffff;
+  border: 1px solid rgba(255,255,255,0.14);
+}
 
     .secondary-btn:hover {
       background: rgba(44, 62, 148, 0.06);
@@ -621,12 +624,12 @@
       <section class="hero">
         <div class="hero-card">
           <div class="eyebrow">Workspace optimisation, thoughtfully guided</div>
-          <h1>Premium desk advice, tailored to how you actually work.</h1>
+          <h1>Design a better workspace with DeskLab.</h1>
           <p class="hero-copy">
-            Describe your current setup and receive clear, practical recommendations focused on organisation,
-            lighting, ergonomics and overall workspace quality. The aim is not to oversell, but to help you create
-            a calmer, more effective desk environment with improvements that feel considered and realistic.
-          </p>
+  DeskLab helps you improve your setup with sharper recommendations across organisation,
+  lighting, ergonomics and overall desk quality. Start with free improvements, then move
+  into smarter upgrades only where they genuinely add value.
+</p>
 
           <div class="hero-meta">
             <div class="meta-pill">Free-first recommendations</div>
@@ -639,9 +642,10 @@
           <div>
             <h2>How it works</h2>
             <p>
-              Start with a brief description of your current workspace. Mention the size of your desk, the lighting,
-              any clutter, your equipment, and anything that feels inefficient or uncomfortable.
-            </p>
+  Describe your current workspace in a few lines. Mention desk size, lighting, clutter,
+  equipment and anything that feels inefficient. DeskLab will return structured advice
+  across free improvements, budget-conscious upgrades and more refined premium direction.
+</p>
           </div>
 
           <div class="mini-grid">
