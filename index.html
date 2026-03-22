@@ -14,14 +14,13 @@
       --brand: #2c3e94;
       --brand-strong: #3a50b8;
       --bg: #0b1020;
-      --bg-elevated: #10172d;
       --panel: rgba(255, 255, 255, 0.06);
       --panel-strong: rgba(255, 255, 255, 0.08);
       --panel-soft: rgba(255, 255, 255, 0.04);
       --border: rgba(255, 255, 255, 0.10);
-      --border-strong: rgba(255, 255, 255, 0.16);
+      --border-strong: rgba(255, 255, 255, 0.18);
       --text: #f4f7ff;
-      --text-soft: rgba(244, 247, 255, 0.78);
+      --text-soft: rgba(244, 247, 255, 0.80);
       --text-muted: rgba(244, 247, 255, 0.58);
       --success: #77d18a;
       --warning: #f0c46a;
@@ -49,7 +48,7 @@
       background:
         radial-gradient(circle at top left, rgba(58, 80, 184, 0.24), transparent 24%),
         radial-gradient(circle at 85% 10%, rgba(44, 62, 148, 0.22), transparent 20%),
-        linear-gradient(180deg, #0a1020 0%, #0d1326 100%);
+        linear-gradient(180deg, #09101f 0%, #0d1326 100%);
       min-height: 100vh;
     }
 
@@ -69,7 +68,7 @@
       justify-content: space-between;
       align-items: center;
       gap: 16px;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
     }
 
     .brand {
@@ -126,9 +125,9 @@
 
     .hero {
       display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+      grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
       gap: 22px;
-      margin-bottom: 22px;
+      margin-bottom: 20px;
     }
 
     .card {
@@ -140,7 +139,7 @@
     }
 
     .hero-card {
-      padding: 46px;
+      padding: 38px 42px;
       position: relative;
       overflow: hidden;
     }
@@ -148,11 +147,11 @@
     .hero-card::before {
       content: "";
       position: absolute;
-      width: 360px;
-      height: 360px;
-      top: -180px;
-      right: -90px;
-      background: radial-gradient(circle, rgba(58, 80, 184, 0.30), transparent 68%);
+      width: 320px;
+      height: 320px;
+      top: -160px;
+      right: -80px;
+      background: radial-gradient(circle, rgba(58, 80, 184, 0.28), transparent 68%);
       pointer-events: none;
     }
 
@@ -160,7 +159,7 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
       padding: 9px 13px;
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.06);
@@ -173,26 +172,61 @@
     }
 
     h1 {
-      margin: 0 0 18px;
-      font-size: clamp(2.9rem, 6vw, 5.5rem);
-      line-height: 0.93;
+      margin: 0 0 16px;
+      font-size: clamp(2.5rem, 5vw, 4.6rem);
+      line-height: 0.94;
       letter-spacing: -0.07em;
-      max-width: 840px;
+      max-width: 740px;
     }
 
     .hero-copy {
       margin: 0;
-      max-width: 760px;
-      font-size: 1.06rem;
+      max-width: 720px;
+      font-size: 1rem;
       line-height: 1.8;
       color: var(--text-soft);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .hero-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 13px 16px;
+      border-radius: 14px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.95rem;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .hero-link.primary {
+      background: #ffffff;
+      color: var(--brand);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+    }
+
+    .hero-link.primary:hover {
+      transform: translateY(-1px);
+    }
+
+    .hero-link.secondary {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      border: 1px solid var(--border);
     }
 
     .hero-meta {
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
-      margin-top: 28px;
+      margin-top: 22px;
     }
 
     .meta-pill {
@@ -209,7 +243,7 @@
     }
 
     .side-card {
-      padding: 30px;
+      padding: 28px;
       display: flex;
       flex-direction: column;
       gap: 18px;
@@ -217,15 +251,15 @@
 
     .side-card h2 {
       margin: 0;
-      font-size: 1.18rem;
+      font-size: 1.14rem;
       letter-spacing: -0.04em;
     }
 
     .side-card p {
       margin: 0;
       color: var(--text-soft);
-      line-height: 1.75;
-      font-size: 0.96rem;
+      line-height: 1.72;
+      font-size: 0.95rem;
     }
 
     .mini-grid {
@@ -234,7 +268,7 @@
     }
 
     .mini-card {
-      padding: 18px;
+      padding: 17px;
       border-radius: var(--radius-md);
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border);
@@ -243,14 +277,14 @@
     .mini-card strong {
       display: block;
       margin-bottom: 8px;
-      font-size: 0.95rem;
+      font-size: 0.94rem;
       letter-spacing: -0.02em;
     }
 
     .mini-card span {
       color: var(--text-muted);
-      line-height: 1.65;
-      font-size: 0.92rem;
+      line-height: 1.6;
+      font-size: 0.91rem;
     }
 
     .advisor-card {
@@ -288,11 +322,21 @@
       line-height: 1.55;
     }
 
+    .tool-label {
+      display: inline-block;
+      margin: 8px 0 2px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
     .prompt-chips {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      margin: 18px 0 16px;
+      margin: 18px 0 18px;
     }
 
     .chip {
@@ -317,15 +361,22 @@
 
     .input-wrap {
       display: grid;
-      gap: 14px;
+      gap: 16px;
+    }
+
+    .textarea-shell {
+      padding: 14px;
+      border-radius: 28px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+      border: 1px solid var(--border);
     }
 
     textarea {
       width: 100%;
       min-height: 180px;
       resize: vertical;
-      border-radius: 24px;
-      border: 1px solid var(--border);
+      border-radius: 22px;
+      border: 1px solid rgba(44, 62, 148, 0.18);
       background: rgba(255, 255, 255, 0.96);
       color: #182033;
       padding: 22px;
@@ -334,7 +385,7 @@
       line-height: 1.75;
       outline: none;
       box-shadow: inset 0 1px 2px rgba(16, 24, 40, 0.04);
-      transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
     }
 
     textarea:focus {
@@ -355,7 +406,8 @@
     }
 
     .primary-btn,
-    .secondary-btn {
+    .secondary-btn,
+    .product-btn {
       appearance: none;
       border: none;
       border-radius: 15px;
@@ -378,13 +430,15 @@
       box-shadow: 0 22px 44px rgba(0, 0, 0, 0.28);
     }
 
-    .secondary-btn {
+    .secondary-btn,
+    .product-btn {
       background: rgba(255, 255, 255, 0.04);
       color: var(--text);
       border: 1px solid var(--border);
     }
 
-    .secondary-btn:hover {
+    .secondary-btn:hover,
+    .product-btn:hover {
       background: rgba(255, 255, 255, 0.08);
     }
 
@@ -409,7 +463,8 @@
     .response-intro,
     .response-card,
     .score-card,
-    .note-box {
+    .note-box,
+    .waitlist-card {
       border-radius: 24px;
       border: 1px solid var(--border);
       background: rgba(255, 255, 255, 0.05);
@@ -418,7 +473,8 @@
 
     .loading-card,
     .response-intro,
-    .note-box {
+    .note-box,
+    .waitlist-card {
       padding: 24px;
     }
 
@@ -426,17 +482,19 @@
     .response-intro h4,
     .response-card h5,
     .score-card h5,
-    .note-box h5 {
+    .note-box h5,
+    .waitlist-card h4 {
       margin: 0 0 10px;
       letter-spacing: -0.03em;
     }
 
     .loading-card p,
     .response-intro p,
-    .note-box p {
+    .note-box p,
+    .waitlist-card p {
       margin: 0;
       color: var(--text-soft);
-      line-height: 1.75;
+      line-height: 1.72;
     }
 
     .progress-track {
@@ -465,7 +523,7 @@
 
     .score-layout {
       display: grid;
-      grid-template-columns: 280px 1fr;
+      grid-template-columns: 300px 1fr;
       gap: 18px;
       align-items: stretch;
     }
@@ -491,7 +549,13 @@
       font-weight: 800;
       line-height: 0.95;
       letter-spacing: -0.07em;
-      margin: 10px 0 0;
+      margin: 10px 0 8px;
+    }
+
+    .score-support {
+      color: var(--text-soft);
+      font-size: 0.92rem;
+      line-height: 1.6;
     }
 
     .score-band {
@@ -503,6 +567,7 @@
       border-radius: 999px;
       font-size: 0.84rem;
       font-weight: 700;
+      margin-top: 14px;
     }
 
     .score-band.red {
@@ -531,7 +596,7 @@
 
     .response-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: 1.05fr 1.05fr 0.9fr;
       gap: 18px;
     }
 
@@ -544,10 +609,10 @@
     }
 
     .response-card p {
-      margin: 0 0 14px;
+      margin: 0 0 12px;
       color: var(--text-soft);
-      line-height: 1.7;
-      font-size: 0.93rem;
+      line-height: 1.68;
+      font-size: 0.92rem;
     }
 
     .response-card ul {
@@ -558,7 +623,7 @@
     .response-card li {
       margin-bottom: 12px;
       color: var(--text-soft);
-      line-height: 1.7;
+      line-height: 1.68;
     }
 
     .response-card li:last-child {
@@ -569,7 +634,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      margin-top: 10px;
+      margin-top: 12px;
     }
 
     .issue-pill {
@@ -580,6 +645,46 @@
       color: var(--text-soft);
       font-size: 0.88rem;
       font-weight: 600;
+    }
+
+    .products-grid {
+      display: grid;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .product-card {
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .product-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+      letter-spacing: -0.02em;
+    }
+
+    .product-card span {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.89rem;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .waitlist-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-top: 8px;
+    }
+
+    .waitlist-copy {
+      max-width: 760px;
     }
 
     .features {
@@ -630,8 +735,13 @@
       .hero,
       .score-layout,
       .response-grid,
-      .features {
+      .features,
+      .waitlist-card {
         grid-template-columns: 1fr;
+      }
+
+      .waitlist-card {
+        display: grid;
       }
 
       .hero-card,
@@ -661,12 +771,13 @@
       .response-intro,
       .response-card,
       .loading-card,
-      .note-box {
+      .note-box,
+      .waitlist-card {
         padding: 22px;
       }
 
       h1 {
-        font-size: 2.35rem;
+        font-size: 2.3rem;
       }
 
       .actions {
@@ -675,7 +786,9 @@
       }
 
       .primary-btn,
-      .secondary-btn {
+      .secondary-btn,
+      .product-btn,
+      .hero-link {
         width: 100%;
       }
 
@@ -711,12 +824,16 @@
       <section class="hero">
         <div class="hero-card card">
           <div class="eyebrow">Minimal workspace intelligence</div>
-          <h1>Your desk setup is holding you back.</h1>
+          <h1>Your desk setup is creating friction.</h1>
           <p class="hero-copy">
-            DeskLab analyses your workspace and shows you exactly where to improve ergonomics,
-            organisation, lighting and overall performance. Start with structural fixes first,
-            then move into smarter upgrades that actually earn their place.
+            DeskLab evaluates your workspace and shows you where to improve ergonomics, organisation,
+            lighting and overall focus. Fix the structural issues first, then upgrade selectively.
           </p>
+
+          <div class="hero-actions">
+            <a href="#advisor" class="hero-link primary">Analyse my setup</a>
+            <a href="#how-it-works" class="hero-link secondary">How it works</a>
+          </div>
 
           <div class="hero-meta">
             <div class="meta-pill">Workspace score</div>
@@ -725,28 +842,28 @@
           </div>
         </div>
 
-        <aside class="side-card card">
+        <aside class="side-card card" id="how-it-works">
           <div>
             <h2>How it works</h2>
             <p>
-              Describe your current workspace in a few lines. Mention desk size, lighting,
-              posture, clutter, cables, equipment and what feels inefficient. DeskLab will
-              return a score, key issues, priority improvements and recommended upgrades.
+              Describe your current setup in a few lines. Mention desk size, lighting, posture,
+              clutter, cables, equipment and what feels inefficient. DeskLab returns a score,
+              priority issues, direct fixes and relevant upgrades.
             </p>
           </div>
 
           <div class="mini-grid">
             <div class="mini-card">
-              <strong>1. Analyse the setup</strong>
-              <span>DeskLab identifies the highest-friction parts of your workspace based on what you describe.</span>
+              <strong>1. Diagnose the setup</strong>
+              <span>DeskLab identifies the highest-friction parts of your workspace from the details you provide.</span>
             </div>
             <div class="mini-card">
-              <strong>2. Prioritise the fixes</strong>
-              <span>Get direct advice on what to change first before buying anything unnecessary.</span>
+              <strong>2. Fix the fundamentals</strong>
+              <span>Get direct improvements to make before spending money on the wrong things.</span>
             </div>
             <div class="mini-card">
-              <strong>3. Upgrade selectively</strong>
-              <span>Only introduce products where they solve a clear ergonomic, organisational or visual problem.</span>
+              <strong>3. Upgrade where it counts</strong>
+              <span>Only add products where they solve a clear ergonomic, organisational or visual problem.</span>
             </div>
           </div>
         </aside>
@@ -757,8 +874,8 @@
           <div>
             <h3>Analyse your workspace</h3>
             <p>
-              Be specific. Stronger inputs produce more accurate diagnostics. Include what you use,
-              what feels off, and what kind of setup you are trying to create.
+              Be specific. Better inputs produce better diagnostics. Include what you use, what feels off,
+              and what kind of setup you are trying to build.
             </p>
           </div>
           <div class="hint">
@@ -766,6 +883,8 @@
             neck strain after long sessions
           </div>
         </div>
+
+        <span class="tool-label">Workspace input</span>
 
         <div class="prompt-chips">
           <button class="chip" type="button" onclick="fillPrompt('I have a small desk with a laptop, poor evening lighting, visible cables and not much storage. I want it to feel cleaner and more focused.')">Small desk reset</button>
@@ -775,7 +894,9 @@
         </div>
 
         <div class="input-wrap">
-          <textarea id="userInput" placeholder="Describe your workspace, your frustrations, and what you want to improve."></textarea>
+          <div class="textarea-shell">
+            <textarea id="userInput" placeholder="Describe your workspace, your frustrations, and what you want to improve."></textarea>
+          </div>
 
           <div class="actions">
             <button class="primary-btn" type="button" onclick="generateAdvice()">Analyse my setup</button>
@@ -783,7 +904,7 @@
           </div>
 
           <div class="micro-note">
-            Current beta works from text input. Image-based analysis can be layered in later without changing the core recommendation engine.
+            Current beta works from text input. Image upload and photo-based analysis are planned next.
           </div>
         </div>
 
@@ -793,25 +914,25 @@
       <section class="features">
         <div class="feature-card card">
           <div class="feature-icon">01</div>
-          <h4>Structured like a diagnostic tool</h4>
+          <h4>What DeskLab evaluates</h4>
           <p>
-            Results are framed as a workspace assessment, not a vague list of design suggestions.
+            Ergonomics, layout efficiency, lighting quality, visual clutter and upgrade priority.
           </p>
         </div>
 
         <div class="feature-card card">
           <div class="feature-icon">02</div>
-          <h4>Focused on real performance gains</h4>
+          <h4>Why the output feels different</h4>
           <p>
-            DeskLab prioritises posture, lighting, layout and visual friction before decorative upgrades.
+            Recommendations are framed as a workspace diagnosis, not generic styling advice.
           </p>
         </div>
 
         <div class="feature-card card">
           <div class="feature-icon">03</div>
-          <h4>Commercially useful by design</h4>
+          <h4>Why this matters commercially</h4>
           <p>
-            Recommendations naturally connect diagnostic insight with relevant product solutions.
+            Better diagnostics create more relevant product recommendations and stronger purchase intent.
           </p>
         </div>
       </section>
@@ -841,9 +962,71 @@
     }
 
     function getScoreBand(score) {
-      if (score < 50) return { label: "Needs attention", className: "red" };
-      if (score < 75) return { label: "Partially optimised", className: "amber" };
-      return { label: "Strong foundation", className: "green" };
+      if (score < 50) return { label: "High friction", className: "red" };
+      if (score < 75) return { label: "Moderate friction", className: "amber" };
+      return { label: "Low friction", className: "green" };
+    }
+
+    function createProductDetails(productName) {
+      const details = {
+        "Laptop stand": {
+          reason: "Raises screen height and improves posture during long sessions.",
+          link: "#"
+        },
+        "Monitor riser": {
+          reason: "Improves screen alignment and recovers usable desk space.",
+          link: "#"
+        },
+        "Monitor arm": {
+          reason: "Useful when screen height, distance or angle needs more control.",
+          link: "#"
+        },
+        "Monitor light bar": {
+          reason: "Improves focused lighting and reduces harsh screen-area contrast.",
+          link: "#"
+        },
+        "Minimal task lamp": {
+          reason: "Adds directional light for evening work and better visual comfort.",
+          link: "#"
+        },
+        "Premium desk mat": {
+          reason: "Defines the workspace visually and supports a cleaner layout.",
+          link: "#"
+        },
+        "Desk mat": {
+          reason: "Anchors the desk surface and creates stronger visual structure.",
+          link: "#"
+        },
+        "Compact desk organiser": {
+          reason: "Recovers surface space without making the setup feel busier.",
+          link: "#"
+        },
+        "Desktop organiser": {
+          reason: "Helps separate active tools from occasional-use items.",
+          link: "#"
+        },
+        "Under-monitor shelf": {
+          reason: "Useful for compact desks where vertical structure matters.",
+          link: "#"
+        },
+        "Cable management kit": {
+          reason: "Reduces visible cable noise and improves visual clarity.",
+          link: "#"
+        },
+        "Under-desk cable tray": {
+          reason: "Keeps cables off the visible desk line and supports a cleaner setup.",
+          link: "#"
+        },
+        "Minimal desk accessories": {
+          reason: "Supports a more restrained and coherent premium workspace aesthetic.",
+          link: "#"
+        }
+      };
+
+      return details[productName] || {
+        reason: "Relevant to the friction points detected in this setup.",
+        link: "#"
+      };
     }
 
     function generateAdvice() {
@@ -879,7 +1062,7 @@
             </div>
             <div class="loading-steps">
               <div>Evaluating desk constraints...</div>
-              <div>Assessing comfort and screen position...</div>
+              <div>Assessing posture and screen position...</div>
               <div>Generating prioritised recommendations...</div>
             </div>
           </div>
@@ -888,12 +1071,12 @@
 
       setTimeout(() => {
         const progressBar = document.getElementById("progressBar");
-        if (progressBar) progressBar.style.width = "34%";
+        if (progressBar) progressBar.style.width = "32%";
       }, 120);
 
       setTimeout(() => {
         const progressBar = document.getElementById("progressBar");
-        if (progressBar) progressBar.style.width = "72%";
+        if (progressBar) progressBar.style.width = "70%";
       }, 450);
 
       setTimeout(() => {
@@ -945,9 +1128,9 @@
       ) {
         addTheme("space");
         addIssue("Limited usable desk space", 10);
-        addFree("Remove non-essential items from the permanent desk surface and keep only core workflow items visible.");
-        addFree("Use vertical space more intentionally so the desk feels controlled rather than compressed.");
-        addPaid("Add a compact organiser or under-monitor tray to recover surface area without increasing visual noise.");
+        addFree("Remove non-essential items from the desk surface and keep only core workflow items visible.");
+        addFree("Use vertical space more deliberately so the desk feels controlled rather than compressed.");
+        addPaid("Add a compact organiser or under-monitor shelf to recover surface area without increasing visual noise.");
         addProduct("Compact desk organiser");
         addProduct("Under-monitor shelf");
       }
@@ -963,7 +1146,7 @@
         addIssue("Visual clutter and cable noise", 12);
         addFree("Remove any object that does not directly support your daily workflow.");
         addFree("Route visible cables behind the desk line so the setup reads as cleaner immediately.");
-        addPaid("Use cable clips, sleeves or an under-desk cable tray to reduce friction and visual distraction.");
+        addPaid("Use cable clips, sleeves or an under-desk cable tray to reduce distraction and friction.");
         addProduct("Cable management kit");
         addProduct("Under-desk cable tray");
       }
@@ -978,8 +1161,8 @@
       ) {
         addTheme("lighting");
         addIssue("Suboptimal lighting conditions", 12);
-        addFree("Reduce reliance on harsh overhead light where possible and position your workspace to benefit from softer directional light.");
-        addPaid("Introduce a task light or monitor light bar to improve visibility and reduce eye fatigue.");
+        addFree("Reduce reliance on harsh overhead light and position the workspace for softer directional lighting where possible.");
+        addPaid("Introduce a task light or monitor light bar to improve clarity and reduce eye fatigue.");
         addProduct("Monitor light bar");
         addProduct("Minimal task lamp");
       }
@@ -996,8 +1179,8 @@
         addTheme("comfort");
         addIssue("Ergonomic risk from posture or screen height", 15);
         addFree("Raise the screen so your viewing angle is more neutral and reduce long periods spent looking downward.");
-        addFree("Make sure keyboard and mouse position support relaxed shoulders and a more natural wrist angle.");
-        addPaid("A laptop stand or monitor riser is likely the highest-impact comfort upgrade here.");
+        addFree("Position keyboard and mouse to support relaxed shoulders and a more natural wrist angle.");
+        addPaid("A laptop stand or monitor riser is likely the highest-value comfort upgrade here.");
         addProduct("Laptop stand");
         addProduct("Monitor riser");
       }
@@ -1011,7 +1194,7 @@
         lower.includes("under$")
       ) {
         addTheme("budget");
-        addFree("Prioritise structural improvements first so any spend goes into genuine friction reduction rather than impulse upgrades.");
+        addFree("Prioritise structural improvements first so any spend goes into genuine friction reduction.");
         addPaid("Focus on one or two high-impact additions instead of stacking low-value accessories.");
       }
 
@@ -1025,7 +1208,7 @@
         addTheme("aesthetic");
         addIssue("Inconsistent visual restraint", 7);
         addFree("Reduce competing materials, colours and loose accessories so the setup feels more deliberate.");
-        addPaid("Upgrade toward fewer, better pieces rather than many smaller additions.");
+        addPaid("Upgrade toward fewer, better pieces rather than multiple small additions.");
         addProduct("Premium desk mat");
         addProduct("Minimal desk accessories");
       }
@@ -1074,7 +1257,7 @@
         addTheme("focus");
         addIssue("Low visual focus and workspace coherence", 8);
         addFree("Create a clearer distinction between active tools and passive clutter so the desk supports concentration.");
-        addPaid("Introduce one intentional surface-defining element to anchor the workspace visually.");
+        addPaid("Introduce one surface-defining element to anchor the workspace visually.");
         addProduct("Desk mat");
       }
 
@@ -1083,7 +1266,7 @@
         addFree("Start by reducing visible clutter, improving screen position and reviewing lighting before buying anything.");
         addPaid("One lighting improvement and one structural organiser will usually create the strongest return.");
         addProduct("Monitor light bar");
-        addProduct("Desk organiser");
+        addProduct("Desktop organiser");
       }
 
       score = Math.max(38, Math.min(96, score));
@@ -1093,18 +1276,20 @@
       const finalPaid = unique(paidFixes).slice(0, 4);
       const finalProducts = unique(productRecs).slice(0, 4);
 
-      let introText = "Your setup has a workable foundation, but there are a few clear inefficiencies reducing comfort, clarity and overall performance.";
+      let introText = "Your setup has a workable foundation, but a few clear inefficiencies are reducing comfort, clarity and performance.";
       if (themes.includes("comfort")) {
-        introText = "The main issue is ergonomic. Fixing posture, screen height and input positioning should come before aesthetic upgrades.";
+        introText = "The main constraint is ergonomic. Fix posture, screen height and input positioning before making aesthetic upgrades.";
       } else if (themes.includes("lighting")) {
-        introText = "Lighting looks like one of the main constraints here. Better directional light will improve both usability and the overall feel of the setup.";
+        introText = "Lighting is one of the main constraints here. Better directional light will improve both usability and the overall feel of the setup.";
       } else if (themes.includes("space")) {
-        introText = "Space is the main constraint. The desk needs more restraint and better hierarchy, not more objects.";
+        introText = "Space is the main constraint. The desk needs stronger hierarchy and more restraint, not more objects.";
       } else if (themes.includes("aesthetic")) {
-        introText = "The biggest opportunity is visual refinement. A cleaner mix of objects and stronger restraint will improve the setup quickly.";
+        introText = "The biggest opportunity is visual refinement. A cleaner accessory mix and better restraint will improve the setup quickly.";
       }
 
       const scoreBand = getScoreBand(score);
+      const priorityIssueCount = finalIssues.length;
+      const leadIssue = finalIssues[0] || "General workspace inefficiency";
 
       response.innerHTML = `
         <div class="response-shell">
@@ -1113,6 +1298,7 @@
               <div>
                 <div class="score-label">Workspace score</div>
                 <div class="score-number">${score}<span style="font-size:0.42em; opacity:0.7;">/100</span></div>
+                <div class="score-support">${priorityIssueCount} priority issue${priorityIssueCount === 1 ? "" : "s"} detected<br>Main constraint: ${leadIssue}</div>
               </div>
               <div class="score-band ${scoreBand.className}">${scoreBand.label}</div>
             </div>
@@ -1129,7 +1315,7 @@
           <div class="response-grid">
             <div class="response-card">
               <h5>Fix these first</h5>
-              <p>High-priority changes that should improve the setup before any unnecessary spend.</p>
+              <p>Fix these before buying anything.</p>
               <ul>
                 ${finalFree.map(item => `<li>${item}</li>`).join("")}
               </ul>
@@ -1137,7 +1323,7 @@
 
             <div class="response-card">
               <h5>High-value upgrades</h5>
-              <p>The most efficient paid improvements based on the issues detected above.</p>
+              <p>These are the paid improvements most likely to matter.</p>
               <ul>
                 ${finalPaid.map(item => `<li>${item}</li>`).join("")}
               </ul>
@@ -1145,19 +1331,31 @@
 
             <div class="response-card">
               <h5>Recommended products</h5>
-              <p>These are the most relevant product categories to improve this setup.</p>
-              <ul>
-                ${finalProducts.map(item => `<li>${item}</li>`).join("")}
-              </ul>
+              <p>Relevant product categories for this setup.</p>
+              <div class="products-grid">
+                ${finalProducts.map(product => {
+                  const details = createProductDetails(product);
+                  return `
+                    <div class="product-card">
+                      <strong>${product}</strong>
+                      <span>${details.reason}</span>
+                      <button class="product-btn" type="button" onclick="window.location.href='${details.link}'">View product</button>
+                    </div>
+                  `;
+                }).join("")}
+              </div>
             </div>
           </div>
 
-          <div class="note-box">
-            <h5>Next upgrade for DeskLab</h5>
-            <p>
-              This beta currently analyses written descriptions. The next layer should be image-based
-              setup review so users can upload a desk photo and compare the AI assessment against the text result.
-            </p>
+          <div class="waitlist-card">
+            <div class="waitlist-copy">
+              <h4>Want a more accurate assessment?</h4>
+              <p>
+                Image-based setup analysis is the next DeskLab release. Join the waitlist to get notified
+                when desk photo uploads and more precise diagnostics go live.
+              </p>
+            </div>
+            <button class="primary-btn" type="button" onclick="alert('Waitlist flow can be connected next.')">Join the waitlist</button>
           </div>
         </div>
       `;
