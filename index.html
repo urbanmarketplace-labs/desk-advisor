@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DeskLab Beta | Workspace Optimiser</title>
+  <title>DeskLab | Workspace Optimiser</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -485,7 +485,6 @@
 
     .primary-btn,
     .secondary-btn,
-    .product-btn,
     .ghost-btn {
       appearance: none;
       border: none;
@@ -510,7 +509,6 @@
     }
 
     .secondary-btn,
-    .product-btn,
     .ghost-btn {
       background: rgba(255, 255, 255, 0.04);
       color: var(--text);
@@ -518,7 +516,6 @@
     }
 
     .secondary-btn:hover,
-    .product-btn:hover,
     .ghost-btn:hover {
       background: rgba(255, 255, 255, 0.08);
     }
@@ -544,8 +541,7 @@
     .response-intro,
     .response-card,
     .score-card,
-    .note-box,
-    .waitlist-card {
+    .note-box {
       border-radius: 24px;
       border: 1px solid var(--border);
       background: rgba(255, 255, 255, 0.05);
@@ -554,8 +550,7 @@
 
     .loading-card,
     .response-intro,
-    .note-box,
-    .waitlist-card {
+    .note-box {
       padding: 24px;
     }
 
@@ -563,16 +558,14 @@
     .response-intro h4,
     .response-card h5,
     .score-card h5,
-    .note-box h5,
-    .waitlist-card h4 {
+    .note-box h5 {
       margin: 0 0 10px;
       letter-spacing: -0.03em;
     }
 
     .loading-card p,
     .response-intro p,
-    .note-box p,
-    .waitlist-card p {
+    .note-box p {
       margin: 0;
       color: var(--text-soft);
       line-height: 1.72;
@@ -737,56 +730,7 @@
       color: var(--text-muted);
       font-size: 0.89rem;
       line-height: 1.6;
-      margin-bottom: 12px;
-    }
-
-    .waitlist-card {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-      margin-top: 8px;
-    }
-
-    .waitlist-copy {
-      max-width: 760px;
-    }
-
-    .features {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 18px;
-      margin-top: 22px;
-    }
-
-    .feature-card {
-      padding: 24px;
-    }
-
-    .feature-icon {
-      width: 44px;
-      height: 44px;
-      display: grid;
-      place-items: center;
-      border-radius: 14px;
-      margin-bottom: 16px;
-      background: rgba(255, 255, 255, 0.07);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-weight: 800;
-    }
-
-    .feature-card h4 {
-      margin: 0 0 10px;
-      font-size: 1.02rem;
-      letter-spacing: -0.03em;
-    }
-
-    .feature-card p {
-      margin: 0;
-      color: var(--text-soft);
-      line-height: 1.72;
-      font-size: 0.95rem;
+      margin-bottom: 0;
     }
 
     .footer-note {
@@ -803,14 +747,8 @@
     @media (max-width: 1024px) {
       .hero,
       .score-layout,
-      .response-grid,
-      .features {
+      .response-grid {
         grid-template-columns: 1fr;
-      }
-
-      .waitlist-card {
-        flex-direction: column;
-        align-items: flex-start;
       }
 
       .options-grid {
@@ -819,8 +757,7 @@
 
       .hero-card,
       .side-card,
-      .advisor-card,
-      .feature-card {
+      .advisor-card {
         border-radius: 24px;
       }
     }
@@ -840,13 +777,11 @@
       .hero-card,
       .side-card,
       .advisor-card,
-      .feature-card,
       .score-card,
       .response-intro,
       .response-card,
       .loading-card,
-      .note-box,
-      .waitlist-card {
+      .note-box {
         padding: 22px;
       }
 
@@ -861,7 +796,6 @@
 
       .primary-btn,
       .secondary-btn,
-      .product-btn,
       .hero-link,
       .ghost-btn {
         width: 100%;
@@ -886,13 +820,13 @@
           <img src="desklabs-logo-transparent.png" alt="DeskLab logo" class="logo">
           <div class="brand-copy">
             <strong>DeskLab</strong>
-            <span>AI Workspace Optimiser</span>
+            <span>Workspace optimiser</span>
           </div>
         </div>
 
         <div class="status-pill">
           <span class="status-dot"></span>
-          Pre-Launch Beta
+          Beta
         </div>
       </div>
 
@@ -901,8 +835,8 @@
           <div class="eyebrow">Minimal workspace intelligence</div>
           <h1>Your desk setup is creating friction.</h1>
           <p class="hero-copy">
-            DeskLab now uses a guided diagnostic flow to understand your workspace more precisely,
-            then returns a sharper assessment across ergonomics, layout, lighting and upgrade priority.
+            DeskLab helps you assess your workspace and identify what to improve first across comfort,
+            layout, lighting and overall desk quality.
           </p>
 
           <div class="hero-actions">
@@ -911,9 +845,9 @@
           </div>
 
           <div class="hero-meta">
-            <div class="meta-pill">Guided assessment</div>
-            <div class="meta-pill">Sharper scoring</div>
-            <div class="meta-pill">Tailored product mapping</div>
+            <div class="meta-pill">Structured assessment</div>
+            <div class="meta-pill">Clear priorities</div>
+            <div class="meta-pill">Focused recommendations</div>
           </div>
         </div>
 
@@ -921,24 +855,23 @@
           <div>
             <h2>How it works</h2>
             <p>
-              Answer a few quick questions about your setup, select the problems that matter most,
-              then add any extra detail you want. DeskLab uses that profile to generate a more
-              grounded diagnostic result than a single text prompt alone.
+              Answer a few quick questions about your setup, then add any extra detail you want.
+              DeskLab uses that information to identify the main sources of friction and suggest what to fix first.
             </p>
           </div>
 
           <div class="mini-grid">
             <div class="mini-card">
-              <strong>1. Build the setup profile</strong>
-              <span>DeskLab captures equipment, pain points, work duration and upgrade intent.</span>
+              <strong>1. Assess the setup</strong>
+              <span>Capture your device type, main issues, work duration and upgrade intent.</span>
             </div>
             <div class="mini-card">
               <strong>2. Score the friction</strong>
-              <span>More structured inputs make the result feel more specific and more credible.</span>
+              <span>DeskLab identifies the main constraints reducing comfort, focus or efficiency.</span>
             </div>
             <div class="mini-card">
-              <strong>3. Recommend only what matters</strong>
-              <span>Products appear where they solve a real ergonomic, organisational or visual problem.</span>
+              <strong>3. Improve selectively</strong>
+              <span>Get direct improvements and recommended upgrade categories where they make sense.</span>
             </div>
           </div>
         </aside>
@@ -950,11 +883,10 @@
             <h3>Workspace assessment</h3>
             <p>
               Move through the diagnostic steps, then add any extra context if needed.
-              The final result combines your structured answers with your written detail.
             </p>
           </div>
           <div class="hint">
-            Better answers create a more specific score, stronger issue detection and cleaner product recommendations.
+            Better answers create a clearer score and more useful recommendations.
           </div>
         </div>
 
@@ -973,34 +905,8 @@
         </div>
       </section>
 
-      <section class="features">
-        <div class="feature-card card">
-          <div class="feature-icon">01</div>
-          <h4>What DeskLab evaluates</h4>
-          <p>
-            Ergonomics, layout efficiency, lighting quality, visual clutter, work duration and upgrade priority.
-          </p>
-        </div>
-
-        <div class="feature-card card">
-          <div class="feature-icon">02</div>
-          <h4>Why this feels smarter</h4>
-          <p>
-            The result is built from structured answers first, then refined with your own context.
-          </p>
-        </div>
-
-        <div class="feature-card card">
-          <div class="feature-icon">03</div>
-          <h4>Why this matters commercially</h4>
-          <p>
-            Better diagnosis means more relevant recommendations and stronger intent to buy the right products.
-          </p>
-        </div>
-      </section>
-
       <div class="footer-note">
-        DeskLab is an early concept experience for a premium workspace optimisation platform.
+        DeskLab is an early workspace assessment tool.
       </div>
     </div>
   </div>
@@ -1028,56 +934,43 @@
 
     const productCatalog = {
       "Laptop stand": {
-        reason: "Raises screen height and improves posture during long sessions.",
-        link: "#"
+        reason: "Raises screen height and improves posture during long sessions."
       },
       "Monitor riser": {
-        reason: "Improves screen alignment and recovers usable desk space.",
-        link: "#"
+        reason: "Improves screen alignment and recovers usable desk space."
       },
       "Monitor arm": {
-        reason: "Useful when screen height, distance or angle needs more control.",
-        link: "#"
+        reason: "Useful when screen height, distance or angle needs more control."
       },
       "Monitor light bar": {
-        reason: "Improves focused lighting and reduces harsh screen-area contrast.",
-        link: "#"
+        reason: "Improves focused lighting and reduces harsh screen-area contrast."
       },
       "Minimal task lamp": {
-        reason: "Adds directional light for evening work and better visual comfort.",
-        link: "#"
+        reason: "Adds directional light for evening work and better visual comfort."
       },
       "Premium desk mat": {
-        reason: "Defines the workspace visually and supports a cleaner layout.",
-        link: "#"
+        reason: "Defines the workspace visually and supports a cleaner layout."
       },
       "Desk mat": {
-        reason: "Anchors the desk surface and creates stronger visual structure.",
-        link: "#"
+        reason: "Anchors the desk surface and creates stronger visual structure."
       },
       "Compact desk organiser": {
-        reason: "Recovers surface space without making the setup feel busier.",
-        link: "#"
+        reason: "Recovers surface space without making the setup feel busier."
       },
       "Desktop organiser": {
-        reason: "Helps separate active tools from occasional-use items.",
-        link: "#"
+        reason: "Helps separate active tools from occasional-use items."
       },
       "Under-monitor shelf": {
-        reason: "Useful for compact desks where vertical structure matters.",
-        link: "#"
+        reason: "Useful for compact desks where vertical structure matters."
       },
       "Cable management kit": {
-        reason: "Reduces visible cable noise and improves visual clarity.",
-        link: "#"
+        reason: "Reduces visible cable noise and improves visual clarity."
       },
       "Under-desk cable tray": {
-        reason: "Keeps cables off the visible desk line and supports a cleaner setup.",
-        link: "#"
+        reason: "Keeps cables off the visible desk line and supports a cleaner setup."
       },
       "Minimal desk accessories": {
-        reason: "Supports a more restrained and coherent premium workspace aesthetic.",
-        link: "#"
+        reason: "Supports a more restrained and coherent premium workspace aesthetic."
       }
     };
 
@@ -1175,7 +1068,7 @@
       if (currentStep === "currentFeel") {
         html = `
           <h4 class="question-title">How does your setup feel right now?</h4>
-          <p class="question-copy">Select all that apply. This helps DeskLab understand the shape of the friction.</p>
+          <p class="question-copy">Select all that apply.</p>
           <div class="pill-grid">
             ${renderMultiOption("currentFeel", "Cluttered")}
             ${renderMultiOption("currentFeel", "Uncomfortable")}
@@ -1206,8 +1099,8 @@
 
       if (currentStep === "upgradeIntent") {
         html = `
-          <h4 class="question-title">What kind of upgrade are you looking for?</h4>
-          <p class="question-copy">This helps DeskLab decide how aggressively to recommend paid improvements.</p>
+          <h4 class="question-title">What kind of improvement are you looking for?</h4>
+          <p class="question-copy">This helps DeskLab decide how strongly to recommend paid upgrades.</p>
           <div class="options-grid">
             ${renderSingleOption("upgradeIntent", "Free improvements first")}
             ${renderSingleOption("upgradeIntent", "Budget-conscious upgrade")}
@@ -1221,7 +1114,7 @@
       if (currentStep === "workDuration") {
         html = `
           <h4 class="question-title">How long do you usually work at your desk?</h4>
-          <p class="question-copy">Longer sessions increase the importance of ergonomics and lighting quality.</p>
+          <p class="question-copy">Longer sessions increase the importance of ergonomics and lighting.</p>
           <div class="options-grid">
             ${renderSingleOption("workDuration", "Under 2 hours")}
             ${renderSingleOption("workDuration", "2–4 hours")}
@@ -1235,11 +1128,11 @@
       if (currentStep === "extraDetail") {
         html = `
           <h4 class="question-title">Anything else DeskLab should know?</h4>
-          <p class="question-copy">Optional. Add any detail about lighting, posture, desk size, storage, goals or specific frustrations.</p>
+          <p class="question-copy">Optional. Add any extra detail about lighting, posture, desk size, storage or goals.</p>
           <div class="textarea-shell">
             <textarea id="extraDetailInput" placeholder="Example: I have a compact desk, poor evening lighting, visible cables and some neck strain after long work sessions. I want the setup to feel cleaner and more premium." oninput="updateTextarea(this.value)">${escapeHtml(assessment.extraDetail)}</textarea>
           </div>
-          <div class="micro-note">You can leave this blank, but extra context will make the result stronger.</div>
+          <div class="micro-note">You can leave this blank, but extra context can improve the result.</div>
           ${renderNavigation(true, true, "Analyse my setup")}
         `;
       }
@@ -1280,7 +1173,7 @@
           <div class="loading-card">
             <h4>Analysing your workspace...</h4>
             <p>
-              DeskLab is combining your diagnostic answers with your written context to assess ergonomics,
+              DeskLab is combining your answers with your written context to assess ergonomics,
               lighting, layout efficiency and upgrade opportunities.
             </p>
             <div class="progress-track">
@@ -1354,7 +1247,6 @@
       addProfile(assessment.deviceType);
       addProfile(assessment.upgradeIntent);
       addProfile(assessment.workDuration);
-
       assessment.currentFeel.forEach(item => addProfile(item));
 
       if (assessment.deviceType === "Laptop only") {
@@ -1657,35 +1549,22 @@
             </div>
 
             <div class="response-card">
-              <h5>Recommended products</h5>
-              <p>Most relevant product categories for this workspace.</p>
+              <h5>Recommended categories</h5>
+              <p>Relevant upgrade categories for this workspace.</p>
               <div class="products-grid">
                 ${finalProducts.map(product => {
                   const details = productCatalog[product] || {
-                    reason: "Relevant to the friction points detected in this setup.",
-                    link: "#"
+                    reason: "Relevant to the friction points detected in this setup."
                   };
                   return `
                     <div class="product-card">
                       <strong>${product}</strong>
                       <span>${details.reason}</span>
-                      <button class="product-btn" type="button" onclick="window.location.href='${details.link}'">View product</button>
                     </div>
                   `;
                 }).join("")}
               </div>
             </div>
-          </div>
-
-          <div class="waitlist-card">
-            <div class="waitlist-copy">
-              <h4>Want a more accurate assessment?</h4>
-              <p>
-                Image-based setup analysis is the next DeskLab layer. Join the waitlist to get notified
-                when desk photo uploads and more precise diagnostics go live.
-              </p>
-            </div>
-            <button class="primary-btn" type="button" onclick="alert('Waitlist flow can be connected next.')">Join the waitlist</button>
           </div>
         </div>
       `;
