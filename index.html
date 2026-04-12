@@ -919,11 +919,9 @@
       <section class="hero">
         <div class="hero-card card">
           <div class="eyebrow">Guided workspace recommendations</div>
-          <h1>Find out what your desk setup needs next.</h1>
+          <h1>Fix your desk in under 60 seconds.</h1>
           <p class="hero-copy">
-            DeskLab helps you identify what is holding your workspace back, what to fix first,
-            and which products are actually relevant to your setup. It is designed to make
-            choosing improvements simpler, clearer and more useful.
+            Answer a few quick questions and get a clear plan for what to fix first, what is worth upgrading, and which products actually fit your setup.
           </p>
 
           <div class="hero-actions">
@@ -934,31 +932,30 @@
           <div class="hero-meta">
             <div class="meta-pill">Easy to use</div>
             <div class="meta-pill">Clear priorities</div>
-            <div class="meta-pill">Product-ready recommendations</div>
+            <div class="meta-pill">Relevant recommendations</div>
           </div>
         </div>
 
         <aside class="side-card card">
           <div>
-            <h2>How DeskLab fits the website</h2>
+            <h2>What you get</h2>
             <p>
-              DeskLab is designed to guide the buying journey. A visitor arrives, understands the value,
-              completes the assessment, receives advice, and then sees the most relevant products for that setup.
+              A quick setup review, a clear diagnosis, and only the most relevant next steps.
             </p>
           </div>
 
           <div class="mini-grid">
             <div class="mini-card">
-              <strong>1. Understand the problem</strong>
-              <span>DeskLab helps users identify the main source of friction in their setup.</span>
+              <strong>Clear diagnosis</strong>
+              <span>See what is actually holding your setup back.</span>
             </div>
             <div class="mini-card">
-              <strong>2. Improve selectively</strong>
-              <span>Recommendations focus on what matters most instead of overwhelming people with options.</span>
+              <strong>Prioritised fixes</strong>
+              <span>Know what to change first without wasting money.</span>
             </div>
             <div class="mini-card">
-              <strong>3. Move naturally to products</strong>
-              <span>Each assessment can lead into the most suitable products once the store is live.</span>
+              <strong>Relevant products</strong>
+              <span>Only see products that genuinely fit your workspace.</span>
             </div>
           </div>
         </aside>
@@ -969,12 +966,11 @@
           <div>
             <h3>The Urban Marketplace product system</h3>
             <p>
-              These are the core products DeskLab is built around. Each one solves a clear workspace problem,
-              which makes the recommendations easier to understand and easier to trust.
+              These are the core products DeskLab is built around. Each one solves a clear workspace problem, which makes the recommendations easier to understand and easier to trust.
             </p>
           </div>
           <div class="section-note">
-            Ready for Shopify links once the store goes live.
+            Built around lighting, structure, ergonomics, clarity and environment.
           </div>
         </div>
 
@@ -1001,7 +997,7 @@
           </div>
           <div class="system-item">
             <h4>LumoMist Diffuser</h4>
-            <p>Seasonal and secondary. Useful when someone wants to improve the atmosphere of their workspace.</p>
+            <p>Secondary and seasonal. Useful when someone wants the workspace to feel calmer and more considered.</p>
           </div>
         </div>
       </section>
@@ -1011,12 +1007,11 @@
           <div>
             <h3>Workspace assessment</h3>
             <p>
-              Answer a few simple questions, then add any extra detail you want. DeskLab will assess the setup,
-              highlight the main issues, and recommend the most relevant improvements.
+              Answer a few simple questions, then add a little more detail about your setup. DeskLab will identify the main issues and recommend the most relevant improvements.
             </p>
           </div>
           <div class="hint">
-            Clear answers lead to clearer recommendations.
+            Better detail leads to better recommendations.
           </div>
         </div>
 
@@ -1036,7 +1031,7 @@
       </section>
 
       <div class="footer-note">
-        DeskLab is an early workspace assessment experience by Urban Marketplace.
+        DeskLab by Urban Marketplace
       </div>
     </div>
   </div>
@@ -1054,18 +1049,18 @@
     const assessment = {
       deviceType: "",
       currentFeel: [],
-      biggestProblem: "",
+      problems: [],
+      priority: "",
       upgradeIntent: "",
-      workDuration: "",
       extraDetail: ""
     };
 
     const steps = [
       "deviceType",
       "currentFeel",
-      "biggestProblem",
+      "problems",
+      "priority",
       "upgradeIntent",
-      "workDuration",
       "extraDetail"
     ];
 
@@ -1073,28 +1068,22 @@
 
     const productCatalog = {
       "Monitor Light Bar": {
-        reason: "Useful when lighting is weak, uneven or causing visual strain.",
-        category: "Lighting"
+        reason: "Useful when lighting is weak, uneven or causing visual strain."
       },
       "Wool Desk Mat": {
-        reason: "Helps define the desk surface and gives the setup more structure and finish.",
-        category: "Structure"
+        reason: "Helps define the desk surface and gives the setup more structure and finish."
       },
       "Monitor Stand": {
-        reason: "Improves screen height and often creates more usable desk space.",
-        category: "Ergonomics"
+        reason: "Improves screen height and often creates more usable desk space."
       },
       "Cable Management Kit": {
-        reason: "Reduces visible cable clutter and improves visual clarity quickly.",
-        category: "Clarity"
+        reason: "Reduces visible cable clutter and improves visual clarity quickly."
       },
       "Laptop Stand": {
-        reason: "Useful when laptop users need a better screen height and more comfortable posture.",
-        category: "Ergonomics"
+        reason: "Useful when laptop users need a better screen height and more comfortable posture."
       },
       "LumoMist Diffuser": {
-        reason: "Best as a secondary refinement when the user wants the workspace to feel calmer or more considered.",
-        category: "Environment"
+        reason: "Best as a secondary refinement when the user wants the workspace to feel calmer or more considered."
       }
     };
 
@@ -1132,9 +1121,9 @@
     function restartAssessment() {
       assessment.deviceType = "";
       assessment.currentFeel = [];
-      assessment.biggestProblem = "";
+      assessment.problems = [];
+      assessment.priority = "";
       assessment.upgradeIntent = "";
-      assessment.workDuration = "";
       assessment.extraDetail = "";
       currentStepIndex = 0;
       document.getElementById("response").style.display = "none";
@@ -1237,19 +1226,33 @@
         `;
       }
 
-      if (currentStep === "biggestProblem") {
+      if (currentStep === "problems") {
         html = `
-          <h4 class="question-title">What is the main problem?</h4>
-          <p class="question-copy">Pick the one issue that matters most right now.</p>
-          <div class="options-grid">
-            ${renderSingleOption("biggestProblem", "Neck or back discomfort")}
-            ${renderSingleOption("biggestProblem", "Poor lighting")}
-            ${renderSingleOption("biggestProblem", "Not enough space")}
-            ${renderSingleOption("biggestProblem", "Cable clutter")}
-            ${renderSingleOption("biggestProblem", "Hard to focus")}
-            ${renderSingleOption("biggestProblem", "Does not feel premium")}
+          <h4 class="question-title">What issues are you dealing with?</h4>
+          <p class="question-copy">Select all that apply.</p>
+          <div class="pill-grid">
+            ${renderMultiOption("problems", "Neck or back discomfort")}
+            ${renderMultiOption("problems", "Poor lighting")}
+            ${renderMultiOption("problems", "Not enough space")}
+            ${renderMultiOption("problems", "Cable clutter")}
+            ${renderMultiOption("problems", "Hard to focus")}
+            ${renderMultiOption("problems", "Does not feel premium")}
           </div>
-          ${renderNavigation(Boolean(assessment.biggestProblem), true, "Continue")}
+          ${renderNavigation(assessment.problems.length > 0, true, "Continue")}
+        `;
+      }
+
+      if (currentStep === "priority") {
+        html = `
+          <h4 class="question-title">What matters most to you?</h4>
+          <p class="question-copy">Choose the outcome you care about most.</p>
+          <div class="options-grid">
+            ${renderSingleOption("priority", "Better comfort")}
+            ${renderSingleOption("priority", "Cleaner setup")}
+            ${renderSingleOption("priority", "Better focus")}
+            ${renderSingleOption("priority", "More premium look")}
+          </div>
+          ${renderNavigation(Boolean(assessment.priority), true, "Continue")}
         `;
       }
 
@@ -1267,28 +1270,14 @@
         `;
       }
 
-      if (currentStep === "workDuration") {
-        html = `
-          <h4 class="question-title">How long are you usually at your desk?</h4>
-          <p class="question-copy">Longer sessions usually make ergonomics and lighting more important.</p>
-          <div class="options-grid">
-            ${renderSingleOption("workDuration", "Under 2 hours")}
-            ${renderSingleOption("workDuration", "2 to 4 hours")}
-            ${renderSingleOption("workDuration", "4 to 8 hours")}
-            ${renderSingleOption("workDuration", "8 hours or more")}
-          </div>
-          ${renderNavigation(Boolean(assessment.workDuration), true, "Continue")}
-        `;
-      }
-
       if (currentStep === "extraDetail") {
         html = `
-          <h4 class="question-title">Anything else DeskLab should know?</h4>
-          <p class="question-copy">Optional. Add any extra detail about your lighting, posture, desk size, storage, clutter or what you want the setup to feel like.</p>
+          <h4 class="question-title">Describe your setup in a little more detail</h4>
+          <p class="question-copy">Mention desk size, lighting, cables, comfort, storage, and what feels off.</p>
           <div class="textarea-shell">
-            <textarea id="extraDetailInput" placeholder="Example: I have a compact desk, poor evening lighting, visible cables and some neck strain after long work sessions. I want the setup to feel cleaner, calmer and more premium." oninput="updateTextarea(this.value)">${escapeHtml(assessment.extraDetail)}</textarea>
+            <textarea id="extraDetailInput" placeholder="Example: Small desk, poor evening lighting, visible cables, limited storage, some neck strain, and I want it to feel cleaner and more premium." oninput="updateTextarea(this.value)">${escapeHtml(assessment.extraDetail)}</textarea>
           </div>
-          <div class="micro-note">You can leave this blank, but a little extra detail usually leads to a better result.</div>
+          <div class="micro-note">A little extra detail usually leads to a better result.</div>
           ${renderNavigation(true, true, "Analyse my setup")}
         `;
       }
@@ -1310,8 +1299,7 @@
           <div class="loading-card">
             <h4>DeskLab is reviewing your setup</h4>
             <p>
-              We are combining your answers with your written context to identify the main points of friction,
-              the most useful fixes, and the product categories that best match your needs.
+              We are combining your answers with your written context to identify the main points of friction, the most useful fixes, and the products that best match your needs.
             </p>
             <div class="progress-track" style="margin-top:16px;">
               <div class="progress-bar" id="resultProgress"></div>
@@ -1382,9 +1370,10 @@
       }
 
       addProfile(assessment.deviceType);
+      addProfile(assessment.priority);
       addProfile(assessment.upgradeIntent);
-      addProfile(assessment.workDuration);
       assessment.currentFeel.forEach(item => addProfile(item));
+      assessment.problems.forEach(item => addProfile(item));
 
       if (assessment.deviceType === "Laptop only") {
         addTheme("ergonomics");
@@ -1466,32 +1455,32 @@
         addProduct("Cable Management Kit");
       }
 
-      if (assessment.biggestProblem === "Neck or back discomfort") {
+      if (assessment.problems.includes("Neck or back discomfort")) {
         addTheme("ergonomics");
         addIssue("Posture and screen height are likely the main constraints", 12);
-        addFree("Raise the primary screen and make sure keyboard and mouse placement allow relaxed shoulders and wrists.");
-        addPaid("Prioritise a laptop stand or monitor stand before more aesthetic purchases.");
+        addFree("Raise the main screen and make sure keyboard and mouse placement allow relaxed shoulders and wrists.");
+        addPaid("Prioritise a laptop stand or monitor stand before lower-impact purchases.");
         addProduct("Laptop Stand");
         addProduct("Monitor Stand");
       }
 
-      if (assessment.biggestProblem === "Poor lighting") {
+      if (assessment.problems.includes("Poor lighting")) {
         addTheme("lighting");
-        addIssue("Lighting is the main workspace weakness", 10);
-        addFree("Improve directional light before changing lower-impact parts of the setup.");
-        addPaid("A monitor light bar should be one of the first upgrades here.");
+        addIssue("Lighting is one of the main workspace weaknesses", 10);
+        addFree("Improve directional light around the working area before changing lower-impact parts of the setup.");
+        addPaid("A monitor light bar is one of the clearest lighting upgrades for this type of setup.");
         addProduct("Monitor Light Bar");
       }
 
-      if (assessment.biggestProblem === "Not enough space") {
+      if (assessment.problems.includes("Not enough space")) {
         addTheme("space");
         addIssue("Desk space is being used inefficiently", 10);
-        addFree("Reduce the number of permanent desk objects and use the surface more selectively.");
-        addPaid("A monitor stand can improve both alignment and space use.");
+        addFree("Reduce the number of permanent desk objects and keep only core items in the working zone.");
+        addPaid("A monitor stand can improve both alignment and usable desk space.");
         addProduct("Monitor Stand");
       }
 
-      if (assessment.biggestProblem === "Cable clutter") {
+      if (assessment.problems.includes("Cable clutter")) {
         addTheme("cables");
         addIssue("Cable clutter is reducing visual clarity", 10);
         addFree("Route visible cables behind the desk line so the setup looks cleaner immediately.");
@@ -1499,20 +1488,52 @@
         addProduct("Cable Management Kit");
       }
 
-      if (assessment.biggestProblem === "Hard to focus") {
+      if (assessment.problems.includes("Hard to focus")) {
         addTheme("focus");
         addIssue("The setup is carrying too much visual friction", 9);
         addFree("Reduce passive clutter and create a clearer layout for the objects you actually use.");
-        addPaid("Choose products that improve structure and reduce distractions.");
+        addPaid("Choose upgrades that improve structure and reduce distraction.");
         addProduct("Wool Desk Mat");
         addProduct("Cable Management Kit");
       }
 
-      if (assessment.biggestProblem === "Does not feel premium") {
+      if (assessment.problems.includes("Does not feel premium")) {
         addTheme("aesthetic");
         addIssue("The workspace lacks restraint and definition", 8);
         addFree("Reduce competing materials, colours and desk clutter before buying anything else.");
         addPaid("Upgrade toward fewer, better pieces that improve both function and finish.");
+        addProduct("Wool Desk Mat");
+        addProduct("Monitor Stand");
+      }
+
+      if (assessment.priority === "Better comfort") {
+        addTheme("comfort");
+        addIssue("Comfort is a high-priority outcome", 4);
+        addPaid("Because comfort matters most here, posture and screen height should be treated as priority upgrades.");
+        addProduct("Laptop Stand");
+        addProduct("Monitor Stand");
+      }
+
+      if (assessment.priority === "Cleaner setup") {
+        addTheme("clarity");
+        addIssue("Visual clarity is a key goal", 3);
+        addPaid("A cleaner setup usually comes from stronger structure and less visible cable clutter.");
+        addProduct("Cable Management Kit");
+        addProduct("Wool Desk Mat");
+      }
+
+      if (assessment.priority === "Better focus") {
+        addTheme("focus");
+        addIssue("Focus support is a key priority", 3);
+        addPaid("To improve focus, reduce visual noise and strengthen the working zone first.");
+        addProduct("Cable Management Kit");
+        addProduct("Monitor Light Bar");
+      }
+
+      if (assessment.priority === "More premium look") {
+        addTheme("aesthetic");
+        addIssue("Premium finish is a key priority", 3);
+        addPaid("A more premium setup usually comes from cleaner structure, better materials and fewer loose objects.");
         addProduct("Wool Desk Mat");
         addProduct("Monitor Stand");
       }
@@ -1533,22 +1554,6 @@
         addIssue("Higher expectation for visual coherence", 4);
         addFree("Premium feel usually comes from restraint first, then from carefully chosen upgrades.");
         addPaid("Use fewer, more deliberate products that improve both layout and finish.");
-      }
-
-      if (assessment.workDuration === "2 to 4 hours") {
-        addIssue("Moderate daily desk use", 3);
-      }
-
-      if (assessment.workDuration === "4 to 8 hours") {
-        addIssue("Long daily desk sessions", 8);
-        addTheme("comfort");
-        addFree("Because you spend long stretches at the desk, posture and lighting deserve more attention than smaller visual tweaks.");
-      }
-
-      if (assessment.workDuration === "8 hours or more") {
-        addIssue("Extended daily desk sessions", 12);
-        addTheme("comfort");
-        addFree("With very long desk sessions, ergonomics and lighting should be treated as priority systems, not optional refinements.");
       }
 
       if (lower.includes("small") || lower.includes("compact") || lower.includes("tiny")) {
@@ -1600,9 +1605,9 @@
       score = Math.max(36, Math.min(96, score));
 
       const finalIssues = unique(issues).slice(0, 4);
-      const finalFree = unique(freeFixes).slice(0, 5);
-      const finalPaid = unique(paidFixes).slice(0, 5);
-      const finalProducts = unique(productRecs).slice(0, 4);
+      const finalFree = unique(freeFixes).slice(0, 3);
+      const finalPaid = unique(paidFixes).slice(0, 3);
+      const finalProducts = unique(productRecs).slice(0, 3);
       const finalProfile = unique(detectedProfile).slice(0, 6);
 
       let introText = "Your setup has a workable base, but the assessment suggests a few clear friction points are reducing comfort, focus and overall desk quality.";
@@ -1647,32 +1652,31 @@
 
           <div class="response-grid">
             <div class="response-card">
-              <h5>Fix these first</h5>
-              <p>These are the highest-value improvements before unnecessary spending.</p>
+              <h5>Fix first</h5>
+              <p>The most important changes to make before buying more than you need.</p>
               <ul>
                 ${finalFree.map(item => `<li>${item}</li>`).join("")}
               </ul>
             </div>
 
             <div class="response-card">
-              <h5>Recommended upgrades</h5>
-              <p>These are the most justified paid moves based on your assessment.</p>
+              <h5>Best upgrades</h5>
+              <p>The paid improvements most likely to make a genuine difference.</p>
               <ul>
                 ${finalPaid.map(item => `<li>${item}</li>`).join("")}
               </ul>
             </div>
 
             <div class="response-card">
-              <h5>Relevant products</h5>
-              <p>These categories are the strongest match for the issues identified.</p>
+              <h5>Products that fit this setup</h5>
+              <p>The strongest match for the issues identified here.</p>
               <div class="products-grid">
                 ${finalProducts.map(product => {
                   const details = productCatalog[product] || {
-                    reason: "Relevant to the issues identified in this setup.",
-                    category: "Workspace"
+                    reason: "Relevant to the issues identified in this setup."
                   };
                   const url = SHOP_URLS[product] || "#";
-                  const buttonLabel = url === "#" ? "Product link ready soon" : "View product";
+                  const buttonLabel = url === "#" ? "Product page coming soon" : "View product";
                   return `
                     <div class="product-card">
                       <strong>${product}</strong>
@@ -1686,10 +1690,9 @@
           </div>
 
           <div class="note-box">
-            <h5>How this connects to the website</h5>
+            <h5>Next step</h5>
             <p>
-              When the store goes live, each recommended product card can link directly to the relevant Shopify product page.
-              To switch that on, just replace the placeholder values in the <strong>SHOP_URLS</strong> object near the top of the script.
+              Use these recommendations to decide what matters most. The best results usually come from fixing the main source of friction first, then upgrading selectively.
             </p>
           </div>
         </div>
