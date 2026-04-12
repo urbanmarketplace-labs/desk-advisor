@@ -14,7 +14,6 @@
       --brand: #2c3e94;
       --brand-dark: #22317a;
       --brand-soft: #eef2ff;
-      --bg: #f6f8fc;
       --surface: #ffffff;
       --surface-soft: #f8faff;
       --border: #dfe5f2;
@@ -29,7 +28,7 @@
       --radius-lg: 22px;
       --radius-md: 16px;
       --radius-sm: 12px;
-      --max-width: 1220px;
+      --max-width: 1180px;
     }
 
     * {
@@ -852,7 +851,7 @@
           <div class="eyebrow">Personalised workspace recommendations</div>
           <h1>Fix your desk in under 60 seconds.</h1>
           <p class="hero-copy">
-            Answer a few quick questions and get a clear plan for what to fix first, what is worth upgrading, and which products actually fit your setup.
+            Answer a few quick questions and get a clearer view of what is holding your setup back, what to fix first, and which improvements are actually worth considering.
           </p>
 
           <div class="hero-actions">
@@ -886,7 +885,7 @@
             </div>
             <div class="mini-card">
               <strong>Relevant products</strong>
-              <span>Only see products that genuinely fit your workspace.</span>
+              <span>Only see solutions that genuinely fit your workspace.</span>
             </div>
           </div>
         </aside>
@@ -982,7 +981,7 @@
     }
 
     function escapeHtml(str) {
-      return str
+      return String(str || "")
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
@@ -991,7 +990,7 @@
     }
 
     function escapeJs(str) {
-      return str.replace(/'/g, "\\'");
+      return String(str || "").replace(/'/g, "\\'");
     }
 
     function getScoreBand(score) {
@@ -1149,7 +1148,7 @@
       if (currentStep === "upgradeIntent") {
         html = `
           <h4 class="question-title">What kind of improvement are you looking for?</h4>
-          <p class="question-copy">This helps DeskLab decide how strongly to recommend paid upgrades.</p>
+          <p class="question-copy">This helps DeskLab understand how selective to be with paid recommendations.</p>
           <div class="options-grid">
             ${renderSingleOption("upgradeIntent", "Free improvements first")}
             ${renderSingleOption("upgradeIntent", "A few practical upgrades")}
@@ -1299,7 +1298,7 @@
         addIssue("Visual clutter is reducing clarity", 10);
         addFree("Remove anything from the desk that does not directly support the work you do there every day.");
         addFree("Group the items you keep so the setup feels deliberate rather than scattered.");
-        addPaid("A cable management kit and a clearer desk surface will usually make the biggest difference first.");
+        addPaid("A cable management improvement and a clearer desk surface will usually make the biggest difference first.");
         addProduct("Cable Management Kit");
         addProduct("Wool Desk Mat");
       }
@@ -1333,7 +1332,7 @@
         addTheme("aesthetic");
         addIssue("The desk lacks visual structure", 6);
         addFree("Reduce visual noise first, then define the main working area more clearly.");
-        addPaid("A wool desk mat can give the setup more definition and a more premium overall feel.");
+        addPaid("A desk mat can give the setup more definition and a more premium overall feel.");
         addProduct("Wool Desk Mat");
       }
 
@@ -1558,7 +1557,7 @@
             </div>
 
             <div class="response-card">
-              <h5>Products that fit this setup</h5>
+              <h5>Relevant products</h5>
               <p>The strongest match for the issues identified here.</p>
               <div class="products-grid">
                 ${finalProducts.map(product => {
@@ -1566,12 +1565,11 @@
                     reason: "Relevant to the issues identified in this setup."
                   };
                   const url = SHOP_URLS[product] || "#";
-                  const buttonLabel = url === "#" ? "View product";
                   return `
                     <div class="product-card">
                       <strong>${product}</strong>
                       <span>${details.reason}</span>
-                      <a class="product-link primary" href="${url}" ${url === "#" ? 'onclick="return false;" aria-disabled="true"' : ""}>${buttonLabel}</a>
+                      <a class="product-link primary" href="${url}" ${url === "#" ? 'onclick="return false;" aria-disabled="true"' : ""}>View product</a>
                     </div>
                   `;
                 }).join("")}
