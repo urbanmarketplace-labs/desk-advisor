@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DeskLab | Better workspace recommendations</title>
+  <title>DeskLab | Personalised workspace recommendations</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,8 +23,6 @@
       --text-soft: #44506a;
       --text-muted: #6b7690;
       --success: #2c8f57;
-      --warning: #b37d12;
-      --danger: #b64747;
       --shadow-lg: 0 18px 50px rgba(14, 24, 43, 0.08);
       --shadow-md: 0 10px 28px rgba(14, 24, 43, 0.06);
       --radius-xl: 28px;
@@ -296,67 +294,6 @@
       font-size: 0.95rem;
     }
 
-    .system-card {
-      padding: 26px;
-      margin-bottom: 20px;
-    }
-
-    .section-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      gap: 18px;
-      margin-bottom: 18px;
-    }
-
-    .section-head h3 {
-      margin: 0;
-      font-size: 1.45rem;
-      letter-spacing: -0.05em;
-    }
-
-    .section-head p {
-      margin: 8px 0 0;
-      max-width: 760px;
-      color: var(--text-soft);
-      line-height: 1.72;
-      font-size: 1rem;
-    }
-
-    .section-note {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      line-height: 1.55;
-      max-width: 320px;
-      text-align: right;
-    }
-
-    .system-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .system-item {
-      padding: 18px;
-      border-radius: 18px;
-      background: var(--surface-soft);
-      border: 1px solid var(--border);
-    }
-
-    .system-item h4 {
-      margin: 0 0 6px;
-      font-size: 1rem;
-      letter-spacing: -0.03em;
-    }
-
-    .system-item p {
-      margin: 0;
-      color: var(--text-soft);
-      line-height: 1.65;
-      font-size: 0.94rem;
-    }
-
     .advisor-card {
       padding: 30px;
       margin-bottom: 22px;
@@ -585,16 +522,14 @@
     }
 
     .secondary-btn,
-    .ghost-btn,
-    .product-link.secondary {
+    .ghost-btn {
       background: #ffffff;
       color: var(--text);
       border: 1px solid var(--border);
     }
 
     .secondary-btn:hover,
-    .ghost-btn:hover,
-    .product-link.secondary:hover {
+    .ghost-btn:hover {
       background: var(--surface-soft);
     }
 
@@ -833,8 +768,7 @@
     @media (max-width: 1024px) {
       .hero,
       .score-layout,
-      .response-grid,
-      .system-grid {
+      .response-grid {
         grid-template-columns: 1fr;
       }
 
@@ -850,7 +784,6 @@
 
       .topbar,
       .advisor-header,
-      .section-head,
       .step-meta {
         flex-direction: column;
         align-items: flex-start;
@@ -859,7 +792,6 @@
       .hero-card,
       .side-card,
       .advisor-card,
-      .system-card,
       .score-card,
       .response-intro,
       .response-card,
@@ -886,8 +818,7 @@
         width: 100%;
       }
 
-      .hint,
-      .section-note {
+      .hint {
         text-align: left;
         max-width: none;
       }
@@ -918,7 +849,7 @@
 
       <section class="hero">
         <div class="hero-card card">
-          <div class="eyebrow">Guided workspace recommendations</div>
+          <div class="eyebrow">Personalised workspace recommendations</div>
           <h1>Fix your desk in under 60 seconds.</h1>
           <p class="hero-copy">
             Answer a few quick questions and get a clear plan for what to fix first, what is worth upgrading, and which products actually fit your setup.
@@ -926,13 +857,13 @@
 
           <div class="hero-actions">
             <a href="#advisor" class="hero-link primary">Start your DeskLab assessment</a>
-            <a href="#product-system" class="hero-link secondary">See the product system</a>
+            <a href="#advisor" class="hero-link secondary">See how it works</a>
           </div>
 
           <div class="hero-meta">
             <div class="meta-pill">Easy to use</div>
             <div class="meta-pill">Clear priorities</div>
-            <div class="meta-pill">Relevant recommendations</div>
+            <div class="meta-pill">Personalised recommendations</div>
           </div>
         </div>
 
@@ -959,47 +890,6 @@
             </div>
           </div>
         </aside>
-      </section>
-
-      <section class="system-card card" id="product-system">
-        <div class="section-head">
-          <div>
-            <h3>The Urban Marketplace product system</h3>
-            <p>
-              These are the core products DeskLab is built around. Each one solves a clear workspace problem, which makes the recommendations easier to understand and easier to trust.
-            </p>
-          </div>
-          <div class="section-note">
-            Built around lighting, structure, ergonomics, clarity and environment.
-          </div>
-        </div>
-
-        <div class="system-grid">
-          <div class="system-item">
-            <h4>Monitor Light Bar</h4>
-            <p>Improves task lighting, reduces harsh contrast and makes evening work easier on the eyes.</p>
-          </div>
-          <div class="system-item">
-            <h4>Wool Desk Mat</h4>
-            <p>Defines the workspace, improves visual structure and helps the desk feel cleaner and more deliberate.</p>
-          </div>
-          <div class="system-item">
-            <h4>Monitor Stand</h4>
-            <p>Raises the screen, improves posture and often recovers useful desk space underneath.</p>
-          </div>
-          <div class="system-item">
-            <h4>Cable Management Kit</h4>
-            <p>Removes visual cable noise and helps the desk feel more organised and less distracting.</p>
-          </div>
-          <div class="system-item">
-            <h4>Laptop Stand</h4>
-            <p>Improves screen height and comfort for users working primarily from a laptop.</p>
-          </div>
-          <div class="system-item">
-            <h4>LumoMist Diffuser</h4>
-            <p>Secondary and seasonal. Useful when someone wants the workspace to feel calmer and more considered.</p>
-          </div>
-        </div>
       </section>
 
       <section class="advisor-card card" id="advisor">
@@ -1676,7 +1566,7 @@
                     reason: "Relevant to the issues identified in this setup."
                   };
                   const url = SHOP_URLS[product] || "#";
-                  const buttonLabel = url === "#" ? "Product page coming soon" : "View product";
+                  const buttonLabel = url === "#" ? "View product";
                   return `
                     <div class="product-card">
                       <strong>${product}</strong>
