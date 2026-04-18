@@ -227,24 +227,24 @@ function scoreProducts(productSignals: string[], input: AssessmentInput): Matche
 
 function buildSummary(inputIssues: DiagnosisIssue[], input: AssessmentInput): string {
   if (inputIssues.length === 0) {
-    return "The workspace likely has a workable base, but more context is needed to identify the highest-impact improvements.";
+    return "The setup has a workable base, but it needs a little more context before stronger recommendations make sense.";
   }
 
   const lead = inputIssues[0]?.label ?? "workspace friction";
 
   if (input.priority === "Better comfort") {
-    return `Comfort is the main priority here, and the strongest signal is that ${lead.toLowerCase()}. The next version of the product should treat ergonomic fixes as primary rather than optional.`;
+    return `Comfort should lead here. The clearest signal is that ${lead.toLowerCase()}, so posture and screen position should be fixed first.`;
   }
 
   if (input.priority === "Cleaner setup") {
-    return `This setup needs stronger structure, not just more accessories. The clearest issue is that ${lead.toLowerCase()}, so layout and organization should come before premium styling.`;
+    return `This setup needs stronger structure, not more clutter. ${lead} is the main signal, so layout should improve before styling does.`;
   }
 
   if (input.priority === "Better focus") {
-    return `The desk is not yet supporting focused work well. ${lead} appears to be one of the main blockers, so recommendations should reduce friction before adding novelty.`;
+    return `The desk is not supporting focused work strongly enough yet. ${lead} is one of the main blockers, so friction should come down before anything else is added.`;
   }
 
-  return `The setup has a workable base, but ${lead.toLowerCase()}. The strongest product version should explain that clearly and prioritize only the highest-value changes.`;
+  return `The setup has a decent base, but ${lead.toLowerCase()}. The right next step is a tighter, more selective improvement plan.`;
 }
 
 function buildNextQuestions(input: AssessmentInput, issues: DiagnosisIssue[]): string[] {
