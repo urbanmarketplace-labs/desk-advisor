@@ -15,7 +15,7 @@ export const assessmentSteps: QuestionStep[] = [
     id: "deviceType",
     kind: "single",
     title: "What setup are you using?",
-    description: "Your screen layout is one of the strongest ergonomic signals.",
+    description: "Screen layout changes the diagnosis quickly.",
     options: [
       "Laptop only",
       "Laptop and monitor",
@@ -28,7 +28,7 @@ export const assessmentSteps: QuestionStep[] = [
     id: "currentFeel",
     kind: "multi",
     title: "How does your workspace feel right now?",
-    description: "Pick the signals that best describe the current setup.",
+    description: "Choose the signals that feel true.",
     options: [
       "Cluttered",
       "Uncomfortable",
@@ -43,7 +43,7 @@ export const assessmentSteps: QuestionStep[] = [
     id: "problems",
     kind: "multi",
     title: "What problems are you actively dealing with?",
-    description: "These help us separate surface-level symptoms from real friction.",
+    description: "This helps separate symptoms from root issues.",
     options: [
       "Neck or back discomfort",
       "Poor lighting",
@@ -58,7 +58,7 @@ export const assessmentSteps: QuestionStep[] = [
     id: "priority",
     kind: "single",
     title: "What matters most right now?",
-    description: "This becomes the tie-breaker when several fixes could work.",
+    description: "This tells DeskLab what to optimise for.",
     options: [
       "Better comfort",
       "Cleaner setup",
@@ -71,7 +71,7 @@ export const assessmentSteps: QuestionStep[] = [
     id: "upgradeIntent",
     kind: "single",
     title: "How open are you to upgrades?",
-    description: "This helps us avoid pushing products when behavior changes should come first.",
+    description: "We keep the advice aligned with your appetite to buy.",
     options: [
       "Free improvements first",
       "A few practical upgrades",
@@ -84,7 +84,7 @@ export const assessmentSteps: QuestionStep[] = [
     id: "deskSize",
     kind: "single",
     title: "How much surface space do you have?",
-    description: "Desk size changes what counts as a realistic recommendation.",
+    description: "Space changes what is realistic.",
     options: ["Very small", "Small", "Medium", "Large"] satisfies readonly DeskSize[],
     required: true
   },
@@ -92,7 +92,7 @@ export const assessmentSteps: QuestionStep[] = [
     id: "workStyle",
     kind: "single",
     title: "What kind of work happens here most often?",
-    description: "We can recommend differently for deep work than for light admin use.",
+    description: "Different work patterns need different setups.",
     options: [
       "Deep focus work",
       "Meetings and admin",
@@ -105,7 +105,7 @@ export const assessmentSteps: QuestionStep[] = [
     id: "budgetBand",
     kind: "single",
     title: "What budget feels realistic?",
-    description: "This keeps product recommendations honest and useful.",
+    description: "So the recommendations stay grounded.",
     options: ["Under 50", "50-150", "150-300", "300+"] satisfies readonly BudgetBand[],
     required: true
   },
@@ -113,7 +113,7 @@ export const assessmentSteps: QuestionStep[] = [
     id: "extraDetail",
     kind: "text",
     title: "Describe your workspace in a little more detail",
-    description: "Mention lighting, cables, discomfort, storage, premium feel, or anything else that feels off.",
+    description: "Anything else that feels off?",
     placeholder:
       "Example: Small desk, poor evening lighting, visible cables, limited storage, slight neck strain, and I want it to feel cleaner and more intentional.",
     required: false
