@@ -1,15 +1,15 @@
 :root {
   --bg: #f4f6fb;
-  --surface: rgba(255, 255, 255, 0.88);
+  --surface: rgba(255, 255, 255, 0.9);
   --surface-strong: #ffffff;
-  --surface-soft: #eef2ff;
+  --surface-soft: #f5f7fd;
   --text: #11182e;
   --muted: #65708b;
   --brand: #223996;
   --brand-strong: #162760;
   --brand-soft: rgba(34, 57, 150, 0.08);
-  --line: rgba(22, 39, 96, 0.1);
-  --shadow: 0 24px 60px rgba(17, 24, 46, 0.08);
+  --line: rgba(22, 39, 96, 0.08);
+  --shadow: 0 20px 46px rgba(17, 24, 46, 0.06);
   --radius-xl: 32px;
   --radius-lg: 24px;
   --radius-md: 18px;
@@ -31,11 +31,11 @@ body {
 }
 
 body {
-  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-family: "Aptos", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   color: var(--text);
   background:
-    radial-gradient(circle at top left, rgba(34, 57, 150, 0.14), transparent 24%),
-    radial-gradient(circle at right 18%, rgba(34, 57, 150, 0.08), transparent 18%),
+    radial-gradient(circle at top left, rgba(34, 57, 150, 0.1), transparent 22%),
+    radial-gradient(circle at right 18%, rgba(34, 57, 150, 0.05), transparent 18%),
     linear-gradient(180deg, #fbfcff 0%, #f2f5fb 100%);
 }
 
@@ -51,9 +51,9 @@ input {
 }
 
 .page {
-  width: min(1180px, calc(100% - 32px));
+  width: min(1080px, calc(100% - 36px));
   margin: 0 auto;
-  padding: 24px 0 80px;
+  padding: 24px 0 72px;
 }
 
 .siteHeader {
@@ -71,33 +71,40 @@ input {
 }
 
 .brandMark {
-  position: relative;
-  width: 58px;
-  height: 58px;
-  border-radius: 20px;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 18px 34px rgba(22, 39, 96, 0.18);
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(22, 39, 96, 0.12);
+}
+
+.brandImage {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 .brandText {
   display: grid;
-  gap: 2px;
+  gap: 1px;
 }
 
 .brandText strong {
-  font-size: 1.12rem;
-  letter-spacing: -0.04em;
+  font-size: 0.98rem;
+  letter-spacing: -0.03em;
 }
 
 .brandText span {
   color: var(--muted);
-  font-size: 0.92rem;
+  font-size: 0.78rem;
 }
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
-  gap: 22px;
+  grid-template-columns: minmax(0, 1.12fr) minmax(280px, 0.88fr);
+  gap: 18px;
   align-items: stretch;
 }
 
@@ -111,7 +118,7 @@ input {
 }
 
 .heroContent {
-  padding: 38px;
+  padding: 32px;
   border-radius: var(--radius-xl);
 }
 
@@ -144,11 +151,12 @@ input {
 }
 
 .hero h1 {
-  max-width: 11ch;
-  margin: 18px 0 14px;
-  font-size: clamp(3rem, 7vw, 5.8rem);
-  line-height: 0.92;
-  letter-spacing: -0.08em;
+  max-width: 9.6ch;
+  margin: 14px 0 12px;
+  font-size: clamp(2.8rem, 5.3vw, 4.8rem);
+  font-weight: 800;
+  line-height: 0.94;
+  letter-spacing: -0.075em;
 }
 
 .heroLead,
@@ -158,7 +166,8 @@ input {
 .productCard p,
 .sectionIntro p {
   color: var(--muted);
-  line-height: 1.6;
+  line-height: 1.55;
+  font-size: 0.97rem;
 }
 
 .heroActions,
@@ -171,14 +180,14 @@ input {
 }
 
 .heroActions {
-  gap: 14px;
+  gap: 12px;
   flex-wrap: wrap;
-  margin-top: 28px;
+  margin-top: 22px;
 }
 
 .heroMeta {
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: 0.84rem;
 }
 
 .heroPreview {
@@ -187,11 +196,39 @@ input {
 
 .heroPanel {
   height: 100%;
-  padding: 28px;
+  padding: 24px;
   border-radius: var(--radius-xl);
   background:
-    linear-gradient(160deg, rgba(255, 255, 255, 0.98), rgba(238, 242, 255, 0.92)),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.98), rgba(245, 247, 253, 0.92)),
     var(--surface);
+}
+
+.previewList {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.previewLine {
+  display: grid;
+  gap: 4px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(22, 39, 96, 0.08);
+}
+
+.previewLine:last-child {
+  border-bottom: none;
+}
+
+.previewLine strong {
+  font-size: 0.92rem;
+  letter-spacing: -0.02em;
+}
+
+.previewLine span {
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
 }
 
 .previewGrid {
@@ -207,8 +244,8 @@ input {
 .productCard,
 .optionButton,
 .pillChoice {
-  border: 1px solid var(--line);
-  background: var(--surface-strong);
+  border: 1px solid rgba(22, 39, 96, 0.07);
+  background: rgba(255, 255, 255, 0.92);
   border-radius: var(--radius-md);
 }
 
@@ -232,11 +269,11 @@ input {
 }
 
 .assessmentSection {
-  margin-top: 24px;
+  margin-top: 18px;
 }
 
 .assessmentPanel {
-  padding: 32px;
+  padding: 28px;
   border-radius: var(--radius-xl);
 }
 
@@ -260,9 +297,9 @@ input {
 .loadingState h2,
 .resultOverview h2 {
   margin: 0;
-  font-size: clamp(2rem, 4vw, 3rem);
-  line-height: 1;
-  letter-spacing: -0.06em;
+  font-size: clamp(1.7rem, 3.2vw, 2.55rem);
+  line-height: 1.02;
+  letter-spacing: -0.05em;
 }
 
 .introPoints {
@@ -274,8 +311,8 @@ input {
 .introPoints span,
 .signalChip,
 .productMeta span {
-  padding: 10px 14px;
-  background: rgba(17, 24, 46, 0.04);
+  padding: 8px 12px;
+  background: rgba(17, 24, 46, 0.035);
   color: var(--muted);
 }
 
@@ -306,18 +343,18 @@ input {
 
 .questionArea {
   display: grid;
-  gap: 18px;
+  gap: 16px;
 }
 
 .optionGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 10px;
 }
 
 .optionButton,
 .pillChoice {
-  padding: 16px 18px;
+  padding: 14px 16px;
   cursor: pointer;
   text-align: left;
   color: var(--text);
@@ -351,10 +388,10 @@ input {
 
 .textarea {
   width: 100%;
-  min-height: 150px;
-  padding: 18px;
+  min-height: 136px;
+  padding: 16px;
   border: 1px solid var(--line);
-  border-radius: 22px;
+  border-radius: 18px;
   resize: vertical;
   background: var(--surface-strong);
   color: var(--text);
@@ -373,10 +410,11 @@ input {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 52px;
-  padding: 14px 18px;
-  border-radius: 16px;
+  min-height: 46px;
+  padding: 12px 16px;
+  border-radius: 14px;
   font-weight: 700;
+  font-size: 0.92rem;
   transition: transform 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease;
 }
 
@@ -405,15 +443,15 @@ input {
 }
 
 .loadingState {
-  min-height: 420px;
+  min-height: 360px;
   place-items: center;
   text-align: center;
   align-content: center;
 }
 
 .thinkingOrb {
-  width: 96px;
-  height: 96px;
+  width: 78px;
+  height: 78px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #5f79e5 0%, var(--brand) 46%, var(--brand-strong) 100%);
   box-shadow:
@@ -440,13 +478,13 @@ input {
 }
 
 .resultHero {
-  grid-template-columns: minmax(280px, 0.85fr) minmax(0, 1.15fr);
+  grid-template-columns: minmax(220px, 0.68fr) minmax(0, 1.32fr);
   align-items: start;
 }
 
 .scoreCard,
 .resultOverview {
-  padding: 26px;
+  padding: 22px;
   border-radius: var(--radius-lg);
 }
 
@@ -460,8 +498,8 @@ input {
 }
 
 .score {
-  margin: 10px 0 14px;
-  font-size: clamp(3.6rem, 8vw, 5.4rem);
+  margin: 8px 0 10px;
+  font-size: clamp(2.8rem, 6vw, 4.2rem);
   line-height: 0.9;
   letter-spacing: -0.08em;
 }
@@ -495,8 +533,8 @@ input {
 }
 
 .resultOverview {
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(22, 39, 96, 0.08);
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .signalRow,
@@ -508,10 +546,11 @@ input {
 
 .resultGrid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
 }
 
 .resultBlock {
-  padding: 24px;
+  padding: 20px;
 }
 
 .blockLabel {
@@ -526,22 +565,24 @@ input {
   margin: 0;
   padding-left: 18px;
   display: grid;
-  gap: 12px;
-  line-height: 1.55;
+  gap: 10px;
+  line-height: 1.45;
+  font-size: 0.92rem;
 }
 
 .insightStrip {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
 }
 
 .insightCard {
-  padding: 20px;
+  padding: 16px;
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .compactIntro {
-  gap: 10px;
+  gap: 8px;
 }
 
 .compactIntro h2 {
@@ -550,12 +591,13 @@ input {
 
 .productGrid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
 }
 
 .productCard {
-  padding: 22px;
+  padding: 18px;
   display: grid;
-  gap: 14px;
+  gap: 10px;
 }
 
 .productTop {
@@ -574,8 +616,7 @@ input {
   .resultGrid,
   .insightStrip,
   .productGrid,
-  .optionGrid,
-  .previewGrid {
+  .optionGrid {
     grid-template-columns: 1fr;
   }
 }
