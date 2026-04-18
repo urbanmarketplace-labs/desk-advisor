@@ -201,13 +201,7 @@ export function DeskAdvisorSite() {
     <main className="page">
       <header className="siteHeader">
         <a className="brandLockup" href="#top">
-          <span className="brandMark">
-            <img alt="DeskLab" className="brandImage" src="/desklab-round.png?v=4" />
-          </span>
-          <span className="brandText">
-            <strong>DeskLab</strong>
-            <span>by Urban Marketplace</span>
-          </span>
+          <img alt="DeskLab by Urban Marketplace" className="brandLogo" src="/desklab-round.png?v=5" />
         </a>
         <button className="ghostButton" type="button" onClick={phase === "idle" ? startAssessment : restart}>
           {phase === "idle" ? "Start assessment" : "Reset"}
@@ -218,55 +212,53 @@ export function DeskAdvisorSite() {
         <div className="heroBackdrop">
           <div className="hero">
             <div className="heroContent">
-              <div className="heroBadge">Workspace intelligence</div>
-              <h1>Build a sharper desk with clearer diagnosis.</h1>
+              <div className="heroBadge">Desk intelligence, refined</div>
+              <h1>Diagnose the desk you have. Build the one you actually want.</h1>
               <p className="heroLead">
-                DeskLab assesses comfort, focus, lighting, and layout, then turns that diagnosis into a cleaner upgrade plan.
+                DeskLab reads the friction inside your setup, then returns a cleaner improvement plan with free fixes first and product recommendations only when they genuinely help.
               </p>
               <div className="heroActions">
                 <button className="primaryButton lightButton" type="button" onClick={startAssessment}>
                   Diagnose my desk
                 </button>
-                <span className="heroMeta">Professional guidance first. Recommendations only when they fit.</span>
+                <span className="heroMeta">Two minutes. Sharper diagnosis. Premium guidance.</span>
+              </div>
+              <div className="heroHighlights">
+                <div>
+                  <strong>Comfort</strong>
+                  <span>Posture, reach, and fatigue pressure points.</span>
+                </div>
+                <div>
+                  <strong>Focus</strong>
+                  <span>Clutter, hierarchy, and visual calm.</span>
+                </div>
+                <div>
+                  <strong>Fit</strong>
+                  <span>Desk size, budget, and upgrade intent.</span>
+                </div>
               </div>
             </div>
 
             <aside className="heroAside">
               <div className="heroPanel">
-                <span className="panelKicker">What DeskLab reads</span>
-                <div className="heroStatGrid">
-                  <div>
-                    <strong>Comfort</strong>
-                    <span>Posture, reach, and strain signals.</span>
-                  </div>
-                  <div>
-                    <strong>Focus</strong>
-                    <span>Clutter, hierarchy, and visual calm.</span>
-                  </div>
-                  <div>
-                    <strong>Lighting</strong>
-                    <span>Task visibility and evening use.</span>
-                  </div>
-                  <div>
-                    <strong>Fit</strong>
-                    <span>Desk size, budget, and upgrade intent.</span>
-                  </div>
-                </div>
+                <span className="panelKicker">What DeskLab sees</span>
+                <h2 className="heroPanelTitle">A calm workspace starts with the right diagnosis, not more accessories.</h2>
+                <p className="heroPanelText">
+                  The tool looks for the invisible causes of strain, clutter, and wasted desk space before it recommends anything.
+                </p>
+                <ul className="heroList">
+                  <li>Posture and monitor alignment</li>
+                  <li>Lighting quality across the day</li>
+                  <li>Desk surface efficiency and cable load</li>
+                  <li>Whether an upgrade is actually justified</li>
+                </ul>
               </div>
 
               <div className="heroFoot">
-                <div className="heroMetric">
-                  <strong>9</strong>
-                  <span>quick steps</span>
-                </div>
-                <div className="heroMetric">
-                  <strong>Free-first</strong>
-                  <span>practical fixes before spend</span>
-                </div>
-                <div className="heroMetric">
-                  <strong>Smart fit</strong>
-                  <span>products only when the desk needs them</span>
-                </div>
+                <span className="panelKicker">Assessment standard</span>
+                <p>
+                  Free improvements first. Products second. Recommendations only when they improve the desk in front of you.
+                </p>
               </div>
             </aside>
           </div>
@@ -284,9 +276,9 @@ export function DeskAdvisorSite() {
           {phase === "idle" ? (
             <div className="introState">
               <div className="introPoints">
-                <span>9 quick steps</span>
-                <span>Sharper diagnosis</span>
-                <span>Smarter product fit</span>
+                <span>Fast assessment</span>
+                <span>Intelligent scoring</span>
+                <span>Premium recommendations</span>
               </div>
               <button className="primaryButton wideButton" type="button" onClick={startAssessment}>
                 Begin assessment
