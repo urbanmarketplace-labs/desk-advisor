@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { diagnoseWorkspace } from "@/core/diagnose";
 import { productCatalog } from "@/data/product-catalog";
@@ -203,7 +202,7 @@ export function DeskAdvisorSite() {
       <header className="siteHeader">
         <a className="brandLockup" href="#top">
           <span className="brandMark">
-            <Image alt="DeskLab" src="/desklab-round.png" fill sizes="72px" />
+            <img alt="DeskLab" className="brandImage" src="/desklab-round.png?v=2" />
           </span>
           <span className="brandText">
             <strong>DeskLab</strong>
@@ -233,22 +232,22 @@ export function DeskAdvisorSite() {
         <div className="heroPreview">
           <div className="heroPanel">
             <span className="panelKicker">What the tool looks for</span>
-            <div className="previewGrid">
-              <div className="previewTile">
+            <div className="previewList">
+              <div className="previewLine">
                 <strong>Comfort</strong>
-                <span>Screen height, posture, daily strain</span>
+                <span>Posture, screen height, daily strain</span>
               </div>
-              <div className="previewTile">
+              <div className="previewLine">
                 <strong>Focus</strong>
-                <span>Clutter, hierarchy, visual calm</span>
+                <span>Clutter, hierarchy, and visual calm</span>
               </div>
-              <div className="previewTile">
+              <div className="previewLine">
                 <strong>Lighting</strong>
                 <span>Task visibility and evening use</span>
               </div>
-              <div className="previewTile">
+              <div className="previewLine">
                 <strong>Fit</strong>
-                <span>Desk size, budget, and intent</span>
+                <span>Desk size, budget, and upgrade intent</span>
               </div>
             </div>
           </div>
@@ -266,8 +265,8 @@ export function DeskAdvisorSite() {
               </div>
               <div className="introPoints">
                 <span>9 quick steps</span>
-                <span>Premium-style diagnosis</span>
-                <span>Personalised product fit</span>
+                <span>Sharper diagnosis</span>
+                <span>Smarter product fit</span>
               </div>
               <button className="primaryButton" type="button" onClick={startAssessment}>
                 Begin
