@@ -13,9 +13,9 @@ import type {
 
 const productReasonMap = new Map(productCatalog.map((product) => [product.name, product]));
 const loadingMessages = [
-  "Reviewing ergonomics and layout",
-  "Weighing lighting, focus, and desk constraints",
-  "Prioritising the highest-impact improvements"
+  "Reading posture, lighting, and layout",
+  "Comparing free fixes against upgrades",
+  "Building a sharper recommendation plan"
 ];
 
 function isStepComplete(stepId: keyof AssessmentInput, value: AssessmentInput[keyof AssessmentInput]): boolean {
@@ -46,15 +46,15 @@ function buildHeadline(result: DiagnosisResult, input: AssessmentInput): string 
   const topIssue = result.mainIssues[0]?.label ?? "workspace friction";
 
   if (input.priority === "Better comfort") {
-    return `Your main blocker is comfort, driven by ${topIssue.toLowerCase()}.`;
+    return `Comfort is being held back by ${topIssue.toLowerCase()}.`;
   }
 
   if (input.priority === "Cleaner setup") {
-    return `This setup needs clearer structure before anything decorative.`;
+    return "This desk needs stronger structure before extra styling.";
   }
 
   if (input.priority === "Better focus") {
-    return `The desk has potential, but friction is still interrupting focus.`;
+    return "Too much friction is still getting in the way of focused work.";
   }
 
   return `Your workspace has a solid base, but ${topIssue.toLowerCase()}.`;
@@ -76,7 +76,7 @@ function buildSignals(result: DiagnosisResult, input: AssessmentInput): string[]
   }
 
   if (input.upgradeIntent === "Free improvements first") {
-    signals.push("Low-spend first");
+    signals.push("Free fixes first");
   }
 
   return signals.slice(0, 3);
@@ -162,13 +162,13 @@ export function DeskAdvisorSite() {
 
       loadingIntervalRef.current = setInterval(() => {
         setLoadingIndex((current) => (current + 1) % loadingMessages.length);
-      }, 700);
+      }, 820);
 
       loadingTimeoutRef.current = setTimeout(() => {
         clearLoadingTimers();
         setResult(diagnoseWorkspace(assessment));
         setPhase("result");
-      }, 2400);
+      }, 2600);
 
       return;
     }
@@ -202,7 +202,7 @@ export function DeskAdvisorSite() {
       <header className="siteHeader">
         <a className="brandLockup" href="#top">
           <span className="brandMark">
-            <img alt="DeskLab" className="brandImage" src="/desklab-round.png?v=2" />
+            <img alt="DeskLab" className="brandImage" src="/desklab-round.png?v=3" />
           </span>
           <span className="brandText">
             <strong>DeskLab</strong>
@@ -217,59 +217,64 @@ export function DeskAdvisorSite() {
       <section className="hero" id="top">
         <div className="heroContent">
           <div className="heroBadge">Workspace intelligence</div>
-          <h1>Find what your setup is missing in under two minutes.</h1>
+          <h1>Understand what your desk needs, then improve it with confidence.</h1>
           <p className="heroLead">
-            Cleaner diagnosis. Better recommendations. A premium path to a better desk.
+            DeskLab diagnoses the friction in a workspace and prioritises the improvements that will make the biggest difference.
           </p>
           <div className="heroActions">
             <button className="primaryButton" type="button" onClick={startAssessment}>
               Diagnose my desk
             </button>
-            <span className="heroMeta">Free guidance first. Products only when they fit.</span>
+            <span className="heroMeta">Built around your layout, constraints, and priorities.</span>
           </div>
         </div>
 
-        <div className="heroPreview">
-          <div className="heroPanel">
-            <span className="panelKicker">What the tool looks for</span>
-            <div className="previewList">
-              <div className="previewLine">
+        <aside className="heroAside">
+          <div className="heroStat">
+            <span className="panelKicker">What DeskLab reads</span>
+            <div className="heroStatGrid">
+              <div>
                 <strong>Comfort</strong>
-                <span>Posture, screen height, daily strain</span>
+                <span>Posture, reach, and strain signals.</span>
               </div>
-              <div className="previewLine">
+              <div>
                 <strong>Focus</strong>
-                <span>Clutter, hierarchy, and visual calm</span>
+                <span>Clutter, hierarchy, and visual calm.</span>
               </div>
-              <div className="previewLine">
+              <div>
                 <strong>Lighting</strong>
-                <span>Task visibility and evening use</span>
+                <span>Task visibility and evening use.</span>
               </div>
-              <div className="previewLine">
+              <div>
                 <strong>Fit</strong>
-                <span>Desk size, budget, and upgrade intent</span>
+                <span>Desk size, budget, and upgrade intent.</span>
               </div>
             </div>
           </div>
-        </div>
+          <div className="heroNote">
+            <span className="panelKicker">Approach</span>
+            <p>Free fixes first. Product recommendations only when they genuinely improve the desk in front of you.</p>
+          </div>
+        </aside>
       </section>
 
       <section className="assessmentSection">
-        <div className="assessmentPanel">
+        <div className="assessmentFrame">
+          <div className="assessmentIntro">
+            <span className="sectionLabel">Assessment</span>
+            <h2>Professional guidance, shaped around the desk in front of you.</h2>
+            <p>Short, focused, and built to return a more intelligent recommendation.</p>
+          </div>
+
           {phase === "idle" ? (
             <div className="introState">
-              <div className="sectionIntro">
-                <span className="sectionLabel">Assessment</span>
-                <h2>Fast, clear, and tailored to the desk in front of them.</h2>
-                <p>Answer a few focused questions and DeskLab will prioritise what matters most.</p>
-              </div>
               <div className="introPoints">
                 <span>9 quick steps</span>
                 <span>Sharper diagnosis</span>
                 <span>Smarter product fit</span>
               </div>
-              <button className="primaryButton" type="button" onClick={startAssessment}>
-                Begin
+              <button className="primaryButton wideButton" type="button" onClick={startAssessment}>
+                Begin assessment
               </button>
             </div>
           ) : null}
@@ -355,7 +360,7 @@ export function DeskAdvisorSite() {
               <div className="thinkingOrb" />
               <span className="sectionLabel">DeskLab is thinking</span>
               <h2>{loadingMessages[loadingIndex]}</h2>
-              <p>Building a cleaner recommendation set for this workspace.</p>
+              <p>Building a tighter recommendation plan for this workspace.</p>
             </div>
           ) : null}
 
