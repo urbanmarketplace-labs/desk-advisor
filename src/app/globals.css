@@ -86,9 +86,8 @@ button {
 .brandLogo {
   display: block;
   width: auto;
-  height: 78px;
+  height: 68px;
   object-fit: contain;
-  filter: drop-shadow(0 16px 30px rgba(20, 29, 72, 0.16));
 }
 
 .ghostButton,
@@ -208,7 +207,7 @@ button {
   padding: 8px 13px;
   background: rgba(255, 255, 255, 0.12);
   color: #fff;
-  font-size: 0.68rem;
+  font-size: 0.64rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -239,9 +238,9 @@ button {
 }
 
 .hero h1 {
-  max-width: 10ch;
-  font-size: clamp(3.7rem, 6vw, 6.4rem);
-  line-height: 0.9;
+  max-width: 11ch;
+  font-size: clamp(3.1rem, 5.3vw, 5rem);
+  line-height: 0.95;
 }
 
 .heroLead,
@@ -269,7 +268,7 @@ button {
 
 .heroMeta {
   color: rgba(255, 255, 255, 0.76);
-  font-size: 0.9rem;
+  font-size: 0.86rem;
 }
 
 .heroHighlights {
@@ -312,12 +311,12 @@ button {
 .heroPanel {
   display: grid;
   gap: 16px;
-  padding: 24px;
+  padding: 28px;
 }
 
 .heroPanelTitle {
-  font-size: clamp(2rem, 3vw, 2.8rem);
-  line-height: 0.98;
+  font-size: clamp(1.7rem, 2.5vw, 2.25rem);
+  line-height: 1.04;
   color: var(--brand-dark);
 }
 
@@ -327,36 +326,34 @@ button {
   color: var(--muted);
 }
 
-.heroList {
+.heroEditorial {
   display: grid;
-  gap: 12px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  gap: 16px;
 }
 
-.heroList li {
-  position: relative;
-  padding-left: 18px;
-  color: var(--ink);
-  line-height: 1.55;
+.heroEditorial div {
+  display: grid;
+  gap: 5px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(44, 62, 148, 0.1);
 }
 
-.heroList li::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0.7em;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--brand);
+.heroEditorial strong {
+  color: var(--brand-dark);
+  font-size: 0.98rem;
+  letter-spacing: -0.02em;
+}
+
+.heroEditorial span {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
 }
 
 .heroFoot {
   display: grid;
   gap: 10px;
-  padding: 22px 24px;
+  padding: 24px 28px;
 }
 
 .assessmentSection {
@@ -398,8 +395,8 @@ button {
 
 .assessmentIntro h2 {
   max-width: 16ch;
-  font-size: clamp(2.4rem, 4vw, 4rem);
-  line-height: 0.96;
+  font-size: clamp(2rem, 3.3vw, 3.2rem);
+  line-height: 1;
   color: var(--brand-dark);
 }
 
@@ -777,7 +774,7 @@ button {
   }
 
   .brandLogo {
-    height: 62px;
+    height: 56px;
   }
 
   .ghostButton,
