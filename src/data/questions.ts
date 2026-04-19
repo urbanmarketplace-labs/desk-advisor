@@ -14,8 +14,8 @@ export const assessmentSteps: QuestionStep[] = [
   {
     id: "deviceType",
     kind: "single",
-    title: "What setup are you using?",
-    description: "Screen layout changes the diagnosis quickly.",
+    title: "What are you working from?",
+    description: "Your screen setup changes what is realistic straight away.",
     options: [
       "Laptop only",
       "Laptop and monitor",
@@ -27,8 +27,8 @@ export const assessmentSteps: QuestionStep[] = [
   {
     id: "currentFeel",
     kind: "multi",
-    title: "How does your workspace feel right now?",
-    description: "Choose the signals that feel true.",
+    title: "How does the desk feel right now?",
+    description: "Choose the signals that genuinely match your setup.",
     options: [
       "Cluttered",
       "Uncomfortable",
@@ -42,8 +42,8 @@ export const assessmentSteps: QuestionStep[] = [
   {
     id: "problems",
     kind: "multi",
-    title: "What problems are you actively dealing with?",
-    description: "This helps separate symptoms from root issues.",
+    title: "What is actively getting in the way?",
+    description: "This helps separate surface symptoms from the real constraints.",
     options: [
       "Neck or back discomfort",
       "Poor lighting",
@@ -57,8 +57,8 @@ export const assessmentSteps: QuestionStep[] = [
   {
     id: "priority",
     kind: "single",
-    title: "What matters most right now?",
-    description: "This tells DeskLab what to optimise for.",
+    title: "What do you want to improve first?",
+    description: "DeskLab will weight the recommendation around this priority.",
     options: [
       "Better comfort",
       "Cleaner setup",
@@ -70,8 +70,8 @@ export const assessmentSteps: QuestionStep[] = [
   {
     id: "upgradeIntent",
     kind: "single",
-    title: "How open are you to upgrades?",
-    description: "We keep the advice aligned with your appetite to buy.",
+    title: "How open are you to buying anything?",
+    description: "The advice should match your appetite to spend.",
     options: [
       "Free improvements first",
       "A few practical upgrades",
@@ -83,16 +83,16 @@ export const assessmentSteps: QuestionStep[] = [
   {
     id: "deskSize",
     kind: "single",
-    title: "How much surface space do you have?",
-    description: "Space changes what is realistic.",
+    title: "How much desk space are you working with?",
+    description: "Surface area changes what is genuinely worth recommending.",
     options: ["Very small", "Small", "Medium", "Large"] satisfies readonly DeskSize[],
     required: true
   },
   {
     id: "workStyle",
     kind: "single",
-    title: "What kind of work happens here most often?",
-    description: "Different work patterns need different setups.",
+    title: "What type of work happens here most often?",
+    description: "The right desk for deep work is different from the right desk for admin or creative work.",
     options: [
       "Deep focus work",
       "Meetings and admin",
@@ -104,18 +104,18 @@ export const assessmentSteps: QuestionStep[] = [
   {
     id: "budgetBand",
     kind: "single",
-    title: "What budget feels realistic?",
-    description: "So the recommendations stay grounded.",
+    title: "What budget feels sensible?",
+    description: "This keeps the recommendation practical.",
     options: ["Under 50", "50-150", "150-300", "300+"] satisfies readonly BudgetBand[],
     required: true
   },
   {
     id: "extraDetail",
     kind: "text",
-    title: "Describe your workspace in a little more detail",
-    description: "Anything else that feels off?",
+    title: "Anything else worth knowing?",
+    description: "A short note helps DeskLab pick up layout, lighting, storage, and strain signals.",
     placeholder:
-      "Example: Small desk, poor evening lighting, visible cables, limited storage, slight neck strain, and I want it to feel cleaner and more intentional.",
+      "Example: Small desk, weak evening light, visible cables, limited storage, slight neck strain, and I want it to feel cleaner and calmer.",
     required: false
   }
 ];

@@ -43,6 +43,7 @@ export type WorkStyle =
   | "Mixed use";
 
 export type StepKind = "single" | "multi" | "text";
+export type ScoreKey = "comfort" | "focus" | "lighting" | "fit";
 
 export type ProductCategory =
   | "ergonomics"
@@ -92,6 +93,13 @@ export interface DiagnosisIssue {
   causes: string[];
 }
 
+export interface DiagnosisSubScore {
+  key: ScoreKey;
+  label: string;
+  score: number;
+  summary: string;
+}
+
 export interface RecommendationBucket {
   title: string;
   items: string[];
@@ -108,6 +116,10 @@ export interface DiagnosisResult {
   confidence: "low" | "medium" | "high";
   summary: string;
   profile: string[];
+  diagnosisTags: string[];
+  primaryConstraint: string;
+  secondaryConstraint: string | null;
+  subScores: DiagnosisSubScore[];
   mainIssues: DiagnosisIssue[];
   freeFixes: RecommendationBucket;
   paidUpgrades: RecommendationBucket;
