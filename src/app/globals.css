@@ -85,11 +85,16 @@ button {
 
 .brandMark {
   display: block;
-  width: 52px;
-  height: 52px;
-  object-fit: contain;
-  object-position: center;
+  width: 44px;
+  height: 44px;
   flex: 0 0 auto;
+  border-radius: 12px;
+  background-color: #2c3e94;
+  background-image: url("/desklab-mark.png?v=4");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  box-shadow: 0 10px 24px rgba(19, 31, 77, 0.12);
 }
 
 .brandText {
@@ -801,8 +806,8 @@ button {
   }
 
   .brandMark {
-    width: 46px;
-    height: 46px;
+    width: 40px;
+    height: 40px;
   }
 
   .ghostButton,
