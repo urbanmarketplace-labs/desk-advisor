@@ -72,6 +72,7 @@ button {
   justify-content: space-between;
   gap: 24px;
   margin-bottom: 24px;
+  min-height: 96px;
 }
 
 .brandLockup {
@@ -83,9 +84,10 @@ button {
 
 .brandImage {
   display: block;
-  width: clamp(120px, 14vw, 156px);
-  height: auto;
-  max-width: 100%;
+  height: clamp(72px, 9vw, 104px);
+  width: auto;
+  max-width: none;
+  object-fit: contain;
 }
 
 .ghostButton,
@@ -844,7 +846,7 @@ button {
   }
 
   .brandImage {
-    width: clamp(108px, 30vw, 132px);
+    height: clamp(60px, 18vw, 84px);
   }
 
   .ghostButton,
