@@ -85,11 +85,11 @@ button {
 
 .brandMark {
   display: block;
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  object-fit: cover;
-  box-shadow: 0 12px 28px rgba(19, 31, 77, 0.12);
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  object-position: center;
+  flex: 0 0 auto;
 }
 
 .brandText {
@@ -801,8 +801,8 @@ button {
   }
 
   .brandMark {
-    width: 40px;
-    height: 40px;
+    width: 46px;
+    height: 46px;
   }
 
   .ghostButton,
