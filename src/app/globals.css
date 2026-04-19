@@ -86,7 +86,7 @@ button {
 
 .brandImage {
   display: block;
-  height: 44px;
+  height: 132px;
   width: auto;
   max-width: none;
   object-fit: contain;
@@ -850,7 +850,7 @@ button {
   }
 
   .brandImage {
-    height: 44px;
+    height: 96px;
     width: auto;
   }
 
