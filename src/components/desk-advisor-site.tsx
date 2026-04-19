@@ -201,7 +201,7 @@ export function DeskAdvisorSite() {
     <main className="page">
       <header className="siteHeader">
         <a className="brandLockup" href="#top">
-          <img alt="DeskLab mark" className="brandMark" src="/desklab-round.png?v=3" />
+          <span aria-hidden="true" className="brandMark" />
           <span className="brandText">
             <strong>DeskLab</strong>
             <span>by Urban Marketplace</span>
