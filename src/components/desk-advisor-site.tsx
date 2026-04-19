@@ -201,11 +201,8 @@ export function DeskAdvisorSite() {
     <main className="page">
       <header className="siteHeader">
         <a className="brandLockup" href="#top">
-          <span aria-hidden="true" className="brandMark" />
-          <span className="brandText">
-            <strong>DeskLab</strong>
-            <span>by Urban Marketplace</span>
-          </span>
+          <span aria-hidden="true" className="brandPlate" />
+          <span className="srOnly">DeskLab by Urban Marketplace</span>
         </a>
         <button className="ghostButton" type="button" onClick={phase === "idle" ? startAssessment : restart}>
           {phase === "idle" ? "Start assessment" : "Reset"}
