@@ -1,9 +1,0 @@
-<svg width="720" height="120" viewBox="0 0 720 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect x="0" y="12" width="96" height="96" rx="28" fill="#2C3E94"/>
-  <path d="M26 38H45L60 53L75 38H94V52H80L60 72L40 52H26V38Z" fill="white"/>
-  <path d="M34 56H48V88H34V56Z" fill="white"/>
-  <path d="M72 56H86V88H72V56Z" fill="white"/>
-  <path d="M46 64L60 78L74 64V90C74 98.837 66.837 106 58 106C49.163 106 42 98.837 42 90V64H46Z" fill="white"/>
-  <text x="126" y="62" fill="#16204E" font-family="Georgia, 'Times New Roman', serif" font-size="52" letter-spacing="-1.5">DeskLab</text>
-  <text x="129" y="91" fill="#5B6686" font-family="Aptos, 'Segoe UI', Arial, sans-serif" font-size="18" letter-spacing="2.4">BY URBAN MARKETPLACE</text>
-</svg>
