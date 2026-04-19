@@ -24,7 +24,7 @@ const brandPlateStyle = {
   flex: "0 0 auto",
   borderRadius: "18px",
   backgroundColor: "#2c3e94",
-  backgroundImage: 'url("/desklabs-logo-transparent.svg?v=4")',
+  backgroundImage: 'url("/desklabs-logo-transparent.svg?v=5")',
   backgroundRepeat: "no-repeat",
   backgroundPosition: "center",
   backgroundSize: "auto 60px",
