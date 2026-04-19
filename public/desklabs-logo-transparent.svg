@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="144" viewBox="0 0 440 144" fill="none">
+  <g fill="#fff">
+    <path d="M42 22h28l20 20 20-20h28v10h-23.6L90 56.4 65.6 32H42z"/>
+    <path d="M42 34h14v46h16V46h14v48H42z"/>
+    <path d="M94 46h14v34h16V34h14v60H94z"/>
+    <path d="M56 92h68c-2.2 18.4-17.9 30-34 30s-31.8-11.6-34-30Z"/>
+  </g>
+  <text x="164" y="72" fill="#fff" font-family="Georgia, 'Times New Roman', serif" font-size="46" letter-spacing="-1.2">DeskLab</text>
+  <text x="165" y="102" fill="#fff" font-family="Arial, Helvetica, sans-serif" font-size="14" letter-spacing="3.2">BY URBAN MARKETPLACE</text>
+</svg>
