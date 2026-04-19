@@ -200,7 +200,7 @@ export function DeskAdvisorSite() {
           <img
             alt="DeskLab by Urban Marketplace"
             className="brandImage"
-            src="/desklab-logo.png"
+            src="/desklab-logo-transparent.png"
           />
         </a>
         <button className="ghostButton" type="button" onClick={phase === "idle" ? startAssessment : restart}>
