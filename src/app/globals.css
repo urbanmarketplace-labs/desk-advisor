@@ -72,7 +72,7 @@ button {
   justify-content: space-between;
   gap: 24px;
   margin-bottom: 24px;
-  min-height: 96px;
+  overflow: visible;
 }
 
 .brandLockup {
@@ -80,14 +80,18 @@ button {
   align-items: center;
   padding: 0;
   line-height: 0;
+  overflow: visible;
+  flex: 0 0 auto;
 }
 
 .brandImage {
   display: block;
-  height: clamp(72px, 9vw, 104px);
+  height: 44px;
   width: auto;
   max-width: none;
   object-fit: contain;
+  overflow: visible;
+  flex: 0 0 auto;
 }
 
 .ghostButton,
@@ -846,7 +850,8 @@ button {
   }
 
   .brandImage {
-    height: clamp(60px, 18vw, 84px);
+    height: 44px;
+    width: auto;
   }
 
   .ghostButton,
