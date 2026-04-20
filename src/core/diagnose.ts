@@ -6,6 +6,7 @@ import type {
   DiagnosisSubScore,
   MatchedProduct,
   ProductCatalogItem,
+  ScoreImprovement,
   ScoreKey
 } from "@/types/assessment";
 
@@ -27,10 +28,10 @@ interface DiagnoseContext {
 }
 
 const subScoreLabels: Record<ScoreKey, string> = {
-  comfort: "Comfort / ergonomics",
-  focus: "Focus / visual clarity",
-  lighting: "Lighting / visual quality",
-  fit: "Fit / space / upgrade suitability"
+  comfort: "Comfort",
+  focus: "Focus",
+  lighting: "Lighting",
+  fit: "Space & fit"
 };
 
 const scoreWeights: Record<ScoreKey, number> = {
@@ -90,162 +91,181 @@ function signalProducts(context: DiagnoseContext, ...names: string[]): void {
   names.forEach((name) => context.productSignals.add(name));
 }
 
+function hasSpacePressure(input: AssessmentInput, context: DiagnoseContext): boolean {
+  return (
+    context.issueTags.has("Space pressure")
+    || input.currentFeel.includes("Too cramped")
+    || input.problems.includes("Not enough space")
+    || input.deskSize === "Very small"
+    || input.deskSize === "Small"
+  );
+}
+
+function hasVisualNoise(input: AssessmentInput, context: DiagnoseContext): boolean {
+  return (
+    context.issueTags.has("Visual clutter")
+    || context.issueTags.has("Cable clutter")
+    || input.currentFeel.includes("Cluttered")
+    || input.problems.includes("Cable clutter")
+  );
+}
+
 function analyseFreeText(input: AssessmentInput, context: DiagnoseContext): void {
   const detail = input.extraDetail.trim();
   if (!detail) return;
 
   if (/\b(small|compact|cramped|tight)\b/i.test(detail)) {
-    addScoreEffect(context, "fit", -9, "The desk sounds space-constrained.");
-    addScoreEffect(context, "focus", -4, "Limited surface area is adding visual pressure.");
+    addScoreEffect(context, "fit", -9, "Usable desk space is tight.");
+    addScoreEffect(context, "focus", -4, "Limited surface space makes the setup feel busier.");
     addIssueTag(context, "Space pressure");
-    addFreeFix(context, "Keep only essential items on the main work surface and move lower-use objects off the desk.");
+    addFreeFix(context, "Move low-use items off the desk so the main surface can do one job well.");
     signalProducts(context, "Monitor Stand");
   }
 
   if (/\b(neck|back|posture|wrist|strain|ache)\b/i.test(detail)) {
-    addScoreEffect(context, "comfort", -14, "The notes point to sustained ergonomic strain.");
-    addScoreEffect(context, "fit", -5, "Poor positioning is affecting how the desk is being used.");
+    addScoreEffect(context, "comfort", -14, "Your notes point to strain during normal use.");
+    addScoreEffect(context, "fit", -5, "Screen and input position are likely working against you.");
     addIssueTag(context, "Posture strain");
-    addFreeFix(context, "Adjust screen height and input position before changing anything decorative.");
-    addPaidUpgrade(context, "If posture still feels compromised after adjustments, prioritise a stand before any styling upgrade.");
+    addFreeFix(context, "Set the screen and input position before changing anything cosmetic.");
+    addPaidUpgrade(context, "If the screen still sits too low after adjustment, a stand is worth it.");
     signalProducts(context, "Laptop Stand", "Monitor Stand");
   }
 
   if (/\b(dark|dim|evening|glare|lighting)\b/i.test(detail)) {
-    addScoreEffect(context, "lighting", -13, "The workspace description points to weak task lighting.");
-    addScoreEffect(context, "focus", -5, "Visual quality is likely dropping as light changes through the day.");
+    addScoreEffect(context, "lighting", -13, "The desk is not getting enough clean task light.");
+    addScoreEffect(context, "focus", -5, "Weak light makes visual work feel heavier.");
     addIssueTag(context, "Low light");
-    addFreeFix(context, "Position the desk to favour directional light on the task area rather than general room glow.");
+    addFreeFix(context, "Aim more direct light at the task area, not just the room around it.");
     signalProducts(context, "Monitor Light Bar");
   }
 
   if (/\b(clutter|messy|cables|cable|wires|wire)\b/i.test(detail)) {
-    addScoreEffect(context, "focus", -12, "Visible clutter is adding friction.");
-    addScoreEffect(context, "fit", -6, "Surface space is being consumed by layout noise.");
-    addIssueTag(context, "Visual clutter");
-    addFreeFix(context, "Reduce visible cables and remove any object that does not support daily work.");
-    addPaidUpgrade(context, "Use cable management only after deciding what genuinely needs to stay in view.");
+    addScoreEffect(context, "focus", -12, "Visual noise is getting in the way.");
+    addScoreEffect(context, "fit", -6, "Loose cables and overflow items are eating into usable space.");
+    addIssueTag(context, "Visual clutter", "Cable clutter");
+    addFreeFix(context, "Hide loose cables and remove any object that is not helping daily work.");
+    addPaidUpgrade(context, "Buy cable tools only after deciding what really needs to stay on the desk.");
     signalProducts(context, "Cable Management Kit");
   }
 
   if (/\b(premium|cleaner|calmer|minimal|minimalist)\b/i.test(detail)) {
     addPreferenceTag(context, "Calmer finish");
-    addPaidUpgrade(context, "Only add finishing pieces once the desk feels lighter, clearer, and easier to use.");
+    addPaidUpgrade(context, "Add finish-led pieces only once the setup feels lighter and easier to use.");
     signalProducts(context, "Wool Desk Mat");
   }
 
   if (/\b(storage|shelf|drawer)\b/i.test(detail)) {
-    addScoreEffect(context, "fit", -8, "Storage pressure is affecting the working layout.");
+    addScoreEffect(context, "fit", -8, "The desk is carrying storage pressure as well as work.");
     addIssueTag(context, "Storage pressure");
-    addFreeFix(context, "Separate working tools from storage items so the surface is not acting as a holding area.");
+    addFreeFix(context, "Split working tools from storage so the desk stops acting like overflow space.");
   }
 }
 
 function applyAssessmentSelections(input: AssessmentInput, context: DiagnoseContext): void {
   switch (input.deviceType) {
     case "Laptop only":
-      addScoreEffect(context, "comfort", -16, "Laptop-only setups often leave the screen too low.");
-      addScoreEffect(context, "fit", -6, "The working position is likely compromised by the device layout.");
+      addScoreEffect(context, "comfort", -16, "A laptop screen usually sits too low for long sessions.");
+      addScoreEffect(context, "fit", -6, "The working position is being limited by the device setup.");
       addIssueTag(context, "Posture strain");
-      addFreeFix(context, "Raise the screen for longer work blocks and avoid treating the laptop angle as the default working height.");
-      addPaidUpgrade(context, "A laptop stand is the most justified first hardware change for this setup.");
+      addFreeFix(context, "Raise the screen for longer work blocks instead of working down into it.");
+      addPaidUpgrade(context, "A laptop stand is the clearest hardware fix if this is your main setup.");
       signalProducts(context, "Laptop Stand");
       break;
     case "Laptop and monitor":
-      addScoreEffect(context, "comfort", -6, "Mixed-screen setups often create uneven viewing height.");
-      addScoreEffect(context, "fit", -4, "The layout may be splitting attention across two heights.");
+      addScoreEffect(context, "comfort", -6, "Two screen heights can pull posture out of line.");
+      addScoreEffect(context, "fit", -4, "The layout may be splitting your attention across two positions.");
       signalProducts(context, "Laptop Stand", "Monitor Stand");
       break;
     case "Single external monitor":
-      addScoreEffect(context, "comfort", 3, "An external screen gives more positioning flexibility.");
-      addScoreEffect(context, "focus", 2, "A single-screen layout is easier to keep visually clear.");
+      addScoreEffect(context, "comfort", 3, "An external screen gives you more control over height.");
+      addScoreEffect(context, "focus", 2, "One main screen is easier to keep clean and clear.");
       break;
     case "Dual monitors":
-      addScoreEffect(context, "focus", 3, "Dual screens can work well when aligned and simplified.");
-      addScoreEffect(context, "fit", -7, "Two displays increase surface pressure quickly.");
+      addScoreEffect(context, "focus", 3, "Two screens can work well when the layout stays disciplined.");
+      addScoreEffect(context, "fit", -7, "Two displays increase desk pressure quickly.");
       addIssueTag(context, "Space pressure");
       signalProducts(context, "Monitor Stand");
       break;
   }
 
   if (input.currentFeel.includes("Cluttered")) {
-    addScoreEffect(context, "focus", -16, "The desk already feels cluttered.");
-    addScoreEffect(context, "fit", -7, "Visual clutter usually reflects a layout problem as well.");
+    addScoreEffect(context, "focus", -16, "Too much is competing for attention.");
+    addScoreEffect(context, "fit", -7, "The layout is using more space than it should.");
     addIssueTag(context, "Visual clutter");
-    addFreeFix(context, "Create one clear work zone and remove secondary objects from that area.");
+    addFreeFix(context, "Create one clear work zone and strip out everything that does not support it.");
     signalProducts(context, "Cable Management Kit");
   }
   if (input.currentFeel.includes("Uncomfortable")) {
-    addScoreEffect(context, "comfort", -18, "The setup already feels uncomfortable in use.");
+    addScoreEffect(context, "comfort", -18, "The setup already feels physically wrong.");
     addIssueTag(context, "Posture strain");
   }
   if (input.currentFeel.includes("Too dark")) {
-    addScoreEffect(context, "lighting", -18, "Lighting is already being felt as a daily constraint.");
-    addScoreEffect(context, "focus", -5, "Weak lighting often reduces clarity and focus together.");
+    addScoreEffect(context, "lighting", -18, "The desk does not feel bright enough to work from comfortably.");
+    addScoreEffect(context, "focus", -5, "Weak light makes it harder to settle into work.");
     addIssueTag(context, "Low light");
     signalProducts(context, "Monitor Light Bar");
   }
   if (input.currentFeel.includes("Too cramped")) {
-    addScoreEffect(context, "fit", -17, "The desk feels cramped.");
-    addScoreEffect(context, "focus", -6, "Tight layouts make it harder to keep the desk visually calm.");
+    addScoreEffect(context, "fit", -17, "There is not enough clear working room.");
+    addScoreEffect(context, "focus", -6, "A tight layout makes the desk feel visually heavier.");
     addIssueTag(context, "Space pressure");
   }
   if (input.currentFeel.includes("Looks flat")) {
-    addScoreEffect(context, "fit", -4, "The setup lacks enough structure and finish.");
+    addScoreEffect(context, "fit", -4, "The setup needs more structure, not more stuff.");
     addPreferenceTag(context, "Calmer finish");
   }
   if (input.currentFeel.includes("Hard to focus")) {
-    addScoreEffect(context, "focus", -18, "The desk is not supporting concentration well enough.");
+    addScoreEffect(context, "focus", -18, "The desk is adding friction instead of removing it.");
     addIssueTag(context, "Focus drag");
   }
 
   if (input.problems.includes("Neck or back discomfort")) {
-    addScoreEffect(context, "comfort", -22, "Physical discomfort is a clear ergonomic signal.");
-    addScoreEffect(context, "fit", -5, "Screen and input placement are likely contributing.");
+    addScoreEffect(context, "comfort", -22, "Your screen and input position are costing you comfort.");
+    addScoreEffect(context, "fit", -5, "The desk is not supporting a better working posture yet.");
     addIssueTag(context, "Posture strain");
     signalProducts(context, "Laptop Stand", "Monitor Stand");
   }
   if (input.problems.includes("Poor lighting")) {
-    addScoreEffect(context, "lighting", -22, "Lighting quality is actively getting in the way.");
-    addScoreEffect(context, "focus", -8, "Poor lighting also affects visual ease.");
+    addScoreEffect(context, "lighting", -22, "Light quality is actively getting in the way.");
+    addScoreEffect(context, "focus", -8, "Poor light also makes focus harder to hold.");
     addIssueTag(context, "Low light");
     signalProducts(context, "Monitor Light Bar");
   }
   if (input.problems.includes("Not enough space")) {
-    addScoreEffect(context, "fit", -21, "There is not enough usable surface space.");
-    addScoreEffect(context, "focus", -5, "Layout pressure is reducing clarity as well.");
+    addScoreEffect(context, "fit", -21, "The desk is short on usable space.");
+    addScoreEffect(context, "focus", -5, "Crowding is making the setup harder to read.");
     addIssueTag(context, "Space pressure");
     signalProducts(context, "Monitor Stand");
   }
   if (input.problems.includes("Cable clutter")) {
-    addScoreEffect(context, "focus", -14, "Visible cables are adding noise to the setup.");
-    addScoreEffect(context, "fit", -8, "Cable load is also affecting usable space.");
+    addScoreEffect(context, "focus", -14, "Loose cables are keeping the desk visually busy.");
+    addScoreEffect(context, "fit", -8, "Cable load is also stealing working room.");
     addIssueTag(context, "Cable clutter");
     signalProducts(context, "Cable Management Kit");
   }
   if (input.problems.includes("Hard to focus")) {
-    addScoreEffect(context, "focus", -16, "The current layout is not supporting focused work.");
+    addScoreEffect(context, "focus", -16, "The setup is not helping you get into deep work.");
     addIssueTag(context, "Focus drag");
   }
   if (input.problems.includes("Does not feel premium")) {
-    addScoreEffect(context, "fit", -5, "The desk lacks enough structure and restraint.");
+    addScoreEffect(context, "fit", -5, "The desk needs more restraint and stronger structure.");
     addPreferenceTag(context, "Calmer finish");
     signalProducts(context, "Wool Desk Mat");
   }
 
   switch (input.priority) {
     case "Better comfort":
-      context.recommendationRationale.push("Comfort is the main decision lens, so posture and daily ease come first.");
+      context.recommendationRationale.push("Comfort comes first, so screen position and daily ease lead the plan.");
       break;
     case "Cleaner setup":
-      context.recommendationRationale.push("The recommendation mix favours cleaner structure before aesthetic extras.");
+      context.recommendationRationale.push("The quickest win is a cleaner, calmer layout.");
       addPreferenceTag(context, "Calmer finish");
       break;
     case "Better focus":
-      context.recommendationRationale.push("Focus work benefits most from visual calm, usable light, and a disciplined layout.");
+      context.recommendationRationale.push("Focus improves when the desk feels visually lighter and easier to read.");
       break;
     case "More premium look":
-      context.recommendationRationale.push("A more premium look is only being recommended where it supports usability rather than adding noise.");
+      context.recommendationRationale.push("A more premium feel should come from better structure, not extra clutter.");
       addPreferenceTag(context, "Calmer finish");
       signalProducts(context, "Wool Desk Mat", "LumoMist Diffuser");
       break;
@@ -253,56 +273,60 @@ function applyAssessmentSelections(input: AssessmentInput, context: DiagnoseCont
 
   switch (input.upgradeIntent) {
     case "Free improvements first":
-      context.recommendationRationale.push("The plan stays conservative and free-first before suggesting products.");
+      context.recommendationRationale.push("The plan stays free-first unless a product solves a clear problem.");
       break;
     case "A few practical upgrades":
-      context.recommendationRationale.push("Only a small number of practical upgrades are being prioritised.");
+      context.recommendationRationale.push("Only a small number of high-value upgrades are being kept in play.");
       break;
     case "A cleaner premium setup":
-      context.recommendationRationale.push("Finishing upgrades are included only where the core setup is ready for them.");
+      context.recommendationRationale.push("Finish-led upgrades are included only where the desk is ready for them.");
       addPreferenceTag(context, "Calmer finish");
       break;
   }
 
   switch (input.deskSize) {
     case "Very small":
-      addScoreEffect(context, "fit", -12, "Very small desks need stricter discipline around footprint.");
-      addScoreEffect(context, "focus", -4, "Compact desks can feel visually busy more quickly.");
+      addScoreEffect(context, "fit", -12, "A very small desk leaves little room for layout mistakes.");
+      addScoreEffect(context, "focus", -4, "Small surfaces feel busy faster.");
       addIssueTag(context, "Space pressure");
       break;
     case "Small":
-      addScoreEffect(context, "fit", -8, "Small desks leave less room for layout errors.");
-      addScoreEffect(context, "focus", -2, "A smaller surface makes clarity more important.");
+      addScoreEffect(context, "fit", -8, "A small desk needs tighter control over footprint.");
+      addScoreEffect(context, "focus", -2, "Clearer layout matters more when surface area is limited.");
       break;
     case "Large":
-      addScoreEffect(context, "fit", 4, "A larger desk gives more room to structure the layout properly.");
+      addScoreEffect(context, "fit", 4, "A larger desk gives you more room to organise the setup well.");
       break;
   }
 
   switch (input.workStyle) {
     case "Deep focus work":
-      addScoreEffect(context, "focus", -4, "Focused work needs a calmer visual environment.");
-      addScoreEffect(context, "lighting", -2, "Longer concentration blocks make lighting quality more important.");
+      addScoreEffect(context, "focus", -4, "Deep work needs a calmer visual field.");
+      addScoreEffect(context, "lighting", -2, "Longer sessions make light quality more important.");
       break;
     case "Creative work":
-      addScoreEffect(context, "lighting", -3, "Creative work benefits from stronger visual quality.");
+      addScoreEffect(context, "lighting", -3, "Creative work usually asks more from visual quality.");
       break;
     case "Mixed use":
-      addScoreEffect(context, "fit", -2, "Mixed-use desks need clearer zoning to avoid feeling overloaded.");
+      addScoreEffect(context, "fit", -2, "Mixed-use desks need stronger boundaries to stay clear.");
       break;
   }
 
   if (input.budgetBand === "Under 50") {
-    context.recommendationRationale.push("Budget is tight, so high-value free changes and lower-cost upgrades are favoured.");
+    context.recommendationRationale.push("The recommendations lean toward high-value free fixes and lower-cost wins.");
   }
 }
 
 function scoreToConstraint(key: ScoreKey): string {
   switch (key) {
-    case "comfort": return "Comfort / ergonomics";
-    case "focus": return "Focus / visual clarity";
-    case "lighting": return "Lighting / visual quality";
-    case "fit": return "Fit / space / upgrade suitability";
+    case "comfort":
+      return "Comfort";
+    case "focus":
+      return "Focus";
+    case "lighting":
+      return "Lighting";
+    case "fit":
+      return "Space & fit";
   }
 }
 
@@ -319,99 +343,250 @@ function buildOverallScore(subScores: DiagnosisSubScore[]): number {
   return Math.round(clamp(subScores.reduce((sum, score) => sum + score.score * scoreWeights[score.key], 0), 24, 96));
 }
 
-function buildIssues(subScores: DiagnosisSubScore[]): DiagnosisIssue[] {
+function issueTitleForKey(key: ScoreKey, input: AssessmentInput, context: DiagnoseContext): string {
+  switch (key) {
+    case "comfort":
+      return input.deviceType === "Laptop only" ? "Your screen is too low" : "Your setup is putting strain on you";
+    case "focus":
+      return hasVisualNoise(input, context) ? "Too much is competing for attention" : "The desk is interrupting focus";
+    case "lighting":
+      return "The work area is underlit";
+    case "fit":
+      return hasSpacePressure(input, context) ? "The desk is carrying too much" : "Space is being used badly";
+  }
+}
+
+function issueSummaryForKey(key: ScoreKey, input: AssessmentInput, context: DiagnoseContext): string {
+  switch (key) {
+    case "comfort":
+      return input.deviceType === "Laptop only"
+        ? "Looking down at the laptop screen pulls your neck and shoulders forward."
+        : "Screen and input position are working against a more relaxed posture.";
+    case "focus":
+      return hasVisualNoise(input, context)
+        ? "Loose cables and extra objects make the desk harder to read at a glance."
+        : "The setup is adding small bits of friction that keep breaking concentration.";
+    case "lighting":
+      return "The task area is not getting enough clean, direct light.";
+    case "fit":
+      return hasSpacePressure(input, context)
+        ? "Work tools, storage, and overflow items are competing for the same surface."
+        : "The setup needs clearer boundaries between work space and everything else.";
+  }
+}
+
+function issueImpactForKey(key: ScoreKey, input: AssessmentInput, context: DiagnoseContext): string {
+  switch (key) {
+    case "comfort":
+      return "Long sessions feel more tiring than they should.";
+    case "focus":
+      return hasVisualNoise(input, context)
+        ? "Focus drops even when you are trying to settle in."
+        : "You lose momentum without always noticing why.";
+    case "lighting":
+      return "Your eyes work harder, especially later in the day.";
+    case "fit":
+      return hasSpacePressure(input, context)
+        ? "The desk feels cramped faster and leaves less room to work."
+        : "The setup feels busier than it needs to.";
+  }
+}
+
+function buildIssues(input: AssessmentInput, subScores: DiagnosisSubScore[], context: DiagnoseContext): DiagnosisIssue[] {
   return subScores
     .slice()
     .sort((left, right) => left.score - right.score)
     .map((subScore) => ({
       id: subScore.key,
-      label: scoreToConstraint(subScore.key),
+      label: issueTitleForKey(subScore.key, input, context),
       severity: clamp(100 - subScore.score, 28, 95),
       confidence: subScore.score <= 56 ? 0.88 : subScore.score <= 68 ? 0.8 : 0.7,
-      causes: [subScore.summary]
+      summary: issueSummaryForKey(subScore.key, input, context),
+      impact: issueImpactForKey(subScore.key, input, context)
     }));
 }
 
 function buildDiagnosisTags(context: DiagnoseContext, subScores: DiagnosisSubScore[], input: AssessmentInput): string[] {
   const tags = [...context.issueTags];
-  if ((subScores.find((score) => score.key === "comfort")?.score ?? 100) < 60) tags.push("Ergonomic risk");
+  if ((subScores.find((score) => score.key === "comfort")?.score ?? 100) < 60) tags.push("Comfort drag");
   if ((subScores.find((score) => score.key === "lighting")?.score ?? 100) < 60) tags.push("Low light");
   if ((subScores.find((score) => score.key === "fit")?.score ?? 100) < 60) tags.push("Space pressure");
   if (input.priority === "More premium look" || context.preferenceTags.has("Calmer finish")) tags.push("Calmer finish");
   return unique(tags).slice(0, 4);
 }
 
-function buildSummary(input: AssessmentInput, score: number, primary: DiagnosisSubScore, secondary: DiagnosisSubScore | undefined, tags: string[]): string {
+function summaryConstraint(key: ScoreKey): string {
+  switch (key) {
+    case "comfort":
+      return "screen position and comfort";
+    case "focus":
+      return "visual noise and focus";
+    case "lighting":
+      return "light on the work area";
+    case "fit":
+      return "usable desk space";
+  }
+}
+
+function buildSummary(score: number, primary: ScoreKey, firstAction: string): string {
   const opening = score < 55
-    ? "This workspace is carrying more friction than it needs to."
+    ? "You've got a few core issues, but they are fixable."
     : score < 72
-      ? "The desk has a workable base, but the setup still has avoidable weak points."
-      : "The setup is in a good place overall, but the last gains will come from more selective changes.";
+      ? "You've got a solid base, but a few things are holding it back."
+      : "Your setup is in good shape. The next gains come from a few targeted fixes.";
 
-  const priorityLens = input.priority === "Better comfort"
-    ? "Comfort should lead the next round of changes."
-    : input.priority === "Cleaner setup"
-      ? "The clearest improvement will come from a calmer, more disciplined layout."
-      : input.priority === "Better focus"
-        ? "The next step is reducing friction that interrupts concentration."
-        : input.priority === "More premium look"
-          ? "A more premium finish should follow structure, not replace it."
-          : "The next step is a more selective improvement plan.";
+  return `${opening} The main issue is ${summaryConstraint(primary)}. Start with ${firstAction.toLowerCase()}.`;
+}
 
-  const secondaryText = secondary ? ` ${scoreToConstraint(secondary.key)} is the next issue behind it.` : "";
-  const tagText = tags.length > 0 ? ` Signals include ${tags.join(", ").toLowerCase()}.` : "";
+function buildWhyThisMatters(subScores: DiagnosisSubScore[], input: AssessmentInput, context: DiagnoseContext): string[] {
+  return unique(
+    subScores
+      .slice()
+      .sort((left, right) => left.score - right.score)
+      .slice(0, 3)
+      .map((subScore) => issueImpactForKey(subScore.key, input, context))
+  );
+}
 
-  return `${opening} ${scoreToConstraint(primary.key)} is the main constraint.${secondaryText} ${priorityLens}${tagText}`;
+function baseFixesForKey(key: ScoreKey, input: AssessmentInput, context: DiagnoseContext): string[] {
+  switch (key) {
+    case "comfort":
+      return [
+        input.deviceType === "Laptop only"
+          ? "Raise the laptop screen so you are not looking down all day."
+          : "Set the main screen closer to eye level and keep it directly in front of you.",
+        "Bring keyboard and mouse close enough that your shoulders can stay relaxed."
+      ];
+    case "focus":
+      return [
+        "Clear the main work zone until only active tools remain.",
+        hasVisualNoise(input, context)
+          ? "Hide loose cables before buying anything else for the desk."
+          : "Reduce what stays visible on the surface during the day."
+      ];
+    case "lighting":
+      return [
+        "Add cleaner light to the area you actually work in.",
+        "Angle the screen and light source so they are not fighting each other."
+      ];
+    case "fit":
+      return [
+        "Move storage and overflow items off the main work surface.",
+        "Give the desk one clear working zone instead of asking it to hold everything."
+      ];
+  }
 }
 
 function buildFixFirst(input: AssessmentInput, subScores: DiagnosisSubScore[], context: DiagnoseContext): string[] {
-  const items: string[] = [];
   const [primary, secondary] = subScores.slice().sort((left, right) => left.score - right.score);
+  const items = [
+    ...baseFixesForKey(primary.key, input, context),
+    ...(secondary ? baseFixesForKey(secondary.key, input, context).slice(0, 1) : []),
+    ...context.freeFixes
+  ];
 
-  if (primary.key === "comfort") {
-    items.push("Set the screen so the top of the viewing area sits closer to eye level during your main work posture.");
-    items.push("Keep keyboard and mouse close enough to avoid reaching through the shoulders.");
+  if (input.upgradeIntent === "Free improvements first") {
+    items.push("Live with the layout changes for a few days before deciding if you still need a product.");
   }
-  if (primary.key === "focus") {
-    items.push("Clear the main work zone so only active tools remain visible during the day.");
-    items.push("Route cables behind the desk line before adding any new accessories.");
-  }
-  if (primary.key === "lighting") {
-    items.push("Improve task light on the working area before trying to solve the problem with decorative lighting.");
-    items.push("Reduce glare by angling the screen and light source so they are not competing.");
-  }
-  if (primary.key === "fit") {
-    items.push("Define one primary work zone and move storage, chargers, and overflow items away from that surface.");
-    items.push("Reduce the permanent footprint of the setup before buying anything new.");
-  }
-  if (secondary?.key === "lighting") items.push("Check the desk in the evening as well as daytime so the recommendation reflects real use.");
-  if (secondary?.key === "focus") items.push("Use fewer visible objects so the desk reads clearly at a glance.");
-  if (input.upgradeIntent === "Free improvements first") items.push("Run the layout and posture changes for a few days before deciding whether any product is still necessary.");
-  items.push(...context.freeFixes);
+
   return unique(items).slice(0, 4);
 }
 
+function upgradeLinesForKey(key: ScoreKey, input: AssessmentInput, context: DiagnoseContext): string[] {
+  switch (key) {
+    case "comfort":
+      return [
+        input.deviceType === "Laptop only"
+          ? "A laptop stand is worth it if the screen still sits too low after adjustment."
+          : "A monitor stand makes sense if better screen height would also improve posture."
+      ];
+    case "focus":
+      return [
+        hasVisualNoise(input, context)
+          ? "Cable tools are worth it if loose wires keep pulling the desk back into clutter."
+          : "Organisation products only help if they remove visual drag straight away."
+      ];
+    case "lighting":
+      return ["A focused task light is justified if the desk still drops into shadow later in the day."];
+    case "fit":
+      return ["A stand that lifts the screen can also give you back working room."];
+  }
+}
+
 function buildBestUpgrades(input: AssessmentInput, subScores: DiagnosisSubScore[], context: DiagnoseContext): string[] {
-  const items: string[] = [];
-  subScores.slice().sort((left, right) => left.score - right.score).forEach((subScore) => {
-    if (subScore.key === "comfort" && subScore.score < 72) items.push("Prioritise a stand that corrects screen height before considering lower-impact accessories.");
-    if (subScore.key === "lighting" && subScore.score < 72) items.push("A focused task-light upgrade is justified if the desk is still dim after repositioning.");
-    if (subScore.key === "fit" && subScore.score < 72) items.push("Choose upgrades that recover usable surface area rather than adding more objects.");
-    if (subScore.key === "focus" && subScore.score < 72) items.push("Organisation products only make sense if they reduce visual noise immediately.");
-  });
-  if (input.priority === "More premium look") items.push("Add finish-led products only once comfort, layout, and lighting feel settled.");
+  const items = subScores
+    .slice()
+    .sort((left, right) => left.score - right.score)
+    .flatMap((subScore) => (subScore.score < 72 ? upgradeLinesForKey(subScore.key, input, context) : []));
+
+  if (input.priority === "More premium look") {
+    items.push("Add finish-led pieces only after comfort, light, and layout feel settled.");
+  }
+
   items.push(...context.paidUpgrades);
-  return unique(items).slice(0, 4);
+
+  return unique(items).slice(0, input.upgradeIntent === "Free improvements first" ? 2 : 4);
+}
+
+function buildScoreImprovements(subScores: DiagnosisSubScore[], input: AssessmentInput, context: DiagnoseContext): ScoreImprovement[] {
+  const improvements: ScoreImprovement[] = [];
+
+  subScores
+    .slice()
+    .sort((left, right) => left.score - right.score)
+    .slice(0, 4)
+    .forEach((subScore) => {
+      switch (subScore.key) {
+        case "comfort":
+          improvements.push({
+            action: input.deviceType === "Laptop only" ? "Raise the laptop screen" : "Raise the main screen",
+            effect: "reduces neck and shoulder strain",
+            scoreLabel: "comfort"
+          });
+          break;
+        case "focus":
+          improvements.push({
+            action: hasVisualNoise(input, context) ? "Hide loose cables and clear the work zone" : "Reduce what stays visible on the desk",
+            effect: "cuts visual drag and makes focus easier to hold",
+            scoreLabel: "focus"
+          });
+          break;
+        case "lighting":
+          improvements.push({
+            action: "Add direct task light",
+            effect: "makes the work area easier on the eyes",
+            scoreLabel: "lighting"
+          });
+          break;
+        case "fit":
+          improvements.push({
+            action: "Free up permanent desk space",
+            effect: "gives you more room to work comfortably",
+            scoreLabel: "space & fit"
+          });
+          break;
+      }
+    });
+
+  return unique(improvements.map((item) => `${item.action}|${item.effect}|${item.scoreLabel}`)).map((item) => {
+    const [action, effect, scoreLabel] = item.split("|");
+    return { action, effect, scoreLabel };
+  }).slice(0, 4);
 }
 
 function categoryForProduct(product: ProductCatalogItem): ScoreKey | null {
   switch (product.category) {
-    case "ergonomics": return "comfort";
-    case "lighting": return "lighting";
-    case "organization": return "focus";
+    case "ergonomics":
+      return "comfort";
+    case "lighting":
+      return "lighting";
+    case "organization":
+      return "focus";
     case "surface":
-    case "wellbeing": return "fit";
-    default: return null;
+    case "wellbeing":
+      return "fit";
+    default:
+      return null;
   }
 }
 
@@ -419,44 +594,66 @@ function buildProductReasons(product: ProductCatalogItem, input: AssessmentInput
   const reasons: string[] = [];
   const relatedKey = categoryForProduct(product);
   const relatedScore = relatedKey ? subScores.find((score) => score.key === relatedKey)?.score ?? 100 : 100;
+
   if (context.productSignals.has(product.name)) reasons.push(product.benefits[0]);
   if (relatedKey && relatedScore < 70) reasons.push(product.benefits[1] ?? product.benefits[0]);
-  if (input.priority === "More premium look" && product.styleFit !== "utility") reasons.push("Supports a calmer, more considered finish");
-  if (input.priority === "Better comfort" && product.category === "ergonomics") reasons.push("Addresses the main comfort constraint");
-  if (input.priority === "Cleaner setup" && product.category === "organization") reasons.push("Improves layout discipline without adding visual noise");
-  if (input.priority === "Better focus" && (product.category === "lighting" || product.category === "organization")) reasons.push("Helps the desk feel clearer and easier to work from");
-  return unique(reasons).slice(0, 3);
+
+  if (input.priority === "More premium look" && product.styleFit !== "utility") {
+    reasons.push("Helps the desk feel calmer and more considered");
+  }
+  if (input.priority === "Better comfort" && product.category === "ergonomics") {
+    reasons.push("Directly supports the comfort issue");
+  }
+  if (input.priority === "Cleaner setup" && product.category === "organization") {
+    reasons.push("Makes the layout feel cleaner without adding noise");
+  }
+  if (input.priority === "Better focus" && (product.category === "lighting" || product.category === "organization")) {
+    reasons.push("Makes it easier to settle into work");
+  }
+
+  return unique(reasons).slice(0, 2);
 }
 
 function scoreProducts(input: AssessmentInput, subScores: DiagnosisSubScore[], context: DiagnoseContext): MatchedProduct[] {
-  return productCatalog.map((product) => {
-    const relatedKey = categoryForProduct(product);
-    const relatedScore = relatedKey ? subScores.find((score) => score.key === relatedKey)?.score ?? 78 : 78;
-    let fitScore = 46;
-    if (context.productSignals.has(product.name)) fitScore += 22;
-    if (relatedScore < 60) fitScore += 18;
-    else if (relatedScore < 72) fitScore += 10;
-    if (input.priority === "Better comfort" && product.category === "ergonomics") fitScore += 14;
-    if (input.priority === "Cleaner setup" && product.category === "organization") fitScore += 12;
-    if (input.priority === "Better focus" && (product.category === "lighting" || product.category === "organization")) fitScore += 12;
-    if (input.priority === "More premium look" && product.styleFit !== "utility") fitScore += 10;
-    if ((input.deskSize === "Very small" || input.deskSize === "Small") && product.spaceImpact === "high") fitScore -= 18;
-    if (input.budgetBand === "Under 50" && !["Under 50", "50-150"].includes(product.priceBand)) fitScore -= 22;
-    if (input.upgradeIntent === "Free improvements first") fitScore -= 8;
-    return {
-      name: product.name,
-      fitScore: clamp(Math.round(fitScore), 0, 100),
-      reasons: buildProductReasons(product, input, subScores, context)
-    };
-  }).sort((left, right) => right.fitScore - left.fitScore).slice(0, 3);
+  return productCatalog
+    .map((product) => {
+      const relatedKey = categoryForProduct(product);
+      const relatedScore = relatedKey ? subScores.find((score) => score.key === relatedKey)?.score ?? 78 : 78;
+      let fitScore = 46;
+
+      if (context.productSignals.has(product.name)) fitScore += 22;
+      if (relatedScore < 60) fitScore += 18;
+      else if (relatedScore < 72) fitScore += 10;
+      if (input.priority === "Better comfort" && product.category === "ergonomics") fitScore += 14;
+      if (input.priority === "Cleaner setup" && product.category === "organization") fitScore += 12;
+      if (input.priority === "Better focus" && (product.category === "lighting" || product.category === "organization")) fitScore += 12;
+      if (input.priority === "More premium look" && product.styleFit !== "utility") fitScore += 10;
+      if ((input.deskSize === "Very small" || input.deskSize === "Small") && product.spaceImpact === "high") fitScore -= 18;
+      if (input.budgetBand === "Under 50" && !["Under 50", "50-150"].includes(product.priceBand)) fitScore -= 22;
+      if (input.upgradeIntent === "Free improvements first") fitScore -= 8;
+
+      return {
+        name: product.name,
+        fitScore: clamp(Math.round(fitScore), 0, 100),
+        reasons: buildProductReasons(product, input, subScores, context)
+      };
+    })
+    .sort((left, right) => right.fitScore - left.fitScore)
+    .slice(0, 3);
 }
 
 function buildNextQuestions(input: AssessmentInput, subScores: DiagnosisSubScore[]): string[] {
   const questions: string[] = [];
-  if ((subScores.find((score) => score.key === "lighting")?.score ?? 100) < 70) questions.push("How does the desk feel in the evening compared with daylight?");
-  if (input.deviceType === "Laptop only" || input.deviceType === "Laptop and monitor") questions.push("Do you use an external keyboard and mouse during longer sessions?");
-  if ((subScores.find((score) => score.key === "fit")?.score ?? 100) < 70) questions.push("Which items need to stay on the desk permanently, and which can move off it?");
-  questions.push("Would you rather improve this setup gradually or make one stronger round of upgrades?");
+  if ((subScores.find((score) => score.key === "lighting")?.score ?? 100) < 70) {
+    questions.push("Does the desk feel worse in the evening than it does in daylight?");
+  }
+  if (input.deviceType === "Laptop only" || input.deviceType === "Laptop and monitor") {
+    questions.push("Do you use an external keyboard and mouse during longer sessions?");
+  }
+  if ((subScores.find((score) => score.key === "fit")?.score ?? 100) < 70) {
+    questions.push("What needs to stay on the desk all the time, and what can move off it?");
+  }
+  questions.push("Would you rather improve this desk gradually or in one stronger pass?");
   return unique(questions).slice(0, 3);
 }
 
@@ -473,11 +670,12 @@ export function diagnoseWorkspace(input: AssessmentInput): DiagnosisResult {
   const primary = sorted[0];
   const secondary = sorted[1];
   const diagnosisTags = buildDiagnosisTags(context, subScores, input);
+  const freeFixes = buildFixFirst(input, subScores, context);
 
   return {
     score: overallScore,
     confidence,
-    summary: buildSummary(input, overallScore, primary, secondary, diagnosisTags),
+    summary: buildSummary(overallScore, primary.key, freeFixes[0] ?? "the main constraint first"),
     profile: unique([
       input.deviceType,
       input.priority,
@@ -492,10 +690,11 @@ export function diagnoseWorkspace(input: AssessmentInput): DiagnosisResult {
     primaryConstraint: scoreToConstraint(primary.key),
     secondaryConstraint: secondary ? scoreToConstraint(secondary.key) : null,
     subScores,
-    mainIssues: buildIssues(subScores).slice(0, 4),
-    freeFixes: { title: "Fix first", items: buildFixFirst(input, subScores, context) },
-    paidUpgrades: { title: "Best upgrades", items: buildBestUpgrades(input, subScores, context) },
-    whyTheseRecommendations: unique(context.recommendationRationale).slice(0, 4),
+    mainIssues: buildIssues(input, subScores, context).slice(0, 4),
+    whyThisMatters: buildWhyThisMatters(subScores, input, context),
+    freeFixes: { title: "Fix this first", items: freeFixes },
+    paidUpgrades: { title: "Upgrades worth considering", items: buildBestUpgrades(input, subScores, context) },
+    scoreImprovements: buildScoreImprovements(subScores, input, context),
     matchedProducts: scoreProducts(input, subScores, context),
     nextQuestions: buildNextQuestions(input, subScores)
   };
