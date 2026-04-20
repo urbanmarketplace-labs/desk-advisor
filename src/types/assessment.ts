@@ -1,26 +1,42 @@
-export type TimeExposure = "<2h" | "2-4h" | "4-8h" | "8h+";
+export type TimeExposure = "Under 2 hours" | "2-4 hours" | "4-8 hours" | "8+ hours";
 
 export type SetupType =
   | "Laptop only"
-  | "Laptop raised"
-  | "External monitor"
-  | "Multi-monitor";
+  | "Laptop + external monitor"
+  | "Single external monitor"
+  | "Dual monitor"
+  | "Other / mixed";
 
 export type FrictionSignal =
+  | "Discomfort / strain"
+  | "Low light / poor visibility"
+  | "Clutter / visual noise"
   | "Space feels limited"
-  | "Looks cluttered"
-  | "Physical discomfort"
-  | "Lighting is not good"
   | "Hard to focus"
-  | "Nothing obvious";
+  | "Setup feels flat / unfinished"
+  | "Nothing obvious, just feels off";
 
 export type DeskDensity = "Minimal" | "Moderate" | "Busy" | "Overloaded";
 
 export type LightingQuality =
-  | "Even and bright"
-  | "Usable but inconsistent"
+  | "Bright and even"
+  | "Mostly okay"
   | "Dim / shadowy"
   | "Changes throughout the day";
+
+export type PrioritySignal =
+  | "Comfort"
+  | "Focus"
+  | "Cleaner look"
+  | "Better use of space"
+  | "More premium feel";
+
+export type WorkStyle =
+  | "Deep focus / knowledge work"
+  | "Meetings and admin"
+  | "Creative / visual work"
+  | "Mixed workday"
+  | "Prefer not to say";
 
 export type UpgradeIntent =
   | "Free improvements first"
@@ -31,6 +47,7 @@ export type DeskSize = "Very small" | "Small" | "Medium" | "Large";
 
 export type StepKind = "single" | "multi" | "text";
 export type ScoreKey = "comfort" | "focus" | "lighting" | "fit";
+export type InputQuality = "light" | "moderate" | "rich";
 
 export type ProductCategory =
   | "ergonomics"
@@ -40,11 +57,13 @@ export type ProductCategory =
   | "wellbeing";
 
 export interface AssessmentInput {
-  timeExposure: TimeExposure | "";
   setupType: SetupType | "";
+  timeExposure: TimeExposure | "";
   frictionSignals: FrictionSignal[];
   deskDensity: DeskDensity | "";
   lightingQuality: LightingQuality | "";
+  whatMattersMost: PrioritySignal | "";
+  workStyle: WorkStyle | "";
   deskSize: DeskSize | "";
   upgradeIntent: UpgradeIntent | "";
   extraDetail: string;
@@ -109,6 +128,10 @@ export interface DiagnosisResult {
   score: number;
   confidence: "low" | "moderate" | "high";
   confidenceLabel: string;
+  inputQuality: InputQuality;
+  inputQualityLabel: string;
+  inputQualityNote: string;
+  moreDetailPrompt: string | null;
   summary: string;
   profile: string[];
   diagnosisTags: string[];
