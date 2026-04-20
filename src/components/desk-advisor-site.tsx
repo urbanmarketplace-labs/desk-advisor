@@ -4,19 +4,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { diagnoseWorkspace } from "@/core/diagnose";
 import { productCatalog } from "@/data/product-catalog";
 import { assessmentSteps, emptyAssessment } from "@/data/questions";
-import type {
-  AssessmentInput,
-  CurrentFeel,
-  DiagnosisResult,
-  Problem
-} from "@/types/assessment";
+import type { AssessmentInput, DiagnosisResult, FrictionSignal } from "@/types/assessment";
 
 const productReasonMap = new Map(productCatalog.map((product) => [product.name, product]));
 const loadingMessages = [
-  "Reviewing layout, comfort, and lighting",
-  "Separating free fixes from justified upgrades",
-  "Building a clearer recommendation plan"
+  "Analysing workspace signals",
+  "Identifying constraints",
+  "Building recommendations"
 ];
+const summaryTypingSpeed = 18;
 
 function isStepComplete(stepId: keyof AssessmentInput, value: AssessmentInput[keyof AssessmentInput]): boolean {
   if (stepId === "extraDetail") {
@@ -42,22 +38,41 @@ function getScoreAccent(score: number): string {
   return "scoreStrong";
 }
 
+function getConfidenceSupport(result: DiagnosisResult): string {
+  if (result.confidence === "low") {
+    return "A little more context would make this read more specific.";
+  }
+
+  if (result.confidence === "moderate") {
+    return "The main constraints are clear, but a little more detail would sharpen the priorities.";
+  }
+
+  return "There is enough signal here to be specific about what matters most.";
+}
+
 function buildSignals(result: DiagnosisResult): string[] {
   return result.diagnosisTags.slice(0, 4);
 }
 
+function formatProductCategory(value: string): string {
+  return value
+    .split("-")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 export function DeskAdvisorSite() {
-  const [assessment, setAssessment] = useState<AssessmentInput>({
-    ...emptyAssessment,
-    currentFeel: [],
-    problems: []
-  });
+  const [assessment, setAssessment] = useState<AssessmentInput>(emptyAssessment);
   const [stepIndex, setStepIndex] = useState(0);
   const [phase, setPhase] = useState<"idle" | "questions" | "loading" | "result">("idle");
   const [result, setResult] = useState<DiagnosisResult | null>(null);
   const [loadingIndex, setLoadingIndex] = useState(0);
+  const [typedSummary, setTypedSummary] = useState("");
+  const [revealStage, setRevealStage] = useState(0);
   const loadingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const loadingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const typingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const revealTimeoutsRef = useRef<Array<ReturnType<typeof setTimeout>>>([]);
 
   const step = assessmentSteps[stepIndex];
   const totalSteps = assessmentSteps.length;
@@ -67,15 +82,45 @@ export function DeskAdvisorSite() {
 
   useEffect(() => {
     return () => {
-      if (loadingTimeoutRef.current) {
-        clearTimeout(loadingTimeoutRef.current);
-      }
-
-      if (loadingIntervalRef.current) {
-        clearInterval(loadingIntervalRef.current);
-      }
+      clearLoadingTimers();
+      clearRevealTimers();
     };
   }, []);
+
+  useEffect(() => {
+    clearRevealTimers();
+
+    if (phase !== "result" || !result) {
+      setTypedSummary("");
+      setRevealStage(0);
+      return;
+    }
+
+    setTypedSummary("");
+    setRevealStage(0);
+
+    let index = 0;
+    typingIntervalRef.current = setInterval(() => {
+      index += 1;
+      setTypedSummary(result.summary.slice(0, index));
+
+      if (index >= result.summary.length) {
+        if (typingIntervalRef.current) {
+          clearInterval(typingIntervalRef.current);
+          typingIntervalRef.current = null;
+        }
+
+        setRevealStage(1);
+        revealTimeoutsRef.current.push(setTimeout(() => setRevealStage(2), 180));
+        revealTimeoutsRef.current.push(setTimeout(() => setRevealStage(3), 360));
+        revealTimeoutsRef.current.push(setTimeout(() => setRevealStage(4), 560));
+      }
+    }, summaryTypingSpeed);
+
+    return () => {
+      clearRevealTimers();
+    };
+  }, [phase, result]);
 
   function clearLoadingTimers() {
     if (loadingTimeoutRef.current) {
@@ -89,16 +134,40 @@ export function DeskAdvisorSite() {
     }
   }
 
+  function clearRevealTimers() {
+    if (typingIntervalRef.current) {
+      clearInterval(typingIntervalRef.current);
+      typingIntervalRef.current = null;
+    }
+
+    revealTimeoutsRef.current.forEach((timeout) => clearTimeout(timeout));
+    revealTimeoutsRef.current = [];
+  }
+
   function updateSingle<K extends keyof AssessmentInput>(key: K, value: AssessmentInput[K]) {
     setAssessment((current) => ({ ...current, [key]: value }));
   }
 
-  function toggleMultiValue(key: "currentFeel" | "problems", value: CurrentFeel | Problem) {
+  function toggleMultiValue(key: "frictionSignals", value: FrictionSignal, maxSelections = 2) {
     setAssessment((current) => {
-      const currentValues = current[key] as string[];
-      const nextValues = currentValues.includes(value)
-        ? currentValues.filter((item) => item !== value)
-        : [...currentValues, value];
+      const currentValues = current[key];
+
+      if (currentValues.includes(value)) {
+        return {
+          ...current,
+          [key]: currentValues.filter((item) => item !== value)
+        };
+      }
+
+      if (value === "Nothing obvious") {
+        return {
+          ...current,
+          [key]: [value]
+        };
+      }
+
+      const filteredValues = currentValues.filter((item) => item !== "Nothing obvious");
+      const nextValues = [...filteredValues, value].slice(-maxSelections);
 
       return {
         ...current,
@@ -109,7 +178,10 @@ export function DeskAdvisorSite() {
 
   function startAssessment() {
     clearLoadingTimers();
+    clearRevealTimers();
     setResult(null);
+    setTypedSummary("");
+    setRevealStage(0);
     setStepIndex(0);
     setLoadingIndex(0);
     setPhase("questions");
@@ -146,12 +218,11 @@ export function DeskAdvisorSite() {
 
   function restart() {
     clearLoadingTimers();
-    setAssessment({
-      ...emptyAssessment,
-      currentFeel: [],
-      problems: []
-    });
+    clearRevealTimers();
+    setAssessment(emptyAssessment);
     setResult(null);
+    setTypedSummary("");
+    setRevealStage(0);
     setLoadingIndex(0);
     setPhase("idle");
     setStepIndex(0);
@@ -161,6 +232,7 @@ export function DeskAdvisorSite() {
   const resultSignals = result ? buildSignals(result) : [];
   const whyThisMatters = result?.whyThisMatters ?? [];
   const scoreImprovements = result?.scoreImprovements ?? [];
+  const isSummaryTyping = result ? typedSummary.length < result.summary.length : false;
 
   return (
     <main className="page">
@@ -251,9 +323,9 @@ export function DeskAdvisorSite() {
           {phase === "idle" ? (
             <div className="introState">
               <div className="introPoints">
-                <span>Weighted scoring</span>
-                <span>Tailored diagnosis</span>
-                <span>Justified upgrades</span>
+                <span>Adaptive weighting</span>
+                <span>Confidence-aware diagnosis</span>
+                <span>Reasoned recommendations</span>
               </div>
               <button className="primaryButton wideButton" type="button" onClick={startAssessment}>
                 Begin assessment
@@ -308,21 +380,24 @@ export function DeskAdvisorSite() {
                 ) : null}
 
                 {step.kind === "multi" ? (
-                  <div className="pillChoiceRow">
-                    {step.options?.map((option) => {
-                      const selected = (assessment[step.id] as string[]).includes(option);
-                      return (
-                        <button
-                          className={selected ? "pillChoice selected" : "pillChoice"}
-                          key={option}
-                          type="button"
-                          onClick={() => toggleMultiValue(step.id as "currentFeel" | "problems", option as CurrentFeel | Problem)}
-                        >
-                          {option}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <>
+                    <div className="pillChoiceRow">
+                      {step.options?.map((option) => {
+                        const selected = assessment[step.id].includes(option);
+                        return (
+                          <button
+                            className={selected ? "pillChoice selected" : "pillChoice"}
+                            key={option}
+                            type="button"
+                            onClick={() => toggleMultiValue("frictionSignals", option as FrictionSignal, step.maxSelections ?? 2)}
+                          >
+                            {option}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {step.maxSelections ? <span className="questionHint">Choose up to {step.maxSelections}.</span> : null}
+                  </>
                 ) : null}
               </div>
 
@@ -342,7 +417,7 @@ export function DeskAdvisorSite() {
               <div className="thinkingOrb" />
               <span className="sectionLabel">DeskLab is thinking</span>
               <h2>{loadingMessages[loadingIndex]}</h2>
-              <p>Translating your answers into a sharper diagnosis and a cleaner improvement plan.</p>
+              <p>Turning your answers into a clearer read of what is helping, what is getting in the way, and what to fix first.</p>
             </div>
           ) : null}
 
@@ -358,20 +433,27 @@ export function DeskAdvisorSite() {
                   <p>{result.mainIssues[0]?.impact ?? result.summary}</p>
                   <div className="constraintMeta">
                     <strong>Main issue</strong>
-                    <span>{result.mainIssues[0]?.label ?? result.primaryConstraint}</span>
-                    {result.mainIssues[1] ? (
-                      <>
-                        <strong>Next issue</strong>
-                        <span>{result.mainIssues[1].label}</span>
-                      </>
-                    ) : null}
+                    <span>{result.primaryConstraint}</span>
+                    <strong>Next issue</strong>
+                    <span>{result.secondaryConstraint}</span>
                   </div>
                 </div>
 
                 <div className="resultOverview">
-                  <span className="sectionLabel">Summary</span>
-                  <h2>What to do next</h2>
-                  <p className="resultSummary">{result.summary}</p>
+                  <div className="overviewTop">
+                    <div>
+                      <span className="sectionLabel">Summary</span>
+                      <h2>What to do next</h2>
+                    </div>
+                    <div className={`confidencePill confidence${result.confidence}`}>
+                      {result.confidenceLabel}
+                    </div>
+                  </div>
+                  <p className="resultSummary typingSummary" aria-live="polite">
+                    {typedSummary}
+                    <span className={isSummaryTyping ? "typingCaret" : "typingCaret hidden"} />
+                  </p>
+                  <p className="confidenceNote">{getConfidenceSupport(result)}</p>
                   <div className="signalRow">
                     {resultSignals.map((signal) => (
                       <span className="signalChip" key={signal}>
@@ -379,108 +461,152 @@ export function DeskAdvisorSite() {
                       </span>
                     ))}
                   </div>
-                  <div className="subScoreGrid">
-                    {result.subScores.map((subScore) => (
-                      <div className="subScoreCard" key={subScore.key}>
-                        <div className="subScoreTop">
-                          <strong>{subScore.label}</strong>
-                          <span>{subScore.score}/100</span>
-                        </div>
-                        <div className="miniTrack">
-                          <div className="miniFill" style={{ width: `${subScore.score}%` }} />
-                        </div>
-                        <p>{subScore.summary}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
 
-              <div className="productsSection">
-                <div className="sectionIntro compactIntro">
-                  <span className="sectionLabel">What’s holding you back</span>
-                  <h2>The key issues are clear.</h2>
-                  <p>These are the problems doing the most damage right now.</p>
-                </div>
-                <div className="insightStrip">
-                  {result.mainIssues.slice(0, 3).map((issue) => (
-                    <div className="insightCard" key={issue.id}>
-                      <strong>{issue.label}</strong>
-                      <span>{issue.summary}</span>
+                  {revealStage >= 1 ? (
+                    <div className="subScoreGrid revealBlock isVisible">
+                      {result.subScores.map((subScore) => (
+                        <div className="subScoreCard" key={subScore.key}>
+                          <div className="subScoreTop">
+                            <strong>{subScore.label}</strong>
+                            <span>{subScore.score}/100</span>
+                          </div>
+                          <div className="miniTrack">
+                            <div className="miniFill" style={{ width: `${subScore.score}%` }} />
+                          </div>
+                          <p>{subScore.summary}</p>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  ) : null}
                 </div>
               </div>
 
-              <div className="resultGrid">
-                <div className="resultBlock">
-                  <span className="blockLabel">Why this matters</span>
-                  <ul className="cleanList">
-                    {whyThisMatters.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
+              {revealStage >= 2 ? (
+                <>
+                  <div className="productsSection revealBlock isVisible">
+                    <div className="sectionIntro compactIntro">
+                      <span className="sectionLabel">What’s holding you back</span>
+                      <h2>The key issues are clear.</h2>
+                      <p>These are the constraints doing the most damage right now.</p>
+                    </div>
+                    <div className="insightStrip">
+                      {result.mainIssues.slice(0, 4).map((issue) => (
+                        <div className="insightCard" key={issue.id}>
+                          <strong>{issue.label}</strong>
+                          <span>{issue.summary}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
 
-                <div className="resultBlock">
-                  <span className="blockLabel">Fix this first</span>
-                  <ul className="cleanList">
-                    {result.freeFixes.items.slice(0, 4).map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
+                  <div className="resultGrid revealBlock isVisible">
+                    <div className="resultBlock">
+                      <span className="blockLabel">Why this matters</span>
+                      <ul className="cleanList">
+                        {whyThisMatters.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
 
-              {scoreImprovements.length > 0 ? (
-                <div className="rationalePanel">
-                  <span className="sectionLabel">How to improve your score</span>
-                  <ul className="cleanList">
-                    {scoreImprovements.map((item) => (
-                      <li key={`${item.action}-${item.scoreLabel}`}>
-                        {item.action} -&gt; {item.effect} -&gt; improves {item.scoreLabel} score
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                    <div className="resultBlock">
+                      <span className="blockLabel">How this was assessed</span>
+                      <ul className="cleanList">
+                        {result.reasoning.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </>
               ) : null}
 
-              {result.paidUpgrades.items.length > 0 ? (
-                <div className="rationalePanel">
-                  <span className="sectionLabel">Upgrades</span>
-                  <ul className="cleanList">
-                    {result.paidUpgrades.items.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
+              {revealStage >= 3 ? (
+                <>
+                  <div className="resultGrid revealBlock isVisible">
+                    <div className="resultBlock">
+                      <span className="blockLabel">Fix this first</span>
+                      <ul className="cleanList">
+                        {result.freeFixes.items.slice(0, 4).map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {scoreImprovements.length > 0 ? (
+                      <div className="resultBlock">
+                        <span className="blockLabel">How to improve your score</span>
+                        <ul className="cleanList">
+                          {scoreImprovements.map((item) => (
+                            <li key={`${item.action}-${item.scoreLabel}`}>
+                              {item.action} -&gt; {item.effect} -&gt; improves {item.scoreLabel} score
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : (
+                      <div className="resultBlock">
+                        <span className="blockLabel">How to improve your score</span>
+                        <ul className="cleanList">
+                          <li>Keep the current priorities in place, then add more setup detail to sharpen the next step.</li>
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+
+                  {result.nextQuestions.length > 0 ? (
+                    <div className="rationalePanel revealBlock isVisible">
+                      <span className="sectionLabel">To sharpen this further</span>
+                      <ul className="cleanList">
+                        {result.nextQuestions.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                </>
               ) : null}
 
-              <div className="productsSection">
-                <div className="sectionIntro compactIntro">
-                  <span className="sectionLabel">Products worth considering</span>
-                  <h2>Only the options that solve a real problem.</h2>
-                  <p>Each one connects back to a constraint in this setup.</p>
-                </div>
+              {revealStage >= 4 ? (
+                <>
+                  {result.paidUpgrades.items.length > 0 ? (
+                    <div className="rationalePanel revealBlock isVisible">
+                      <span className="sectionLabel">Upgrades</span>
+                      <ul className="cleanList">
+                        {result.paidUpgrades.items.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
 
-                <div className="productGrid">
-                  {matchedProducts.map((product) => {
-                    const metadata = productReasonMap.get(product.name);
-                    return (
-                      <article className="productCard" key={product.name}>
-                        <div className="productTop">
-                          <strong>{product.name}</strong>
-                        </div>
-                        <p>{product.reasons[0] ?? metadata?.benefits[0] ?? "Included because it solves a real problem in this setup."}</p>
-                        <div className="productMeta">
-                          {product.reasons[1] ? <span>{product.reasons[1]}</span> : null}
-                          {metadata ? <span>{metadata.category}</span> : null}
-                        </div>
-                      </article>
-                    );
-                  })}
-                </div>
-              </div>
+                  <div className="productsSection revealBlock isVisible">
+                    <div className="sectionIntro compactIntro">
+                      <span className="sectionLabel">Products worth considering</span>
+                      <h2>Only the options that solve a real problem.</h2>
+                      <p>Each one connects back to a clear constraint in this setup.</p>
+                    </div>
+
+                    <div className="productGrid">
+                      {matchedProducts.map((product) => {
+                        const metadata = productReasonMap.get(product.name);
+                        return (
+                          <article className="productCard" key={product.name}>
+                            <div className="productTop">
+                              <strong>{product.name}</strong>
+                            </div>
+                            <p>{product.reasons[0] ?? metadata?.benefits[0] ?? "Included because it solves a real problem in this setup."}</p>
+                            <div className="productMeta">
+                              {product.reasons[1] ? <span>{product.reasons[1]}</span> : null}
+                              {metadata ? <span>{formatProductCategory(metadata.category)}</span> : null}
+                            </div>
+                          </article>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </>
+              ) : null}
             </div>
           ) : null}
         </div>
