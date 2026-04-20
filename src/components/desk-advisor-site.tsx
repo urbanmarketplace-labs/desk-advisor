@@ -42,40 +42,8 @@ function getScoreAccent(score: number): string {
   return "scoreStrong";
 }
 
-function buildHeadline(result: DiagnosisResult, input: AssessmentInput): string {
-  const topIssue = result.primaryConstraint.toLowerCase();
-
-  if (input.priority === "Better comfort") {
-    return `Comfort is mainly being limited by ${topIssue}.`;
-  }
-
-  if (input.priority === "Cleaner setup") {
-    return "This desk needs stronger structure before any finishing touches.";
-  }
-
-  if (input.priority === "Better focus") {
-    return "Too much friction is still sitting in the way of focused work.";
-  }
-
-  return `The main pressure point right now is ${topIssue}.`;
-}
-
-function buildSignals(result: DiagnosisResult, input: AssessmentInput): string[] {
-  const signals = [...result.diagnosisTags];
-
-  if (input.workStyle) {
-    signals.push(input.workStyle);
-  }
-
-  if (input.deskSize === "Very small" || input.deskSize === "Small") {
-    signals.push("Space constrained");
-  }
-
-  if (input.upgradeIntent === "Free improvements first") {
-    signals.push("Free fixes first");
-  }
-
-  return [...new Set(signals)].slice(0, 4);
+function buildSignals(result: DiagnosisResult): string[] {
+  return result.diagnosisTags.slice(0, 4);
 }
 
 export function DeskAdvisorSite() {
@@ -190,8 +158,9 @@ export function DeskAdvisorSite() {
   }
 
   const matchedProducts = result?.matchedProducts ?? [];
-  const resultHeadline = result ? buildHeadline(result, assessment) : "";
-  const resultSignals = result ? buildSignals(result, assessment) : [];
+  const resultSignals = result ? buildSignals(result) : [];
+  const whyThisMatters = result?.whyThisMatters ?? [];
+  const scoreImprovements = result?.scoreImprovements ?? [];
 
   return (
     <main className="page">
@@ -386,22 +355,22 @@ export function DeskAdvisorSite() {
                     {result.score}
                     <span className="scoreSuffix">/100</span>
                   </div>
-                  <p>{resultHeadline}</p>
+                  <p>{result.mainIssues[0]?.impact ?? result.summary}</p>
                   <div className="constraintMeta">
-                    <strong>Primary constraint</strong>
-                    <span>{result.primaryConstraint}</span>
-                    {result.secondaryConstraint ? (
+                    <strong>Main issue</strong>
+                    <span>{result.mainIssues[0]?.label ?? result.primaryConstraint}</span>
+                    {result.mainIssues[1] ? (
                       <>
-                        <strong>Secondary constraint</strong>
-                        <span>{result.secondaryConstraint}</span>
+                        <strong>Next issue</strong>
+                        <span>{result.mainIssues[1].label}</span>
                       </>
                     ) : null}
                   </div>
                 </div>
 
                 <div className="resultOverview">
-                  <span className="sectionLabel">Diagnosis</span>
-                  <h2>Your workspace diagnosis</h2>
+                  <span className="sectionLabel">Summary</span>
+                  <h2>What to do next</h2>
                   <p className="resultSummary">{result.summary}</p>
                   <div className="signalRow">
                     {resultSignals.map((signal) => (
@@ -427,51 +396,71 @@ export function DeskAdvisorSite() {
                 </div>
               </div>
 
+              <div className="productsSection">
+                <div className="sectionIntro compactIntro">
+                  <span className="sectionLabel">What’s holding you back</span>
+                  <h2>The key issues are clear.</h2>
+                  <p>These are the problems doing the most damage right now.</p>
+                </div>
+                <div className="insightStrip">
+                  {result.mainIssues.slice(0, 3).map((issue) => (
+                    <div className="insightCard" key={issue.id}>
+                      <strong>{issue.label}</strong>
+                      <span>{issue.summary}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div className="resultGrid">
                 <div className="resultBlock">
-                  <span className="blockLabel">Fix first</span>
+                  <span className="blockLabel">Why this matters</span>
                   <ul className="cleanList">
-                    {result.freeFixes.items.slice(0, 3).map((item) => (
+                    {whyThisMatters.map((item) => (
                       <li key={item}>{item}</li>
                     ))}
                   </ul>
                 </div>
 
                 <div className="resultBlock">
-                  <span className="blockLabel">Best upgrades</span>
+                  <span className="blockLabel">Fix this first</span>
                   <ul className="cleanList">
-                    {result.paidUpgrades.items.slice(0, 3).map((item) => (
+                    {result.freeFixes.items.slice(0, 4).map((item) => (
                       <li key={item}>{item}</li>
                     ))}
                   </ul>
                 </div>
               </div>
 
-              {result.whyTheseRecommendations.length > 0 ? (
+              {scoreImprovements.length > 0 ? (
                 <div className="rationalePanel">
-                  <span className="sectionLabel">Why this direction</span>
+                  <span className="sectionLabel">How to improve your score</span>
                   <ul className="cleanList">
-                    {result.whyTheseRecommendations.map((item) => (
+                    {scoreImprovements.map((item) => (
+                      <li key={`${item.action}-${item.scoreLabel}`}>
+                        {item.action} -&gt; {item.effect} -&gt; improves {item.scoreLabel} score
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              {result.paidUpgrades.items.length > 0 ? (
+                <div className="rationalePanel">
+                  <span className="sectionLabel">Upgrades</span>
+                  <ul className="cleanList">
+                    {result.paidUpgrades.items.map((item) => (
                       <li key={item}>{item}</li>
                     ))}
                   </ul>
                 </div>
               ) : null}
 
-              <div className="insightStrip">
-                {result.mainIssues.slice(0, 3).map((issue) => (
-                  <div className="insightCard" key={issue.id}>
-                    <strong>{issue.label}</strong>
-                    <span>{issue.causes[0]}</span>
-                  </div>
-                ))}
-              </div>
-
               <div className="productsSection">
                 <div className="sectionIntro compactIntro">
-                  <span className="sectionLabel">Recommended for this setup</span>
-                  <h2>Relevant products for this desk.</h2>
-                  <p>These are the most relevant directions for the issues showing up in this setup.</p>
+                  <span className="sectionLabel">Products worth considering</span>
+                  <h2>Only the options that solve a real problem.</h2>
+                  <p>Each one connects back to a constraint in this setup.</p>
                 </div>
 
                 <div className="productGrid">
@@ -481,9 +470,8 @@ export function DeskAdvisorSite() {
                       <article className="productCard" key={product.name}>
                         <div className="productTop">
                           <strong>{product.name}</strong>
-                          <span className="fitPill">{product.fitScore}% fit</span>
                         </div>
-                        <p>{product.reasons[0] ?? metadata?.benefits[0] ?? "Selected because it suits the current diagnosis."}</p>
+                        <p>{product.reasons[0] ?? metadata?.benefits[0] ?? "Included because it solves a real problem in this setup."}</p>
                         <div className="productMeta">
                           {product.reasons[1] ? <span>{product.reasons[1]}</span> : null}
                           {metadata ? <span>{metadata.category}</span> : null}
