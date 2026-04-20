@@ -1,4 +1,5 @@
 import type {
+  AssessmentInput,
   DeskDensity,
   DeskSize,
   FrictionSignal,
@@ -131,7 +132,7 @@ export const assessmentSteps: QuestionStep[] = [
   }
 ];
 
-export const emptyAssessment = {
+export const emptyAssessment: AssessmentInput = {
   setupType: "",
   timeExposure: "",
   frictionSignals: [],
@@ -142,4 +143,4 @@ export const emptyAssessment = {
   deskSize: "",
   upgradeIntent: "",
   extraDetail: ""
-} as const;
+};
