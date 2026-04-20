@@ -64,7 +64,8 @@ button {
 .signalRow,
 .productMeta,
 .subScoreTop,
-.overviewTop {
+.overviewTop,
+.assessmentIntroRow {
   display: flex;
   align-items: center;
 }
@@ -106,7 +107,8 @@ button {
 
 .ghostButton,
 .secondaryButton,
-.primaryButton {
+.primaryButton,
+.textButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -124,10 +126,19 @@ button {
 }
 
 .ghostButton,
-.secondaryButton {
+.secondaryButton,
+.textButton {
   color: var(--brand-dark);
   cursor: pointer;
   box-shadow: 0 10px 24px rgba(10, 17, 48, 0.08);
+}
+
+.textButton {
+  min-height: 42px;
+  padding: 10px 14px;
+  border: 1px solid rgba(17, 25, 47, 0.08);
+  background: #fff;
+  box-shadow: none;
 }
 
 .primaryButton {
@@ -146,7 +157,8 @@ button {
 .ghostButton:hover,
 .secondaryButton:hover,
 .optionButton:hover,
-.pillChoice:hover {
+.pillChoice:hover,
+.textButton:hover {
   transform: translateY(-1px);
 }
 
@@ -254,7 +266,9 @@ button {
 .heroPanelText,
 .heroFoot p,
 .resultSummary,
-.confidenceNote {
+.confidenceNote,
+.inputQualityCard span,
+.inputQualityCard p {
   font-size: 1rem;
   line-height: 1.66;
 }
@@ -379,6 +393,7 @@ button {
 .assessmentFrame {
   padding: 30px;
   border-radius: 32px;
+  outline: none;
 }
 
 .assessmentIntro,
@@ -391,8 +406,16 @@ button {
 .productsSection,
 .productGrid,
 .insightStrip,
-.subScoreGrid {
+.subScoreGrid,
+.pillStack,
+.inputQualityCard {
   display: grid;
+}
+
+.assessmentIntroRow {
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
 }
 
 .assessmentIntro {
@@ -412,7 +435,9 @@ button {
 .loadingState p,
 .productCard p,
 .resultSummary,
-.confidenceNote {
+.confidenceNote,
+.inputQualityCard span,
+.inputQualityCard p {
   margin: 0;
   color: var(--muted);
 }
@@ -449,13 +474,15 @@ button {
 .questionShell {
   gap: 24px;
   margin-top: 30px;
+  outline: none;
 }
 
 .progressMeta,
 .navRow,
 .productTop,
 .subScoreTop,
-.overviewTop {
+.overviewTop,
+.assessmentIntroRow {
   justify-content: space-between;
   gap: 12px;
 }
@@ -492,6 +519,7 @@ button {
   font-size: clamp(1.8rem, 3vw, 2.45rem);
   line-height: 1.05;
   color: var(--brand-dark);
+  outline: none;
 }
 
 .optionGrid {
@@ -538,6 +566,8 @@ button {
 
 .textareaWrap {
   max-width: 780px;
+  display: grid;
+  gap: 10px;
 }
 
 .textarea {
@@ -561,6 +591,7 @@ button {
   place-items: center;
   align-content: center;
   text-align: center;
+  outline: none;
 }
 
 .thinkingOrb {
@@ -588,6 +619,7 @@ button {
 .resultShell {
   gap: 18px;
   margin-top: 30px;
+  outline: none;
 }
 
 .resultHero {
@@ -682,10 +714,19 @@ button {
   gap: 10px;
 }
 
+.pillStack {
+  gap: 8px;
+  justify-items: end;
+}
+
 .confidencePill {
   border: 1px solid rgba(44, 62, 148, 0.12);
   background: #eef3ff;
   color: var(--brand-dark);
+}
+
+.qualityPill {
+  background: #f4f7ff;
 }
 
 .confidencelow {
@@ -701,6 +742,19 @@ button {
 .confidencehigh {
   background: #e8f2ff;
   color: #173b79;
+}
+
+.inputQualityCard {
+  gap: 4px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: #f7f9ff;
+  border: 1px solid rgba(44, 62, 148, 0.08);
+}
+
+.inputQualityCard strong {
+  color: var(--brand-dark);
+  font-size: 0.92rem;
 }
 
 .typingSummary {
@@ -899,7 +953,8 @@ button {
   .progressMeta,
   .productTop,
   .subScoreTop,
-  .overviewTop {
+  .overviewTop,
+  .assessmentIntroRow {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -949,9 +1004,14 @@ button {
     min-height: 6.4rem;
   }
 
+  .pillStack {
+    justify-items: start;
+  }
+
   .ghostButton,
   .secondaryButton,
-  .primaryButton {
+  .primaryButton,
+  .textButton {
     width: 100%;
   }
 }
