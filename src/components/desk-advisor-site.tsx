@@ -383,7 +383,7 @@ export function DeskAdvisorSite() {
                   <>
                     <div className="pillChoiceRow">
                       {step.options?.map((option) => {
-                        const selected = assessment[step.id].includes(option);
+                        const selected = (assessment[step.id] as string[]).includes(option);
                         return (
                           <button
                             className={selected ? "pillChoice selected" : "pillChoice"}
