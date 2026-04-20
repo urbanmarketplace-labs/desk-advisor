@@ -63,7 +63,8 @@ button {
 .productTop,
 .signalRow,
 .productMeta,
-.subScoreTop {
+.subScoreTop,
+.overviewTop {
   display: flex;
   align-items: center;
 }
@@ -194,7 +195,8 @@ button {
 .fitPill,
 .signalChip,
 .introPoints span,
-.productMeta span {
+.productMeta span,
+.confidencePill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -251,7 +253,8 @@ button {
 .productCard p,
 .heroPanelText,
 .heroFoot p,
-.resultSummary {
+.resultSummary,
+.confidenceNote {
   font-size: 1rem;
   line-height: 1.66;
 }
@@ -408,7 +411,8 @@ button {
 .questionArea p,
 .loadingState p,
 .productCard p,
-.resultSummary {
+.resultSummary,
+.confidenceNote {
   margin: 0;
   color: var(--muted);
 }
@@ -450,7 +454,8 @@ button {
 .progressMeta,
 .navRow,
 .productTop,
-.subScoreTop {
+.subScoreTop,
+.overviewTop {
   justify-content: space-between;
   gap: 12px;
 }
@@ -524,6 +529,11 @@ button {
 
 .pillChoice {
   border-radius: 999px;
+}
+
+.questionHint {
+  color: var(--muted);
+  font-size: 0.84rem;
 }
 
 .textareaWrap {
@@ -602,7 +612,8 @@ button {
 }
 
 .scoreTag,
-.fitPill {
+.fitPill,
+.confidencePill {
   padding: 8px 12px;
   font-size: 0.74rem;
   font-weight: 700;
@@ -661,10 +672,89 @@ button {
   border-radius: var(--radius-lg);
 }
 
+.overviewTop {
+  align-items: flex-start;
+}
+
 .signalRow,
 .productMeta {
   flex-wrap: wrap;
   gap: 10px;
+}
+
+.confidencePill {
+  border: 1px solid rgba(44, 62, 148, 0.12);
+  background: #eef3ff;
+  color: var(--brand-dark);
+}
+
+.confidencelow {
+  background: #f5f7ff;
+  color: #4f5e86;
+}
+
+.confidencemoderate {
+  background: #edf1ff;
+  color: var(--brand);
+}
+
+.confidencehigh {
+  background: #e8f2ff;
+  color: #173b79;
+}
+
+.typingSummary {
+  min-height: 4.8rem;
+}
+
+.typingCaret {
+  display: inline-block;
+  width: 0.1em;
+  height: 1.05em;
+  margin-left: 2px;
+  vertical-align: -0.12em;
+  background: var(--brand);
+  animation: blink 0.9s steps(1, end) infinite;
+}
+
+.typingCaret.hidden {
+  opacity: 0;
+  animation: none;
+}
+
+@keyframes blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+
+  50.01%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.revealBlock {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.revealBlock.isVisible {
+  opacity: 1;
+  transform: translateY(0);
+  animation: revealUp 0.45s ease forwards;
+}
+
+@keyframes revealUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .subScoreGrid {
@@ -808,7 +898,8 @@ button {
   .navRow,
   .progressMeta,
   .productTop,
-  .subScoreTop {
+  .subScoreTop,
+  .overviewTop {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -852,6 +943,10 @@ button {
   .brandImage {
     height: 96px;
     width: auto;
+  }
+
+  .typingSummary {
+    min-height: 6.4rem;
   }
 
   .ghostButton,
