@@ -1,133 +1,111 @@
 import type {
-  BudgetBand,
-  CurrentFeel,
+  DeskDensity,
   DeskSize,
-  DeviceType,
-  Problem,
-  Priority,
+  FrictionSignal,
+  LightingQuality,
   QuestionStep,
-  UpgradeIntent,
-  WorkStyle
+  SetupType,
+  TimeExposure,
+  UpgradeIntent
 } from "@/types/assessment";
 
 export const assessmentSteps: QuestionStep[] = [
   {
-    id: "deviceType",
+    id: "timeExposure",
     kind: "single",
-    title: "What are you working from?",
-    description: "Your screen setup changes what is realistic straight away.",
+    title: "How long do you spend at your desk daily?",
+    description: "The longer you are there, the more comfort and lighting matter.",
+    options: ["<2h", "2-4h", "4-8h", "8h+"] satisfies readonly TimeExposure[],
+    required: true
+  },
+  {
+    id: "setupType",
+    kind: "single",
+    title: "What kind of setup are you working from?",
+    description: "Screen position changes the quality of the whole setup.",
     options: [
       "Laptop only",
-      "Laptop and monitor",
-      "Single external monitor",
-      "Dual monitors"
-    ] satisfies readonly DeviceType[],
+      "Laptop raised",
+      "External monitor",
+      "Multi-monitor"
+    ] satisfies readonly SetupType[],
     required: true
   },
   {
-    id: "currentFeel",
+    id: "frictionSignals",
     kind: "multi",
-    title: "How does the desk feel right now?",
-    description: "Choose the signals that genuinely match your setup.",
+    title: "What feels most off about your setup?",
+    description: "Choose up to two. Pick the strongest signals, not everything that sounds familiar.",
     options: [
-      "Cluttered",
-      "Uncomfortable",
-      "Too dark",
-      "Too cramped",
-      "Looks flat",
-      "Hard to focus"
-    ] satisfies readonly CurrentFeel[],
-    required: true
-  },
-  {
-    id: "problems",
-    kind: "multi",
-    title: "What is actively getting in the way?",
-    description: "This helps separate surface symptoms from the real constraints.",
-    options: [
-      "Neck or back discomfort",
-      "Poor lighting",
-      "Not enough space",
-      "Cable clutter",
+      "Space feels limited",
+      "Looks cluttered",
+      "Physical discomfort",
+      "Lighting is not good",
       "Hard to focus",
-      "Does not feel premium"
-    ] satisfies readonly Problem[],
+      "Nothing obvious"
+    ] satisfies readonly FrictionSignal[],
+    required: true,
+    maxSelections: 2
+  },
+  {
+    id: "deskDensity",
+    kind: "single",
+    title: "How full does your desk feel?",
+    description: "Density changes both focus and usable space.",
+    options: ["Minimal", "Moderate", "Busy", "Overloaded"] satisfies readonly DeskDensity[],
     required: true
   },
   {
-    id: "priority",
+    id: "lightingQuality",
     kind: "single",
-    title: "What do you want to improve first?",
-    description: "DeskLab will weight the recommendation around this priority.",
+    title: "How would you describe your lighting?",
+    description: "A setup can look fine and still be tiring to work from.",
     options: [
-      "Better comfort",
-      "Cleaner setup",
-      "Better focus",
-      "More premium look"
-    ] satisfies readonly Priority[],
-    required: true
-  },
-  {
-    id: "upgradeIntent",
-    kind: "single",
-    title: "How open are you to buying anything?",
-    description: "The advice should match your appetite to spend.",
-    options: [
-      "Free improvements first",
-      "A few practical upgrades",
-      "A cleaner premium setup",
-      "Not sure yet"
-    ] satisfies readonly UpgradeIntent[],
+      "Even and bright",
+      "Usable but inconsistent",
+      "Dim / shadowy",
+      "Changes throughout the day"
+    ] satisfies readonly LightingQuality[],
     required: true
   },
   {
     id: "deskSize",
     kind: "single",
     title: "How much desk space are you working with?",
-    description: "Surface area changes what is genuinely worth recommending.",
+    description: "Space changes what is realistic and what will just add pressure.",
     options: ["Very small", "Small", "Medium", "Large"] satisfies readonly DeskSize[],
     required: true
   },
   {
-    id: "workStyle",
+    id: "upgradeIntent",
     kind: "single",
-    title: "What type of work happens here most often?",
-    description: "The right desk for deep work is different from the right desk for admin or creative work.",
+    title: "How open are you to changing or buying anything?",
+    description: "DeskLab should match your appetite for change.",
     options: [
-      "Deep focus work",
-      "Meetings and admin",
-      "Creative work",
-      "Mixed use"
-    ] satisfies readonly WorkStyle[],
-    required: true
-  },
-  {
-    id: "budgetBand",
-    kind: "single",
-    title: "What budget feels sensible?",
-    description: "This keeps the recommendation practical.",
-    options: ["Under 50", "50-150", "150-300", "300+"] satisfies readonly BudgetBand[],
+      "Free improvements first",
+      "A few practical upgrades",
+      "Open to bigger changes"
+    ] satisfies readonly UpgradeIntent[],
     required: true
   },
   {
     id: "extraDetail",
     kind: "text",
-    title: "Anything else worth knowing?",
-    description: "A short note helps DeskLab pick up layout, lighting, storage, and strain signals.",
+    title: "Anything specific about your setup or work we should consider?",
+    description: "Optional, but a useful note helps DeskLab be more certain and more specific.",
     placeholder:
-      "Example: Small desk, weak evening light, visible cables, limited storage, slight neck strain, and I want it to feel cleaner and calmer.",
+      "Example: I work long hours from a small desk, my light changes in the afternoon, and I get neck tension by the end of the day.",
     required: false
   }
 ];
 
 export const emptyAssessment = {
-  deviceType: "",
-  currentFeel: [],
-  problems: [],
-  priority: "",
-  upgradeIntent: "",
+  timeExposure: "",
+  setupType: "",
+  frictionSignals: [],
+  deskDensity: "",
+  lightingQuality: "",
   deskSize: "",
-  workStyle: "",
-  budgetBand: "",
+  upgradeIntent: "",
   extraDetail: ""
 } as const;
