@@ -90,7 +90,8 @@ export interface DiagnosisIssue {
   label: string;
   severity: number;
   confidence: number;
-  causes: string[];
+  summary: string;
+  impact: string;
 }
 
 export interface DiagnosisSubScore {
@@ -103,6 +104,12 @@ export interface DiagnosisSubScore {
 export interface RecommendationBucket {
   title: string;
   items: string[];
+}
+
+export interface ScoreImprovement {
+  action: string;
+  effect: string;
+  scoreLabel: string;
 }
 
 export interface MatchedProduct {
@@ -121,9 +128,10 @@ export interface DiagnosisResult {
   secondaryConstraint: string | null;
   subScores: DiagnosisSubScore[];
   mainIssues: DiagnosisIssue[];
+  whyThisMatters: string[];
   freeFixes: RecommendationBucket;
   paidUpgrades: RecommendationBucket;
-  whyTheseRecommendations: string[];
+  scoreImprovements: ScoreImprovement[];
   matchedProducts: MatchedProduct[];
   nextQuestions: string[];
 }
