@@ -39,12 +39,12 @@ function getScoreAccent(score: number): string {
 }
 
 function getConfidenceSupport(result: DiagnosisResult): string {
-  if (result.confidence === "low") {
-    return "A little more context would make this read more specific.";
+  if (result.inputQuality === "light") {
+    return "This stays careful because it is working from the core answers only.";
   }
 
-  if (result.confidence === "moderate") {
-    return "The main constraints are clear, but a little more detail would sharpen the priorities.";
+  if (result.inputQuality === "moderate") {
+    return "The main pattern is clear, but a little more detail would still sharpen the read.";
   }
 
   return "There is enough signal here to be specific about what matters most.";
@@ -73,6 +73,10 @@ export function DeskAdvisorSite() {
   const loadingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const typingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const revealTimeoutsRef = useRef<Array<ReturnType<typeof setTimeout>>>([]);
+  const guideToAssessmentRef = useRef(false);
+  const assessmentFrameRef = useRef<HTMLDivElement | null>(null);
+  const questionHeadingRef = useRef<HTMLHeadingElement | null>(null);
+  const livePanelRef = useRef<HTMLDivElement | null>(null);
 
   const step = assessmentSteps[stepIndex];
   const totalSteps = assessmentSteps.length;
@@ -122,6 +126,37 @@ export function DeskAdvisorSite() {
     };
   }, [phase, result]);
 
+  useEffect(() => {
+    if (!guideToAssessmentRef.current) {
+      return;
+    }
+
+    if (phase === "questions") {
+      const target = questionHeadingRef.current ?? assessmentFrameRef.current;
+      requestAnimationFrame(() => {
+        target?.scrollIntoView({ behavior: "smooth", block: "start" });
+        target?.focus({ preventScroll: true });
+        guideToAssessmentRef.current = false;
+      });
+      return;
+    }
+
+    if (phase === "loading" || phase === "result") {
+      const target = livePanelRef.current ?? assessmentFrameRef.current;
+      requestAnimationFrame(() => {
+        target?.scrollIntoView({ behavior: "smooth", block: "start" });
+        target?.focus({ preventScroll: true });
+        guideToAssessmentRef.current = false;
+      });
+    }
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase === "questions") {
+      questionHeadingRef.current?.focus({ preventScroll: true });
+    }
+  }, [phase, stepIndex]);
+
   function clearLoadingTimers() {
     if (loadingTimeoutRef.current) {
       clearTimeout(loadingTimeoutRef.current);
@@ -159,14 +194,14 @@ export function DeskAdvisorSite() {
         };
       }
 
-      if (value === "Nothing obvious") {
+      if (value === "Nothing obvious, just feels off") {
         return {
           ...current,
           [key]: [value]
         };
       }
 
-      const filteredValues = currentValues.filter((item) => item !== "Nothing obvious");
+      const filteredValues = currentValues.filter((item) => item !== "Nothing obvious, just feels off");
       const nextValues = [...filteredValues, value].slice(-maxSelections);
 
       return {
@@ -179,12 +214,27 @@ export function DeskAdvisorSite() {
   function startAssessment() {
     clearLoadingTimers();
     clearRevealTimers();
+    guideToAssessmentRef.current = true;
     setResult(null);
     setTypedSummary("");
     setRevealStage(0);
     setStepIndex(0);
     setLoadingIndex(0);
     setPhase("questions");
+  }
+
+  function goToAssessment() {
+    guideToAssessmentRef.current = true;
+
+    if (phase === "idle") {
+      startAssessment();
+      return;
+    }
+
+    const target = phase === "questions" ? questionHeadingRef.current : livePanelRef.current ?? assessmentFrameRef.current;
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
+    target?.focus({ preventScroll: true });
+    guideToAssessmentRef.current = false;
   }
 
   function goNext() {
@@ -195,6 +245,7 @@ export function DeskAdvisorSite() {
     if (stepIndex === totalSteps - 1) {
       setPhase("loading");
       setLoadingIndex(0);
+      guideToAssessmentRef.current = true;
 
       loadingIntervalRef.current = setInterval(() => {
         setLoadingIndex((current) => (current + 1) % loadingMessages.length);
@@ -233,6 +284,8 @@ export function DeskAdvisorSite() {
   const whyThisMatters = result?.whyThisMatters ?? [];
   const scoreImprovements = result?.scoreImprovements ?? [];
   const isSummaryTyping = result ? typedSummary.length < result.summary.length : false;
+  const primaryCtaLabel = phase === "idle" ? "Start assessment" : "Go to assessment";
+  const heroCtaLabel = phase === "idle" ? "Begin assessment" : phase === "result" ? "View diagnosis" : "Continue assessment";
 
   return (
     <main className="page">
@@ -244,8 +297,8 @@ export function DeskAdvisorSite() {
             src="/desklab-logo-transparent.png"
           />
         </a>
-        <button className="ghostButton" type="button" onClick={phase === "idle" ? startAssessment : restart}>
-          {phase === "idle" ? "Start assessment" : "Reset"}
+        <button className="ghostButton" type="button" onClick={goToAssessment}>
+          {primaryCtaLabel}
         </button>
       </header>
 
@@ -259,8 +312,8 @@ export function DeskAdvisorSite() {
                 DeskLab reviews comfort, focus, lighting, and fit, then returns clear next steps and only suggests upgrades when they are justified.
               </p>
               <div className="heroActions">
-                <button className="primaryButton lightButton" type="button" onClick={startAssessment}>
-                  Diagnose my desk
+                <button className="primaryButton lightButton" type="button" onClick={goToAssessment}>
+                  {heroCtaLabel}
                 </button>
                 <span className="heroMeta">A short assessment. Clear guidance. No unnecessary upgrades.</span>
               </div>
@@ -312,12 +365,19 @@ export function DeskAdvisorSite() {
         </div>
       </section>
 
-      <section className="assessmentSection">
-        <div className="assessmentFrame">
-          <div className="assessmentIntro">
-            <span className="sectionLabel">Assessment</span>
-            <h2>Clear guidance shaped around the desk in front of you.</h2>
-            <p>A short assessment designed to return an explainable diagnosis and practical next steps.</p>
+      <section className="assessmentSection" id="assessment">
+        <div className="assessmentFrame" ref={assessmentFrameRef} tabIndex={-1}>
+          <div className="assessmentIntroRow">
+            <div className="assessmentIntro">
+              <span className="sectionLabel">Assessment</span>
+              <h2>Clear guidance shaped around the desk in front of you.</h2>
+              <p>A short assessment designed to return an explainable diagnosis and practical next steps.</p>
+            </div>
+            {phase !== "idle" ? (
+              <button className="textButton" type="button" onClick={restart}>
+                Reset assessment
+              </button>
+            ) : null}
           </div>
 
           {phase === "idle" ? (
@@ -327,14 +387,14 @@ export function DeskAdvisorSite() {
                 <span>Confidence-aware diagnosis</span>
                 <span>Reasoned recommendations</span>
               </div>
-              <button className="primaryButton wideButton" type="button" onClick={startAssessment}>
+              <button className="primaryButton wideButton" type="button" onClick={goToAssessment}>
                 Begin assessment
               </button>
             </div>
           ) : null}
 
           {phase === "questions" ? (
-            <div className="questionShell">
+            <div className="questionShell" ref={livePanelRef} tabIndex={-1}>
               <div className="progressMeta">
                 <span>
                   Step {stepIndex + 1} of {totalSteps}
@@ -346,8 +406,8 @@ export function DeskAdvisorSite() {
               </div>
 
               <div className="questionArea">
-                <span className="sectionLabel">Assessment</span>
-                <h2>{step.title}</h2>
+                <span className="sectionLabel">Live assessment</span>
+                <h2 ref={questionHeadingRef} tabIndex={-1}>{step.title}</h2>
                 <p>{step.description}</p>
 
                 {step.kind === "text" ? (
@@ -358,6 +418,7 @@ export function DeskAdvisorSite() {
                       value={assessment.extraDetail}
                       onChange={(event) => updateSingle("extraDetail", event.target.value)}
                     />
+                    <span className="questionHint">Optional, but this is the part that makes the diagnosis more specific.</span>
                   </div>
                 ) : null}
 
@@ -413,7 +474,7 @@ export function DeskAdvisorSite() {
           ) : null}
 
           {phase === "loading" ? (
-            <div className="loadingState" aria-live="polite">
+            <div className="loadingState" aria-live="polite" ref={livePanelRef} tabIndex={-1}>
               <div className="thinkingOrb" />
               <span className="sectionLabel">DeskLab is thinking</span>
               <h2>{loadingMessages[loadingIndex]}</h2>
@@ -422,7 +483,7 @@ export function DeskAdvisorSite() {
           ) : null}
 
           {phase === "result" && result ? (
-            <div className="resultShell">
+            <div className="resultShell" ref={livePanelRef} tabIndex={-1}>
               <div className="resultHero">
                 <div className="scoreCard">
                   <span className={`scoreTag ${getScoreAccent(result.score)}`}>{getScoreLabel(result.score)}</span>
@@ -445,15 +506,20 @@ export function DeskAdvisorSite() {
                       <span className="sectionLabel">Summary</span>
                       <h2>What to do next</h2>
                     </div>
-                    <div className={`confidencePill confidence${result.confidence}`}>
-                      {result.confidenceLabel}
+                    <div className="pillStack">
+                      <div className="confidencePill qualityPill">{result.inputQualityLabel}</div>
+                      <div className={`confidencePill confidence${result.confidence}`}>{result.confidenceLabel}</div>
                     </div>
                   </div>
                   <p className="resultSummary typingSummary" aria-live="polite">
                     {typedSummary}
                     <span className={isSummaryTyping ? "typingCaret" : "typingCaret hidden"} />
                   </p>
-                  <p className="confidenceNote">{getConfidenceSupport(result)}</p>
+                  <div className="inputQualityCard">
+                    <strong>{getConfidenceSupport(result)}</strong>
+                    <span>{result.inputQualityNote}</span>
+                    {result.moreDetailPrompt ? <p>{result.moreDetailPrompt}</p> : null}
+                  </div>
                   <div className="signalRow">
                     {resultSignals.map((signal) => (
                       <span className="signalChip" key={signal}>
@@ -490,7 +556,7 @@ export function DeskAdvisorSite() {
                       <p>These are the constraints doing the most damage right now.</p>
                     </div>
                     <div className="insightStrip">
-                      {result.mainIssues.slice(0, 4).map((issue) => (
+                      {result.mainIssues.map((issue) => (
                         <div className="insightCard" key={issue.id}>
                           <strong>{issue.label}</strong>
                           <span>{issue.summary}</span>
@@ -527,36 +593,27 @@ export function DeskAdvisorSite() {
                     <div className="resultBlock">
                       <span className="blockLabel">Fix this first</span>
                       <ul className="cleanList">
-                        {result.freeFixes.items.slice(0, 4).map((item) => (
+                        {result.freeFixes.items.map((item) => (
                           <li key={item}>{item}</li>
                         ))}
                       </ul>
                     </div>
 
-                    {scoreImprovements.length > 0 ? (
-                      <div className="resultBlock">
-                        <span className="blockLabel">How to improve your score</span>
-                        <ul className="cleanList">
-                          {scoreImprovements.map((item) => (
-                            <li key={`${item.action}-${item.scoreLabel}`}>
-                              {item.action} -&gt; {item.effect} -&gt; improves {item.scoreLabel} score
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ) : (
-                      <div className="resultBlock">
-                        <span className="blockLabel">How to improve your score</span>
-                        <ul className="cleanList">
-                          <li>Keep the current priorities in place, then add more setup detail to sharpen the next step.</li>
-                        </ul>
-                      </div>
-                    )}
+                    <div className="resultBlock">
+                      <span className="blockLabel">How to improve your score</span>
+                      <ul className="cleanList">
+                        {scoreImprovements.map((item) => (
+                          <li key={`${item.action}-${item.scoreLabel}`}>
+                            {item.action} -&gt; {item.effect} -&gt; improves {item.scoreLabel} score
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
 
                   {result.nextQuestions.length > 0 ? (
                     <div className="rationalePanel revealBlock isVisible">
-                      <span className="sectionLabel">To sharpen this further</span>
+                      <span className="sectionLabel">More detail would help</span>
                       <ul className="cleanList">
                         {result.nextQuestions.map((item) => (
                           <li key={item}>{item}</li>
@@ -580,31 +637,33 @@ export function DeskAdvisorSite() {
                     </div>
                   ) : null}
 
-                  <div className="productsSection revealBlock isVisible">
-                    <div className="sectionIntro compactIntro">
-                      <span className="sectionLabel">Products worth considering</span>
-                      <h2>Only the options that solve a real problem.</h2>
-                      <p>Each one connects back to a clear constraint in this setup.</p>
-                    </div>
+                  {matchedProducts.length > 0 ? (
+                    <div className="productsSection revealBlock isVisible">
+                      <div className="sectionIntro compactIntro">
+                        <span className="sectionLabel">Products worth considering</span>
+                        <h2>Only the options that solve a real problem.</h2>
+                        <p>Each one connects back to a clear constraint in this setup.</p>
+                      </div>
 
-                    <div className="productGrid">
-                      {matchedProducts.map((product) => {
-                        const metadata = productReasonMap.get(product.name);
-                        return (
-                          <article className="productCard" key={product.name}>
-                            <div className="productTop">
-                              <strong>{product.name}</strong>
-                            </div>
-                            <p>{product.reasons[0] ?? metadata?.benefits[0] ?? "Included because it solves a real problem in this setup."}</p>
-                            <div className="productMeta">
-                              {product.reasons[1] ? <span>{product.reasons[1]}</span> : null}
-                              {metadata ? <span>{formatProductCategory(metadata.category)}</span> : null}
-                            </div>
-                          </article>
-                        );
-                      })}
+                      <div className="productGrid">
+                        {matchedProducts.map((product) => {
+                          const metadata = productReasonMap.get(product.name);
+                          return (
+                            <article className="productCard" key={product.name}>
+                              <div className="productTop">
+                                <strong>{product.name}</strong>
+                              </div>
+                              <p>{product.reasons[0] ?? metadata?.benefits[0] ?? "Included because it solves a real problem in this setup."}</p>
+                              <div className="productMeta">
+                                {product.reasons[1] ? <span>{product.reasons[1]}</span> : null}
+                                {metadata ? <span>{formatProductCategory(metadata.category)}</span> : null}
+                              </div>
+                            </article>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
+                  ) : null}
                 </>
               ) : null}
             </div>
