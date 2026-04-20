@@ -1,46 +1,33 @@
-export type DeviceType =
+export type TimeExposure = "<2h" | "2-4h" | "4-8h" | "8h+";
+
+export type SetupType =
   | "Laptop only"
-  | "Laptop and monitor"
-  | "Single external monitor"
-  | "Dual monitors";
+  | "Laptop raised"
+  | "External monitor"
+  | "Multi-monitor";
 
-export type CurrentFeel =
-  | "Cluttered"
-  | "Uncomfortable"
-  | "Too dark"
-  | "Too cramped"
-  | "Looks flat"
-  | "Hard to focus";
-
-export type Problem =
-  | "Neck or back discomfort"
-  | "Poor lighting"
-  | "Not enough space"
-  | "Cable clutter"
+export type FrictionSignal =
+  | "Space feels limited"
+  | "Looks cluttered"
+  | "Physical discomfort"
+  | "Lighting is not good"
   | "Hard to focus"
-  | "Does not feel premium";
+  | "Nothing obvious";
 
-export type Priority =
-  | "Better comfort"
-  | "Cleaner setup"
-  | "Better focus"
-  | "More premium look";
+export type DeskDensity = "Minimal" | "Moderate" | "Busy" | "Overloaded";
+
+export type LightingQuality =
+  | "Even and bright"
+  | "Usable but inconsistent"
+  | "Dim / shadowy"
+  | "Changes throughout the day";
 
 export type UpgradeIntent =
   | "Free improvements first"
   | "A few practical upgrades"
-  | "A cleaner premium setup"
-  | "Not sure yet";
-
-export type BudgetBand = "Under 50" | "50-150" | "150-300" | "300+";
+  | "Open to bigger changes";
 
 export type DeskSize = "Very small" | "Small" | "Medium" | "Large";
-
-export type WorkStyle =
-  | "Deep focus work"
-  | "Meetings and admin"
-  | "Creative work"
-  | "Mixed use";
 
 export type StepKind = "single" | "multi" | "text";
 export type ScoreKey = "comfort" | "focus" | "lighting" | "fit";
@@ -53,14 +40,13 @@ export type ProductCategory =
   | "wellbeing";
 
 export interface AssessmentInput {
-  deviceType: DeviceType | "";
-  currentFeel: CurrentFeel[];
-  problems: Problem[];
-  priority: Priority | "";
-  upgradeIntent: UpgradeIntent | "";
+  timeExposure: TimeExposure | "";
+  setupType: SetupType | "";
+  frictionSignals: FrictionSignal[];
+  deskDensity: DeskDensity | "";
+  lightingQuality: LightingQuality | "";
   deskSize: DeskSize | "";
-  workStyle: WorkStyle | "";
-  budgetBand: BudgetBand | "";
+  upgradeIntent: UpgradeIntent | "";
   extraDetail: string;
 }
 
@@ -72,12 +58,13 @@ export interface QuestionStep<TValue extends string = string> {
   placeholder?: string;
   options?: readonly TValue[];
   required: boolean;
+  maxSelections?: number;
 }
 
 export interface ProductCatalogItem {
   name: string;
   category: ProductCategory;
-  priceBand: BudgetBand | "Premium";
+  priceBand: "Under 50" | "50-150" | "150-300" | "300+" | "Premium";
   benefits: string[];
   bestFor: string[];
   avoidIf: string[];
@@ -120,7 +107,8 @@ export interface MatchedProduct {
 
 export interface DiagnosisResult {
   score: number;
-  confidence: "low" | "medium" | "high";
+  confidence: "low" | "moderate" | "high";
+  confidenceLabel: string;
   summary: string;
   profile: string[];
   diagnosisTags: string[];
@@ -128,6 +116,7 @@ export interface DiagnosisResult {
   secondaryConstraint: string | null;
   subScores: DiagnosisSubScore[];
   mainIssues: DiagnosisIssue[];
+  reasoning: string[];
   whyThisMatters: string[];
   freeFixes: RecommendationBucket;
   paidUpgrades: RecommendationBucket;
