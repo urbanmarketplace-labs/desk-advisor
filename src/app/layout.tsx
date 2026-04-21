@@ -4,7 +4,10 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "DeskLab",
-  description: "DeskLab by Urban Marketplace helps people diagnose workspace friction and take clearer next steps."
+  description: "DeskLab by Urban Marketplace helps people diagnose workspace friction and take clearer next steps.",
+  icons: {
+    icon: "/favicon.ico"
+  }
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
