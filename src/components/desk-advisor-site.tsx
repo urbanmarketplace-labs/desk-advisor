@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { diagnoseWorkspace } from "@/core/diagnose";
 import { productCatalog } from "@/data/product-catalog";
 import { emptyAssessment, getAdaptiveAssessmentSteps } from "@/data/questions";
+import { trackDeskLabEvent } from "@/lib/desklab-events";
 import type { AssessmentInput, DiagnosisResult, FrictionSignal } from "@/types/assessment";
 
 const productReasonMap = new Map(productCatalog.map((product) => [product.name, product]));
@@ -169,6 +170,14 @@ function getGainEstimate(result: DiagnosisResult, scoreLabel: string, index: num
   return Math.max(4, Math.min(12, Math.round((100 - subScore) * multiplier)));
 }
 
+function getCompactActionLine(item: DiagnosisResult["scoreImprovements"][number]): string {
+  const actionIcon = getCueIcon(item.action);
+  const effectIcon = getCueIcon(item.effect);
+  const scoreName = getScoreName(item.scoreLabel).toLowerCase();
+
+  return `${actionIcon} ${item.action}  •  ${effectIcon} ${item.effect}  •  ⬆️ improve ${scoreName}`;
+}
+
 function getSimpleProductReason(product: DiagnosisResult["matchedProducts"][number]): string {
   const reason = product.reasons[0] ?? "Helps improve a real issue in your setup.";
 
@@ -178,6 +187,14 @@ function getSimpleProductReason(product: DiagnosisResult["matchedProducts"][numb
   if (/visual|focus|noise|clutter/i.test(reason)) return "Helps reduce what competes for your attention.";
 
   return humanizeCopy(reason.replace(/^Recommended because /, "Helps because "));
+}
+
+function serializeAnswerValue(value: AssessmentInput[keyof AssessmentInput]): string {
+  if (Array.isArray(value)) {
+    return value.join(", ");
+  }
+
+  return value;
 }
 
 export function DeskAdvisorSite() {
@@ -341,6 +358,7 @@ export function DeskAdvisorSite() {
   function startAssessment() {
     clearLoadingTimers();
     clearRevealTimers();
+    trackDeskLabEvent({ event_name: "assessment_started" });
     guideToAssessmentRef.current = true;
     setResult(null);
     setTypedSummary("");
@@ -369,6 +387,12 @@ export function DeskAdvisorSite() {
       return;
     }
 
+    trackDeskLabEvent({
+      event_name: "question_answered",
+      question_id: step.id,
+      answer_value: serializeAnswerValue(assessment[step.id])
+    });
+
     if (stepIndex === totalSteps - 1) {
       setPhase("loading");
       setLoadingIndex(0);
@@ -380,7 +404,13 @@ export function DeskAdvisorSite() {
 
       loadingTimeoutRef.current = setTimeout(() => {
         clearLoadingTimers();
-        setResult(diagnoseWorkspace(assessment));
+        const diagnosis = diagnoseWorkspace(assessment);
+        setResult(diagnosis);
+        trackDeskLabEvent({
+          event_name: "assessment_completed",
+          score: diagnosis.score,
+          main_issue: humanizeConstraint(diagnosis.primaryConstraint)
+        });
         setPhase("result");
       }, 2600);
 
@@ -709,7 +739,19 @@ export function DeskAdvisorSite() {
                       {matchedProducts.slice(0, 3).map((product) => {
                         const metadata = productReasonMap.get(product.name);
                         return (
-                          <article className="productCard" key={product.name}>
+                          <article
+                            className="productCard"
+                            key={product.name}
+                            onClick={() => trackDeskLabEvent({ event_name: "product_clicked", product_name: product.name })}
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter" || event.key === " ") {
+                                event.preventDefault();
+                                trackDeskLabEvent({ event_name: "product_clicked", product_name: product.name });
+                              }
+                            }}
+                            role="button"
+                            tabIndex={0}
+                          >
                             <div className="productTop">
                               <strong>{product.name}</strong>
                             </div>
