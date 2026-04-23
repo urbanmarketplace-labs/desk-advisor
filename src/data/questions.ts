@@ -2,22 +2,27 @@ import type {
   AssessmentInput,
   DeskDensity,
   DeskSize,
+  FocusPattern,
   FrictionSignal,
+  InputDeviceSetup,
+  LightTiming,
   LightingQuality,
   PrioritySignal,
   QuestionStep,
+  ScreenPosition,
   SetupType,
+  SurfaceUse,
   TimeExposure,
   UpgradeIntent,
   WorkStyle
 } from "@/types/assessment";
 
-export const assessmentSteps: QuestionStep[] = [
+const baseSteps: QuestionStep[] = [
   {
     id: "setupType",
     kind: "single",
     title: "What kind of setup are you working from?",
-    description: "This sets the baseline for posture, space pressure, and what changes are realistic.",
+    description: "This gives DeskLab the first read on posture, surface pressure, and setup complexity.",
     options: [
       "Laptop only",
       "Laptop + external monitor",
@@ -31,7 +36,7 @@ export const assessmentSteps: QuestionStep[] = [
     id: "timeExposure",
     kind: "single",
     title: "How long do you spend at your desk daily?",
-    description: "Longer desk time raises the cost of poor comfort and weak lighting.",
+    description: "Longer sessions make small comfort and lighting problems matter more.",
     options: ["Under 2 hours", "2-4 hours", "4-8 hours", "8+ hours"] satisfies readonly TimeExposure[],
     required: true
   },
@@ -39,7 +44,7 @@ export const assessmentSteps: QuestionStep[] = [
     id: "frictionSignals",
     kind: "multi",
     title: "What feels most off about your setup?",
-    description: "Choose up to two. Pick the strongest signals, not every small annoyance.",
+    description: "Choose up to two. DeskLab uses this to decide what to investigate next.",
     options: [
       "Discomfort / strain",
       "Low light / poor visibility",
@@ -56,7 +61,7 @@ export const assessmentSteps: QuestionStep[] = [
     id: "deskDensity",
     kind: "single",
     title: "How full does your desk feel?",
-    description: "Desk load changes both focus and usable space.",
+    description: "Desk load affects both focus and usable surface area.",
     options: ["Minimal", "Moderate", "Busy", "Overloaded"] satisfies readonly DeskDensity[],
     required: true
   },
@@ -64,7 +69,7 @@ export const assessmentSteps: QuestionStep[] = [
     id: "lightingQuality",
     kind: "single",
     title: "How would you describe your lighting?",
-    description: "A setup can look fine and still feel visually tiring to use.",
+    description: "Weak or inconsistent light often shows up as focus drag before people notice the light itself.",
     options: [
       "Bright and even",
       "Mostly okay",
@@ -77,7 +82,7 @@ export const assessmentSteps: QuestionStep[] = [
     id: "whatMattersMost",
     kind: "single",
     title: "What matters most right now?",
-    description: "This helps DeskLab decide where to focus once the core constraints are covered.",
+    description: "This shapes the recommendation order, unless a stronger constraint needs to override it.",
     options: [
       "Comfort",
       "Focus",
@@ -90,8 +95,8 @@ export const assessmentSteps: QuestionStep[] = [
   {
     id: "workStyle",
     kind: "single",
-    title: "What kind of work do you mainly do here?",
-    description: "Optional context about how the desk is used. If none of these fit, choose the mixed option.",
+    title: "What kind of work mainly happens here?",
+    description: "Different work puts different pressure on the same desk.",
     options: [
       "Deep focus / knowledge work",
       "Meetings and admin",
@@ -105,7 +110,7 @@ export const assessmentSteps: QuestionStep[] = [
     id: "deskSize",
     kind: "single",
     title: "How much desk space are you working with?",
-    description: "Space changes what is realistic and what will just add more pressure.",
+    description: "A small desk can still work well, but it has less tolerance for extra objects.",
     options: ["Very small", "Small", "Medium", "Large"] satisfies readonly DeskSize[],
     required: true
   },
@@ -113,24 +118,172 @@ export const assessmentSteps: QuestionStep[] = [
     id: "upgradeIntent",
     kind: "single",
     title: "How open are you to changing or buying anything?",
-    description: "DeskLab should match your appetite for change, not push beyond it.",
+    description: "DeskLab should not recommend products before the basics are clear.",
     options: [
       "Free improvements first",
       "A few practical upgrades",
       "Open to bigger changes"
     ] satisfies readonly UpgradeIntent[],
     required: true
-  },
-  {
-    id: "extraDetail",
-    kind: "text",
-    title: "Tell us anything useful about how you work or what your setup is fighting against.",
-    description: "Optional, but this is what turns a solid read into a sharper diagnosis.",
-    placeholder:
-      "Example: I work long hours from a small desk, take a lot of calls, lose light in the afternoon, and my neck gets tight by the end of the day.",
-    required: false
   }
 ];
+
+const ergonomicFollowUps: QuestionStep[] = [
+  {
+    id: "screenPosition",
+    kind: "single",
+    title: "Where is your main screen while you work?",
+    description: "This checks whether comfort risk is coming from looking down, reaching, or screen placement.",
+    options: ["Below eye level", "Roughly eye level", "Above eye level", "Not sure"] satisfies readonly ScreenPosition[],
+    required: true,
+    reason: "Asked because your answers point to possible comfort strain."
+  },
+  {
+    id: "inputDevices",
+    kind: "single",
+    title: "What do you use for typing and pointing?",
+    description: "A raised screen only helps if your hands can stay in a relaxed position too.",
+    options: [
+      "Built-in laptop keyboard / trackpad",
+      "External keyboard and mouse",
+      "Some external input devices",
+      "Not sure"
+    ] satisfies readonly InputDeviceSetup[],
+    required: true,
+    reason: "Asked to separate screen-height issues from reach and input-position issues."
+  }
+];
+
+const pressureFollowUp: QuestionStep = {
+  id: "surfaceUse",
+  kind: "single",
+  title: "What usually stays on the desk while you work?",
+  description: "This separates a busy-looking desk from a desk that is genuinely short on working room.",
+  options: [
+    "Only essentials stay out",
+    "A few extras stay out",
+    "Storage spills onto the desk",
+    "Work tools and personal items compete"
+  ] satisfies readonly SurfaceUse[],
+  required: true,
+  reason: "Asked because your setup may have surface pressure."
+};
+
+const lightingFollowUp: QuestionStep = {
+  id: "lightTiming",
+  kind: "single",
+  title: "When does the lighting feel weakest?",
+  description: "Timing matters because a fixed desk lamp, screen light, or layout change solves different lighting problems.",
+  options: [
+    "Consistent all day",
+    "Worse in the morning",
+    "Worse in the afternoon",
+    "Worse at night",
+    "Not sure"
+  ] satisfies readonly LightTiming[],
+  required: true,
+  reason: "Asked because lighting is affecting the diagnosis."
+};
+
+const focusFollowUp: QuestionStep = {
+  id: "focusPattern",
+  kind: "single",
+  title: "When does the desk affect your focus most?",
+  description: "This checks whether the focus issue is coming from visual noise, light, duration, or something outside the desk.",
+  options: [
+    "I lose focus when the desk looks busy",
+    "I lose focus when lighting changes",
+    "I lose focus during long sessions",
+    "The desk is not the main focus issue",
+    "Not sure"
+  ] satisfies readonly FocusPattern[],
+  required: true,
+  reason: "Asked because your answers point to focus fragility."
+};
+
+const refinementStep: QuestionStep = {
+  id: "extraDetail",
+  kind: "text",
+  title: "Add one useful detail so DeskLab does not overreach.",
+  description: "Optional, but this is how the diagnosis becomes more specific instead of staying cautious.",
+  placeholder:
+    "Example: I work 8 hours from a small desk, use calls often, lose light in the afternoon, and my neck gets tight by the end of the day.",
+  required: false,
+  reason: "Asked because limited detail lowers diagnosis confidence."
+};
+
+export function shouldAskErgonomicFollowUp(input: AssessmentInput): boolean {
+  return (
+    input.setupType === "Laptop only" ||
+    input.frictionSignals.includes("Discomfort / strain") ||
+    ((input.timeExposure === "4-8 hours" || input.timeExposure === "8+ hours") && input.setupType.includes("Laptop"))
+  );
+}
+
+export function shouldAskPressureFollowUp(input: AssessmentInput): boolean {
+  return (
+    input.deskDensity === "Busy" ||
+    input.deskDensity === "Overloaded" ||
+    input.deskSize === "Very small" ||
+    input.deskSize === "Small" ||
+    input.setupType === "Dual monitor" ||
+    input.frictionSignals.includes("Space feels limited") ||
+    input.frictionSignals.includes("Clutter / visual noise")
+  );
+}
+
+export function shouldAskLightingFollowUp(input: AssessmentInput): boolean {
+  return (
+    input.lightingQuality === "Dim / shadowy" ||
+    input.lightingQuality === "Changes throughout the day" ||
+    input.frictionSignals.includes("Low light / poor visibility")
+  );
+}
+
+export function shouldAskFocusFollowUp(input: AssessmentInput): boolean {
+  return (
+    input.workStyle === "Deep focus / knowledge work" ||
+    input.frictionSignals.includes("Hard to focus") ||
+    input.frictionSignals.includes("Clutter / visual noise") ||
+    input.deskDensity === "Overloaded"
+  );
+}
+
+function needsRefinement(input: AssessmentInput): boolean {
+  return (
+    input.frictionSignals.includes("Nothing obvious, just feels off") ||
+    input.workStyle === "Prefer not to say" ||
+    input.extraDetail.trim().length === 0
+  );
+}
+
+export function getAdaptiveAssessmentSteps(input: AssessmentInput): QuestionStep[] {
+  const steps = [...baseSteps];
+
+  if (shouldAskErgonomicFollowUp(input)) {
+    steps.push(...ergonomicFollowUps);
+  }
+
+  if (shouldAskPressureFollowUp(input)) {
+    steps.push(pressureFollowUp);
+  }
+
+  if (shouldAskLightingFollowUp(input)) {
+    steps.push(lightingFollowUp);
+  }
+
+  if (shouldAskFocusFollowUp(input)) {
+    steps.push(focusFollowUp);
+  }
+
+  if (needsRefinement(input)) {
+    steps.push(refinementStep);
+  }
+
+  return steps;
+}
+
+export const assessmentSteps = baseSteps;
 
 export const emptyAssessment: AssessmentInput = {
   setupType: "",
@@ -142,5 +295,10 @@ export const emptyAssessment: AssessmentInput = {
   workStyle: "",
   deskSize: "",
   upgradeIntent: "",
+  screenPosition: "",
+  inputDevices: "",
+  surfaceUse: "",
+  lightTiming: "",
+  focusPattern: "",
   extraDetail: ""
 };
