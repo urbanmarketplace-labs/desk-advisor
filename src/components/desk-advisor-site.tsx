@@ -66,6 +66,62 @@ function formatProductCategory(value: string): string {
     .join(" ");
 }
 
+function firstSentence(value: string): string {
+  const sentence = value.split(". ")[0]?.trim() ?? value.trim();
+  return sentence.endsWith(".") ? sentence : `${sentence}.`;
+}
+
+function getCompactDiagnosis(result: DiagnosisResult): string {
+  const primary = result.mainIssues[0]?.summary ?? result.summary;
+  const secondary = result.mainIssues.find((issue) => issue.label !== result.primaryConstraint);
+
+  if (!secondary) {
+    return firstSentence(primary);
+  }
+
+  return `${firstSentence(primary)} Secondary issue: ${secondary.label.toLowerCase()}.`;
+}
+
+function getCueIcon(value: string): string {
+  const text = value.toLowerCase();
+
+  if (text.includes("screen") || text.includes("laptop") || text.includes("monitor")) return "🖥️";
+  if (text.includes("light") || text.includes("shadow")) return "💡";
+  if (text.includes("clutter") || text.includes("clear") || text.includes("cable")) return "🧹";
+  if (text.includes("space") || text.includes("surface") || text.includes("fit")) return "📏";
+  if (text.includes("comfort") || text.includes("strain") || text.includes("neck") || text.includes("shoulder")) return "😌";
+  if (text.includes("focus") || text.includes("visual")) return "🎯";
+
+  return "⬆️";
+}
+
+function getScoreName(scoreLabel: string): string {
+  const text = scoreLabel.toLowerCase();
+
+  if (text.includes("comfort")) return "Comfort";
+  if (text.includes("lighting")) return "Lighting";
+  if (text.includes("focus")) return "Focus";
+  if (text.includes("space")) return "Space";
+
+  return "Score";
+}
+
+function getGainEstimate(result: DiagnosisResult, scoreLabel: string, index: number): number {
+  const scoreName = getScoreName(scoreLabel).toLowerCase();
+  const subScore = result.subScores.find((score) => score.label.toLowerCase().includes(scoreName))?.score ?? result.score;
+  const multiplier = index === 0 ? 0.22 : index === 1 ? 0.18 : 0.14;
+
+  return Math.max(4, Math.min(12, Math.round((100 - subScore) * multiplier)));
+}
+
+function getCompactActionLine(item: DiagnosisResult["scoreImprovements"][number]): string {
+  const actionIcon = getCueIcon(item.action);
+  const effectIcon = getCueIcon(item.effect);
+  const scoreName = getScoreName(item.scoreLabel).toLowerCase();
+
+  return `${actionIcon} ${item.action}  •  ${effectIcon} ${item.effect}  •  ⬆️ improve ${scoreName}`;
+}
+
 export function DeskAdvisorSite() {
   const [assessment, setAssessment] = useState<AssessmentInput>(emptyAssessment);
   const [stepIndex, setStepIndex] = useState(0);
@@ -116,11 +172,12 @@ export function DeskAdvisorSite() {
     setRevealStage(0);
 
     let index = 0;
+    const compactSummary = getCompactDiagnosis(result);
     typingIntervalRef.current = setInterval(() => {
       index += 1;
-      setTypedSummary(result.summary.slice(0, index));
+      setTypedSummary(compactSummary.slice(0, index));
 
-      if (index >= result.summary.length) {
+      if (index >= compactSummary.length) {
         if (typingIntervalRef.current) {
           clearInterval(typingIntervalRef.current);
           typingIntervalRef.current = null;
@@ -293,9 +350,9 @@ export function DeskAdvisorSite() {
 
   const matchedProducts = result?.matchedProducts ?? [];
   const resultSignals = result ? buildSignals(result) : [];
-  const whyThisMatters = result?.whyThisMatters ?? [];
   const scoreImprovements = result?.scoreImprovements ?? [];
-  const isSummaryTyping = result ? typedSummary.length < result.summary.length : false;
+  const compactSummary = result ? getCompactDiagnosis(result) : "";
+  const isSummaryTyping = result ? typedSummary.length < compactSummary.length : false;
   const primaryCtaLabel = phase === "idle" ? "Start assessment" : "Go to assessment";
   const heroCtaLabel = phase === "idle" ? "Begin assessment" : phase === "result" ? "View diagnosis" : "Continue assessment";
 
@@ -504,20 +561,27 @@ export function DeskAdvisorSite() {
                     {result.score}
                     <span className="scoreSuffix">/100</span>
                   </div>
-                  <p>{result.mainIssues[0]?.impact ?? result.summary}</p>
-                  <div className="constraintMeta">
-                    <strong>Main issue</strong>
-                    <span>{result.primaryConstraint}</span>
-                    <strong>Next issue</strong>
-                    <span>{result.secondaryConstraint}</span>
+                  <p>{result.inputQualityLabel} · {result.confidenceLabel}</p>
+                  <div className="subScoreGrid revealBlock isVisible">
+                    {result.subScores.map((subScore) => (
+                      <div className="subScoreCard" key={subScore.key}>
+                        <div className="subScoreTop">
+                          <strong>{subScore.label}</strong>
+                          <span>{subScore.score}</span>
+                        </div>
+                        <div className="miniTrack">
+                          <div className="miniFill" style={{ width: `${subScore.score}%` }} />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
                 <div className="resultOverview">
                   <div className="overviewTop">
                     <div>
-                      <span className="sectionLabel">Summary</span>
-                      <h2>What to do next</h2>
+                      <span className="sectionLabel">Main issue</span>
+                      <h2>⚠️ {result.primaryConstraint}</h2>
                     </div>
                     <div className="pillStack">
                       <div className="confidencePill qualityPill">{result.inputQualityLabel}</div>
@@ -528,11 +592,6 @@ export function DeskAdvisorSite() {
                     {typedSummary}
                     <span className={isSummaryTyping ? "typingCaret" : "typingCaret hidden"} />
                   </p>
-                  <div className="inputQualityCard">
-                    <strong>{getConfidenceSupport(result)}</strong>
-                    <span>{result.inputQualityNote} Confidence score: {Math.round(result.confidenceScore * 100)}%.</span>
-                    {result.moreDetailPrompt ? <p>{result.moreDetailPrompt}</p> : null}
-                  </div>
                   <div className="signalRow">
                     {resultSignals.map((signal) => (
                       <span className="signalChip" key={signal}>
@@ -541,156 +600,76 @@ export function DeskAdvisorSite() {
                     ))}
                   </div>
 
-                  {revealStage >= 1 ? (
-                    <div className="subScoreGrid revealBlock isVisible">
-                      {result.subScores.map((subScore) => (
-                        <div className="subScoreCard" key={subScore.key}>
-                          <div className="subScoreTop">
-                            <strong>{subScore.label}</strong>
-                            <span>{subScore.score}/100</span>
-                          </div>
-                          <div className="miniTrack">
-                            <div className="miniFill" style={{ width: `${subScore.score}%` }} />
-                          </div>
-                          <p>{subScore.summary}</p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : null}
+                  <details className="inputQualityCard">
+                    <summary>See why</summary>
+                    <strong>{getConfidenceSupport(result)}</strong>
+                    <span>{result.inputQualityNote} Confidence score: {Math.round(result.confidenceScore * 100)}%.</span>
+                    {result.reasoning.slice(0, 3).map((item) => (
+                      <p key={item}>{item}</p>
+                    ))}
+                    {result.tradeOffs.slice(0, 1).map((tradeOff) => (
+                      <p key={tradeOff.id}>{tradeOff.summary} {tradeOff.decision}</p>
+                    ))}
+                    {result.moreDetailPrompt ? <p>{result.moreDetailPrompt}</p> : null}
+                  </details>
                 </div>
               </div>
 
               {revealStage >= 2 ? (
-                <>
-                  <div className="productsSection revealBlock isVisible">
-                    <div className="sectionIntro compactIntro">
-                      <span className="sectionLabel">What’s holding you back</span>
-                      <h2>The key issues are clear.</h2>
-                      <p>These are the constraints doing the most damage right now.</p>
-                    </div>
-                    <div className="insightStrip">
-                      {result.mainIssues.map((issue) => (
-                        <div className="insightCard" key={issue.id}>
-                          <strong>{issue.label}</strong>
-                          <span>{issue.summary}</span>
-                        </div>
+                <div className="resultGrid revealBlock isVisible">
+                  <div className="resultBlock">
+                    <span className="blockLabel">Fix this first</span>
+                    <ul className="cleanList">
+                      {scoreImprovements.slice(0, 3).map((item) => (
+                        <li key={`${item.action}-${item.scoreLabel}`}>{getCompactActionLine(item)}</li>
                       ))}
-                    </div>
+                    </ul>
                   </div>
 
-                  <div className="resultGrid revealBlock isVisible">
-                    <div className="resultBlock">
-                      <span className="blockLabel">Why this matters</span>
-                      <ul className="cleanList">
-                        {whyThisMatters.map((item) => (
-                          <li key={item}>{item}</li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="resultBlock">
-                      <span className="blockLabel">How this was assessed</span>
-                      <ul className="cleanList">
-                        {result.reasoning.map((item) => (
-                          <li key={item}>{item}</li>
-                        ))}
-                      </ul>
-                    </div>
+                  <div className="resultBlock">
+                    <span className="blockLabel">Fastest score improvements</span>
+                    <ul className="cleanList">
+                      {scoreImprovements.slice(0, 4).map((item, index) => (
+                        <li key={`${item.action}-${item.scoreLabel}-gain`}>
+                          {getCueIcon(item.action)} {item.action}  <strong>+{getGainEstimate(result, item.scoreLabel, index)} {getScoreName(item.scoreLabel)}</strong>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-
-                  {result.tradeOffs.length > 0 ? (
-                    <div className="rationalePanel revealBlock isVisible">
-                      <span className="sectionLabel">Trade-offs resolved</span>
-                      <ul className="cleanList">
-                        {result.tradeOffs.map((tradeOff) => (
-                          <li key={tradeOff.id}>
-                            {tradeOff.summary} {tradeOff.decision}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : null}
-                </>
-              ) : null}
-
-              {revealStage >= 3 ? (
-                <>
-                  <div className="resultGrid revealBlock isVisible">
-                    <div className="resultBlock">
-                      <span className="blockLabel">Fix this first</span>
-                      <ul className="cleanList">
-                        {result.freeFixes.items.map((item) => (
-                          <li key={item}>{item}</li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="resultBlock">
-                      <span className="blockLabel">How to improve your score</span>
-                      <ul className="cleanList">
-                        {scoreImprovements.map((item) => (
-                          <li key={`${item.action}-${item.scoreLabel}`}>
-                            {item.action} -&gt; {item.effect} -&gt; improves {item.scoreLabel} score
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-
-                  {result.nextQuestions.length > 0 ? (
-                    <div className="rationalePanel revealBlock isVisible">
-                      <span className="sectionLabel">More detail would help</span>
-                      <ul className="cleanList">
-                        {result.nextQuestions.map((item) => (
-                          <li key={item}>{item}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : null}
-                </>
+                </div>
               ) : null}
 
               {revealStage >= 4 ? (
-                <>
-                  {result.paidUpgrades.items.length > 0 ? (
-                    <div className="rationalePanel revealBlock isVisible">
-                      <span className="sectionLabel">Upgrades</span>
-                      <ul className="cleanList">
-                        {result.paidUpgrades.items.map((item) => (
-                          <li key={item}>{item}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : null}
+                <div className="productsSection revealBlock isVisible">
+                  <div className="sectionIntro compactIntro">
+                    <span className="sectionLabel">Best matching products</span>
+                    <h2>Only if it solves the main constraint.</h2>
+                  </div>
 
                   {matchedProducts.length > 0 ? (
-                    <div className="productsSection revealBlock isVisible">
-                      <div className="sectionIntro compactIntro">
-                        <span className="sectionLabel">Products worth considering</span>
-                        <h2>Only the options that solve a real problem.</h2>
-                        <p>Each one connects back to a clear constraint in this setup.</p>
-                      </div>
-
-                      <div className="productGrid">
-                        {matchedProducts.map((product) => {
-                          const metadata = productReasonMap.get(product.name);
-                          return (
-                            <article className="productCard" key={product.name}>
-                              <div className="productTop">
-                                <strong>{product.name}</strong>
-                              </div>
-                              <p>{product.reasons[0] ?? metadata?.benefits[0] ?? "Included because it solves a real problem in this setup."}</p>
-                              <div className="productMeta">
-                                {product.reasons[1] ? <span>{product.reasons[1]}</span> : null}
-                                {metadata ? <span>{formatProductCategory(metadata.category)}</span> : null}
-                              </div>
-                            </article>
-                          );
-                        })}
-                      </div>
+                    <div className="productGrid">
+                      {matchedProducts.slice(0, 3).map((product) => {
+                        const metadata = productReasonMap.get(product.name);
+                        return (
+                          <article className="productCard" key={product.name}>
+                            <div className="productTop">
+                              <strong>{product.name}</strong>
+                            </div>
+                            <p>{product.reasons[0] ?? metadata?.benefits[0] ?? "Matches the highest-impact constraint in this setup."}</p>
+                            <div className="productMeta">
+                              {metadata ? <span>{formatProductCategory(metadata.category)}</span> : null}
+                            </div>
+                          </article>
+                        );
+                      })}
                     </div>
-                  ) : null}
-                </>
+                  ) : (
+                    <div className="rationalePanel">
+                      <span className="sectionLabel">No product-first fix yet</span>
+                      <p>Start with the setup changes above. They are likely to improve the score faster than buying more.</p>
+                    </div>
+                  )}
+                </div>
               ) : null}
             </div>
           ) : null}
