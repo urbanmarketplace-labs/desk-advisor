@@ -28,9 +28,14 @@ function toNullableNumber(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
+function cleanEnvValue(value: string | undefined): string | undefined {
+  const cleaned = value?.trim().replace(/^['"]|['"]$/g, "");
+  return cleaned && cleaned.length > 0 ? cleaned : undefined;
+}
+
 function getSupabaseConfig() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supabaseUrl = cleanEnvValue(process.env.NEXT_PUBLIC_SUPABASE_URL);
+  const supabaseKey = cleanEnvValue(process.env.SUPABASE_SERVICE_ROLE_KEY) ?? cleanEnvValue(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
   return { supabaseUrl, supabaseKey };
 }
