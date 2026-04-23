@@ -3,13 +3,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { diagnoseWorkspace } from "@/core/diagnose";
 import { productCatalog } from "@/data/product-catalog";
-import { assessmentSteps, emptyAssessment } from "@/data/questions";
+import { emptyAssessment, getAdaptiveAssessmentSteps } from "@/data/questions";
 import type { AssessmentInput, DiagnosisResult, FrictionSignal } from "@/types/assessment";
 
 const productReasonMap = new Map(productCatalog.map((product) => [product.name, product]));
 const loadingMessages = [
   "Analysing workspace signals",
+  "Inferring constraints",
   "Identifying constraints",
+  "Resolving trade-offs",
   "Building recommendations"
 ];
 const summaryTypingSpeed = 18;
@@ -51,7 +53,10 @@ function getConfidenceSupport(result: DiagnosisResult): string {
 }
 
 function buildSignals(result: DiagnosisResult): string[] {
-  return result.diagnosisTags.slice(0, 4);
+  return result.signals
+    .filter((signal) => signal.intensity > 0.48)
+    .slice(0, 4)
+    .map((signal) => `${signal.label} ${Math.round(signal.intensity * 100)}%`);
 }
 
 function formatProductCategory(value: string): string {
@@ -78,8 +83,9 @@ export function DeskAdvisorSite() {
   const questionHeadingRef = useRef<HTMLHeadingElement | null>(null);
   const livePanelRef = useRef<HTMLDivElement | null>(null);
 
-  const step = assessmentSteps[stepIndex];
-  const totalSteps = assessmentSteps.length;
+  const adaptiveSteps = useMemo(() => getAdaptiveAssessmentSteps(assessment), [assessment]);
+  const step = adaptiveSteps[Math.min(stepIndex, adaptiveSteps.length - 1)];
+  const totalSteps = adaptiveSteps.length;
   const progress = Math.round(((stepIndex + 1) / totalSteps) * 100);
 
   const canContinue = useMemo(() => isStepComplete(step.id, assessment[step.id]), [assessment, step.id]);
@@ -90,6 +96,12 @@ export function DeskAdvisorSite() {
       clearRevealTimers();
     };
   }, []);
+
+  useEffect(() => {
+    if (stepIndex >= adaptiveSteps.length) {
+      setStepIndex(Math.max(0, adaptiveSteps.length - 1));
+    }
+  }, [adaptiveSteps.length, stepIndex]);
 
   useEffect(() => {
     clearRevealTimers();
@@ -307,15 +319,15 @@ export function DeskAdvisorSite() {
           <div className="hero">
             <div className="heroContent">
               <div className="heroBadge">Desk intelligence, refined</div>
-              <h1>Understand what is creating friction in your workspace, then improve it with confidence.</h1>
+              <h1>Find what is actually holding your desk back.</h1>
               <p className="heroLead">
-                DeskLab reviews comfort, focus, lighting, and fit, then returns clear next steps and only suggests upgrades when they are justified.
+                DeskLab reads your setup, asks smarter follow-ups, then explains what to fix first and why.
               </p>
               <div className="heroActions">
                 <button className="primaryButton lightButton" type="button" onClick={goToAssessment}>
                   {heroCtaLabel}
                 </button>
-                <span className="heroMeta">A short assessment. Clear guidance. No unnecessary upgrades.</span>
+                <span className="heroMeta">Adaptive questions. Clear priorities. No filler.</span>
               </div>
               <div className="heroHighlights">
                 <div>
@@ -336,9 +348,9 @@ export function DeskAdvisorSite() {
             <aside className="heroAside">
               <div className="heroPanel">
                 <span className="panelKicker">What DeskLab sees</span>
-                <h2 className="heroPanelTitle">A better workspace starts with a clearer read of what is actually getting in the way.</h2>
+                <h2 className="heroPanelTitle">It turns answers into signals, then resolves what matters most.</h2>
                 <p className="heroPanelText">
-                  It looks past surface clutter and picks out the practical reasons a desk feels uncomfortable, distracting, visually heavy, or over-equipped.
+                  If comfort, space, light, and style conflict, DeskLab prioritises the constraint that changes daily use.
                 </p>
                 <div className="heroEditorial">
                   <div>
@@ -371,7 +383,7 @@ export function DeskAdvisorSite() {
             <div className="assessmentIntro">
               <span className="sectionLabel">Assessment</span>
               <h2>Clear guidance shaped around the desk in front of you.</h2>
-              <p>A short assessment designed to return an explainable diagnosis and practical next steps.</p>
+              <p>The path changes as DeskLab learns more about your setup.</p>
             </div>
             {phase !== "idle" ? (
               <button className="textButton" type="button" onClick={restart}>
@@ -383,9 +395,9 @@ export function DeskAdvisorSite() {
           {phase === "idle" ? (
             <div className="introState">
               <div className="introPoints">
-                <span>Adaptive weighting</span>
-                <span>Confidence-aware diagnosis</span>
-                <span>Reasoned recommendations</span>
+                <span>Adaptive questions</span>
+                <span>Signal-based reasoning</span>
+                <span>Confidence-aware output</span>
               </div>
               <button className="primaryButton wideButton" type="button" onClick={goToAssessment}>
                 Begin assessment
@@ -409,6 +421,7 @@ export function DeskAdvisorSite() {
                 <span className="sectionLabel">Live assessment</span>
                 <h2 ref={questionHeadingRef} tabIndex={-1}>{step.title}</h2>
                 <p>{step.description}</p>
+                {step.reason ? <span className="questionHint">{step.reason}</span> : null}
 
                 {step.kind === "text" ? (
                   <div className="textareaWrap">
@@ -478,7 +491,7 @@ export function DeskAdvisorSite() {
               <div className="thinkingOrb" />
               <span className="sectionLabel">DeskLab is thinking</span>
               <h2>{loadingMessages[loadingIndex]}</h2>
-              <p>Turning your answers into a clearer read of what is helping, what is getting in the way, and what to fix first.</p>
+              <p>Turning answers into signals, constraints, trade-offs, and next actions.</p>
             </div>
           ) : null}
 
@@ -517,7 +530,7 @@ export function DeskAdvisorSite() {
                   </p>
                   <div className="inputQualityCard">
                     <strong>{getConfidenceSupport(result)}</strong>
-                    <span>{result.inputQualityNote}</span>
+                    <span>{result.inputQualityNote} Confidence score: {Math.round(result.confidenceScore * 100)}%.</span>
                     {result.moreDetailPrompt ? <p>{result.moreDetailPrompt}</p> : null}
                   </div>
                   <div className="signalRow">
@@ -584,6 +597,19 @@ export function DeskAdvisorSite() {
                       </ul>
                     </div>
                   </div>
+
+                  {result.tradeOffs.length > 0 ? (
+                    <div className="rationalePanel revealBlock isVisible">
+                      <span className="sectionLabel">Trade-offs resolved</span>
+                      <ul className="cleanList">
+                        {result.tradeOffs.map((tradeOff) => (
+                          <li key={tradeOff.id}>
+                            {tradeOff.summary} {tradeOff.decision}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
                 </>
               ) : null}
 
