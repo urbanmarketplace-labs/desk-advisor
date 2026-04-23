@@ -45,9 +45,60 @@ export type UpgradeIntent =
 
 export type DeskSize = "Very small" | "Small" | "Medium" | "Large";
 
+export type ScreenPosition =
+  | "Below eye level"
+  | "Roughly eye level"
+  | "Above eye level"
+  | "Not sure";
+
+export type InputDeviceSetup =
+  | "Built-in laptop keyboard / trackpad"
+  | "External keyboard and mouse"
+  | "Some external input devices"
+  | "Not sure";
+
+export type SurfaceUse =
+  | "Only essentials stay out"
+  | "A few extras stay out"
+  | "Storage spills onto the desk"
+  | "Work tools and personal items compete";
+
+export type LightTiming =
+  | "Consistent all day"
+  | "Worse in the morning"
+  | "Worse in the afternoon"
+  | "Worse at night"
+  | "Not sure";
+
+export type FocusPattern =
+  | "I lose focus when the desk looks busy"
+  | "I lose focus when lighting changes"
+  | "I lose focus during long sessions"
+  | "The desk is not the main focus issue"
+  | "Not sure";
+
 export type StepKind = "single" | "multi" | "text";
 export type ScoreKey = "comfort" | "focus" | "lighting" | "fit";
 export type InputQuality = "light" | "moderate" | "rich";
+export type Confidence = "low" | "moderate" | "high";
+export type DetailDepth = "short" | "medium" | "deep";
+
+export type SignalKey =
+  | "ergonomics_risk"
+  | "visual_noise"
+  | "lighting_quality"
+  | "desk_pressure"
+  | "session_intensity"
+  | "setup_complexity"
+  | "upgrade_readiness"
+  | "focus_fragility";
+
+export type ConstraintKey =
+  | "ergonomics"
+  | "focus"
+  | "lighting"
+  | "space"
+  | "finish";
 
 export type ProductCategory =
   | "ergonomics"
@@ -66,6 +117,11 @@ export interface AssessmentInput {
   workStyle: WorkStyle | "";
   deskSize: DeskSize | "";
   upgradeIntent: UpgradeIntent | "";
+  screenPosition: ScreenPosition | "";
+  inputDevices: InputDeviceSetup | "";
+  surfaceUse: SurfaceUse | "";
+  lightTiming: LightTiming | "";
+  focusPattern: FocusPattern | "";
   extraDetail: string;
 }
 
@@ -78,6 +134,35 @@ export interface QuestionStep<TValue extends string = string> {
   options?: readonly TValue[];
   required: boolean;
   maxSelections?: number;
+  reason?: string;
+}
+
+export interface WorkspaceSignal {
+  key: SignalKey;
+  label: string;
+  intensity: number;
+  confidence: number;
+  sources: string[];
+  evidence: string[];
+}
+
+export interface InferredConstraint {
+  key: ConstraintKey;
+  label: string;
+  scoreKey: ScoreKey;
+  priority: number;
+  severity: number;
+  confidence: number;
+  why: string;
+  evidence: string[];
+  sourceSignals: SignalKey[];
+  structural: boolean;
+}
+
+export interface ResolvedTradeOff {
+  id: string;
+  summary: string;
+  decision: string;
 }
 
 export interface ProductCatalogItem {
@@ -126,7 +211,8 @@ export interface MatchedProduct {
 
 export interface DiagnosisResult {
   score: number;
-  confidence: "low" | "moderate" | "high";
+  confidence: Confidence;
+  confidenceScore: number;
   confidenceLabel: string;
   inputQuality: InputQuality;
   inputQualityLabel: string;
@@ -137,6 +223,9 @@ export interface DiagnosisResult {
   diagnosisTags: string[];
   primaryConstraint: string;
   secondaryConstraint: string | null;
+  signals: WorkspaceSignal[];
+  constraints: InferredConstraint[];
+  tradeOffs: ResolvedTradeOff[];
   subScores: DiagnosisSubScore[];
   mainIssues: DiagnosisIssue[];
   reasoning: string[];
