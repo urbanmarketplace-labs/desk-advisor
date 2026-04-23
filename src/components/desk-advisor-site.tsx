@@ -8,11 +8,10 @@ import type { AssessmentInput, DiagnosisResult, FrictionSignal } from "@/types/a
 
 const productReasonMap = new Map(productCatalog.map((product) => [product.name, product]));
 const loadingMessages = [
-  "Analysing workspace signals",
-  "Inferring constraints",
-  "Identifying constraints",
-  "Resolving trade-offs",
-  "Building recommendations"
+  "Reading your setup",
+  "Finding the main issue",
+  "Checking what matters most",
+  "Building your next steps"
 ];
 const summaryTypingSpeed = 18;
 
@@ -42,21 +41,21 @@ function getScoreAccent(score: number): string {
 
 function getConfidenceSupport(result: DiagnosisResult): string {
   if (result.inputQuality === "light") {
-    return "This stays careful because it is working from the core answers only.";
+    return "Lower confidence. Add more detail for sharper results.";
   }
 
   if (result.inputQuality === "moderate") {
-    return "The main pattern is clear, but a little more detail would still sharpen the read.";
+    return "Moderate confidence. The main pattern is clear.";
   }
 
-  return "There is enough signal here to be specific about what matters most.";
+  return "High confidence. Based on detailed inputs.";
 }
 
 function buildSignals(result: DiagnosisResult): string[] {
   return result.signals
     .filter((signal) => signal.intensity > 0.48)
-    .slice(0, 4)
-    .map((signal) => `${signal.label} ${Math.round(signal.intensity * 100)}%`);
+    .slice(0, 3)
+    .map((signal) => formatSignalLabel(signal.label));
 }
 
 function formatProductCategory(value: string): string {
@@ -72,14 +71,70 @@ function firstSentence(value: string): string {
 }
 
 function getCompactDiagnosis(result: DiagnosisResult): string {
-  const primary = result.mainIssues[0]?.summary ?? result.summary;
+  const primary = humanizeCopy(result.mainIssues[0]?.summary ?? result.summary);
   const secondary = result.mainIssues.find((issue) => issue.label !== result.primaryConstraint);
 
   if (!secondary) {
     return firstSentence(primary);
   }
 
-  return `${firstSentence(primary)} Secondary issue: ${secondary.label.toLowerCase()}.`;
+  return `${firstSentence(primary)} Secondary issue: ${humanizeConstraint(secondary.label).toLowerCase()}.`;
+}
+
+function humanizeConstraint(value: string): string {
+  return value
+    .replace("Space and surface pressure", "Not enough usable space")
+    .replace("Lighting reliability", "Lighting could be better")
+    .replace("Focus and visual clarity", "Too much competing for attention")
+    .replace("Comfort and posture", "Comfort and posture")
+    .replace("Finish and visual polish", "Visual polish");
+}
+
+function formatSignalLabel(value: string): string {
+  return value
+    .replace("Ergonomics risk", "Comfort")
+    .replace("Visual noise", "Visual clutter")
+    .replace("Lighting quality", "Lighting")
+    .replace("Desk pressure", "Usable space")
+    .replace("Session intensity", "Desk time")
+    .replace("Setup complexity", "Setup size")
+    .replace("Upgrade readiness", "Upgrade fit")
+    .replace("Focus fragility", "Focus");
+}
+
+function humanizeCopy(value: string): string {
+  return value
+    .replaceAll("space pressure is high", "there may not be enough usable space")
+    .replaceAll("surface pressure", "usable-space limits")
+    .replaceAll("Desk pressure", "Usable space")
+    .replaceAll("visual noise", "visual clutter")
+    .replaceAll("Visual noise", "Visual clutter")
+    .replaceAll("focus fragility", "focus")
+    .replaceAll("Focus fragility", "Focus")
+    .replaceAll("is affecting", "can affect")
+    .replaceAll("is causing", "can lead to")
+    .replaceAll("is limiting", "may be holding back")
+    .replaceAll("constraint", "issue")
+    .replaceAll("Constraint", "Issue")
+    .replaceAll("signal", "input")
+    .replaceAll("Signal", "Input");
+}
+
+function getWhyBlocks(result: DiagnosisResult): Array<{ icon: string; label: string; text: string }> {
+  const blocks = result.constraints.slice(0, 3).map((constraint) => ({
+    icon: getCueIcon(constraint.label),
+    label: humanizeConstraint(constraint.label),
+    text: humanizeCopy(constraint.evidence[0] ?? constraint.why)
+  }));
+
+  return [
+    ...blocks,
+    {
+      icon: "⚖️",
+      label: "Priority",
+      text: `${humanizeConstraint(result.primaryConstraint)} matters most right now. Fixing it should have the biggest impact.`
+    }
+  ].slice(0, 4);
 }
 
 function getCueIcon(value: string): string {
@@ -114,12 +169,15 @@ function getGainEstimate(result: DiagnosisResult, scoreLabel: string, index: num
   return Math.max(4, Math.min(12, Math.round((100 - subScore) * multiplier)));
 }
 
-function getCompactActionLine(item: DiagnosisResult["scoreImprovements"][number]): string {
-  const actionIcon = getCueIcon(item.action);
-  const effectIcon = getCueIcon(item.effect);
-  const scoreName = getScoreName(item.scoreLabel).toLowerCase();
+function getSimpleProductReason(product: DiagnosisResult["matchedProducts"][number]): string {
+  const reason = product.reasons[0] ?? "Helps improve a real issue in your setup.";
 
-  return `${actionIcon} ${item.action}  •  ${effectIcon} ${item.effect}  •  ⬆️ improve ${scoreName}`;
+  if (/lighting|visibility|light/i.test(reason)) return "Helps improve lighting where you work.";
+  if (/ergonomic|comfort|posture|strain|screen/i.test(reason)) return "Helps make long desk sessions more comfortable.";
+  if (/surface|space|pressure|storage/i.test(reason)) return "Helps create more usable desk space.";
+  if (/visual|focus|noise|clutter/i.test(reason)) return "Helps reduce what competes for your attention.";
+
+  return humanizeCopy(reason.replace(/^Recommended because /, "Helps because "));
 }
 
 export function DeskAdvisorSite() {
@@ -353,8 +411,8 @@ export function DeskAdvisorSite() {
   const scoreImprovements = result?.scoreImprovements ?? [];
   const compactSummary = result ? getCompactDiagnosis(result) : "";
   const isSummaryTyping = result ? typedSummary.length < compactSummary.length : false;
-  const primaryCtaLabel = phase === "idle" ? "Start assessment" : "Go to assessment";
-  const heroCtaLabel = phase === "idle" ? "Begin assessment" : phase === "result" ? "View diagnosis" : "Continue assessment";
+  const primaryCtaLabel = phase === "idle" ? "Begin assessment" : "Go to assessment";
+  const heroCtaLabel = phase === "idle" ? "Begin assessment" : phase === "result" ? "View results" : "Continue assessment";
 
   return (
     <main className="page">
@@ -375,16 +433,16 @@ export function DeskAdvisorSite() {
         <div className="heroBackdrop">
           <div className="hero">
             <div className="heroContent">
-              <div className="heroBadge">Desk intelligence, refined</div>
-              <h1>Find what is actually holding your desk back.</h1>
+              <div className="heroBadge">DeskLab</div>
+              <h1>Fix your desk in minutes</h1>
               <p className="heroLead">
-                DeskLab reads your setup, asks smarter follow-ups, then explains what to fix first and why.
+                Find what’s getting in the way, and fix it with clear next steps.
               </p>
               <div className="heroActions">
                 <button className="primaryButton lightButton" type="button" onClick={goToAssessment}>
                   {heroCtaLabel}
                 </button>
-                <span className="heroMeta">Adaptive questions. Clear priorities. No filler.</span>
+                <span className="heroMeta">A clearer workspace starts with the right first fix.</span>
               </div>
               <div className="heroHighlights">
                 <div>
@@ -404,10 +462,10 @@ export function DeskAdvisorSite() {
 
             <aside className="heroAside">
               <div className="heroPanel">
-                <span className="panelKicker">What DeskLab sees</span>
-                <h2 className="heroPanelTitle">It turns answers into signals, then resolves what matters most.</h2>
+                <span className="panelKicker">What you get</span>
+                <h2 className="heroPanelTitle">A clear score, one main issue, and the fastest ways to improve it.</h2>
                 <p className="heroPanelText">
-                  If comfort, space, light, and style conflict, DeskLab prioritises the constraint that changes daily use.
+                  DeskLab keeps the advice practical: fix what changes daily use before adding more to your desk.
                 </p>
                 <div className="heroEditorial">
                   <div>
@@ -426,8 +484,8 @@ export function DeskAdvisorSite() {
               </div>
 
               <div className="heroFoot">
-                <span className="panelKicker">Assessment standard</span>
-                <p>Practical changes first. Products only when they improve the setup in a clear, defensible way.</p>
+                <span className="panelKicker">Beta standard</span>
+                <p>Short assessment. Clear result. No generic desk advice.</p>
               </div>
             </aside>
           </div>
@@ -453,7 +511,7 @@ export function DeskAdvisorSite() {
             <div className="introState">
               <div className="introPoints">
                 <span>Adaptive questions</span>
-                <span>Signal-based reasoning</span>
+                <span>Clear priorities</span>
                 <span>Confidence-aware output</span>
               </div>
               <button className="primaryButton wideButton" type="button" onClick={goToAssessment}>
@@ -548,7 +606,7 @@ export function DeskAdvisorSite() {
               <div className="thinkingOrb" />
               <span className="sectionLabel">DeskLab is thinking</span>
               <h2>{loadingMessages[loadingIndex]}</h2>
-              <p>Turning answers into signals, constraints, trade-offs, and next actions.</p>
+              <p>Turning your answers into a clear score and practical next steps.</p>
             </div>
           ) : null}
 
@@ -559,9 +617,9 @@ export function DeskAdvisorSite() {
                   <span className={`scoreTag ${getScoreAccent(result.score)}`}>{getScoreLabel(result.score)}</span>
                   <div className="score">
                     {result.score}
-                    <span className="scoreSuffix">/100</span>
                   </div>
-                  <p>{result.inputQualityLabel} · {result.confidenceLabel}</p>
+                  <p>out of 100</p>
+                  <div className="confidencePill qualityPill">{getConfidenceSupport(result)}</div>
                   <div className="subScoreGrid revealBlock isVisible">
                     {result.subScores.map((subScore) => (
                       <div className="subScoreCard" key={subScore.key}>
@@ -581,10 +639,9 @@ export function DeskAdvisorSite() {
                   <div className="overviewTop">
                     <div>
                       <span className="sectionLabel">Main issue</span>
-                      <h2>⚠️ {result.primaryConstraint}</h2>
+                      <h2>⚠️ {humanizeConstraint(result.primaryConstraint)}</h2>
                     </div>
                     <div className="pillStack">
-                      <div className="confidencePill qualityPill">{result.inputQualityLabel}</div>
                       <div className={`confidencePill confidence${result.confidence}`}>{result.confidenceLabel}</div>
                     </div>
                   </div>
@@ -601,16 +658,14 @@ export function DeskAdvisorSite() {
                   </div>
 
                   <details className="inputQualityCard">
-                    <summary>See why</summary>
-                    <strong>{getConfidenceSupport(result)}</strong>
-                    <span>{result.inputQualityNote} Confidence score: {Math.round(result.confidenceScore * 100)}%.</span>
-                    {result.reasoning.slice(0, 3).map((item) => (
-                      <p key={item}>{item}</p>
+                    <summary>Why this result</summary>
+                    {getWhyBlocks(result).map((block) => (
+                      <div key={`${block.label}-${block.text}`}>
+                        <strong>{block.icon} {block.label}</strong>
+                        <p>{block.text}</p>
+                      </div>
                     ))}
-                    {result.tradeOffs.slice(0, 1).map((tradeOff) => (
-                      <p key={tradeOff.id}>{tradeOff.summary} {tradeOff.decision}</p>
-                    ))}
-                    {result.moreDetailPrompt ? <p>{result.moreDetailPrompt}</p> : null}
+                    {result.moreDetailPrompt ? <p>{humanizeCopy(result.moreDetailPrompt)}</p> : null}
                   </details>
                 </div>
               </div>
@@ -621,17 +676,20 @@ export function DeskAdvisorSite() {
                     <span className="blockLabel">Fix this first</span>
                     <ul className="cleanList">
                       {scoreImprovements.slice(0, 3).map((item) => (
-                        <li key={`${item.action}-${item.scoreLabel}`}>{getCompactActionLine(item)}</li>
+                        <li key={`${item.action}-${item.scoreLabel}`}>
+                          <strong>{getCueIcon(item.action)} {humanizeCopy(item.action)}</strong>
+                          <span>→ {humanizeCopy(item.effect)}</span>
+                        </li>
                       ))}
                     </ul>
                   </div>
 
                   <div className="resultBlock">
-                    <span className="blockLabel">Fastest score improvements</span>
+                    <span className="blockLabel">Biggest improvements</span>
                     <ul className="cleanList">
                       {scoreImprovements.slice(0, 4).map((item, index) => (
                         <li key={`${item.action}-${item.scoreLabel}-gain`}>
-                          {getCueIcon(item.action)} {item.action}  <strong>+{getGainEstimate(result, item.scoreLabel, index)} {getScoreName(item.scoreLabel)}</strong>
+                          {getCueIcon(item.action)} {humanizeCopy(item.action)}  <strong>+{getGainEstimate(result, item.scoreLabel, index)} {getScoreName(item.scoreLabel)}</strong>
                         </li>
                       ))}
                     </ul>
@@ -642,8 +700,8 @@ export function DeskAdvisorSite() {
               {revealStage >= 4 ? (
                 <div className="productsSection revealBlock isVisible">
                   <div className="sectionIntro compactIntro">
-                    <span className="sectionLabel">Best matching products</span>
-                    <h2>Only if it solves the main constraint.</h2>
+                    <span className="sectionLabel">Recommended for your setup</span>
+                    <h2>Each one helps fix a real issue in your setup.</h2>
                   </div>
 
                   {matchedProducts.length > 0 ? (
@@ -655,7 +713,7 @@ export function DeskAdvisorSite() {
                             <div className="productTop">
                               <strong>{product.name}</strong>
                             </div>
-                            <p>{product.reasons[0] ?? metadata?.benefits[0] ?? "Matches the highest-impact constraint in this setup."}</p>
+                            <p>{getSimpleProductReason(product)}</p>
                             <div className="productMeta">
                               {metadata ? <span>{formatProductCategory(metadata.category)}</span> : null}
                             </div>
@@ -666,7 +724,7 @@ export function DeskAdvisorSite() {
                   ) : (
                     <div className="rationalePanel">
                       <span className="sectionLabel">No product-first fix yet</span>
-                      <p>Start with the setup changes above. They are likely to improve the score faster than buying more.</p>
+                      <p>Start with the setup changes above. They should improve the score faster than buying more.</p>
                     </div>
                   )}
                 </div>
