@@ -29,13 +29,37 @@ function toNullableNumber(value: unknown): number | null {
 }
 
 function cleanEnvValue(value: string | undefined): string | undefined {
-  const cleaned = value?.trim().replace(/^['"]|['"]$/g, "");
+  const cleaned = value
+    ?.trim()
+    .replace(/^['"]|['"]$/g, "")
+    .replace(/\s+/g, "");
+
   return cleaned && cleaned.length > 0 ? cleaned : undefined;
 }
 
+function cleanSupabaseUrl(value: string | undefined): string | undefined {
+  const cleaned = cleanEnvValue(value)?.replace(/^(NEXT_PUBLIC_)?SUPABASE_URL=/, "");
+  return cleaned?.startsWith("https://") ? cleaned : undefined;
+}
+
+function cleanSupabaseKey(value: string | undefined): string | undefined {
+  const cleaned = cleanEnvValue(value)
+    ?.replace(/^Bearer/i, "")
+    .replace(/^=/, "")
+    .replace(/^(NEXT_PUBLIC_)?SUPABASE_ANON_KEY=/, "")
+    .replace(/^SUPABASE_SERVICE_ROLE_KEY=/, "")
+    .replace(/^SUPABASE_SERVICE_ROLE=/, "");
+
+  return cleaned && cleaned.length > 20 ? cleaned : undefined;
+}
+
 function getSupabaseConfig() {
-  const supabaseUrl = cleanEnvValue(process.env.NEXT_PUBLIC_SUPABASE_URL);
-  const supabaseKey = cleanEnvValue(process.env.SUPABASE_SERVICE_ROLE_KEY) ?? cleanEnvValue(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+  const supabaseUrl = cleanSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL) ?? cleanSupabaseUrl(process.env.SUPABASE_URL);
+  const supabaseKey =
+    cleanSupabaseKey(process.env.SUPABASE_SERVICE_ROLE_KEY) ??
+    cleanSupabaseKey(process.env.SUPABASE_SERVICE_ROLE) ??
+    cleanSupabaseKey(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) ??
+    cleanSupabaseKey(process.env.SUPABASE_ANON_KEY);
 
   return { supabaseUrl, supabaseKey };
 }
