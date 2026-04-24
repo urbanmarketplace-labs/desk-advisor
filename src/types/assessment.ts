@@ -1,3 +1,5 @@
+import type { ProductCatalogEntry, ProductCatalogKey } from "@/lib/productCatalog";
+
 export type TimeExposure = "Under 2 hours" | "2-4 hours" | "4-8 hours" | "8+ hours";
 
 export type SetupType =
@@ -165,17 +167,6 @@ export interface ResolvedTradeOff {
   decision: string;
 }
 
-export interface ProductCatalogItem {
-  name: string;
-  category: ProductCategory;
-  priceBand: "Under 50" | "50-150" | "150-300" | "300+" | "Premium";
-  benefits: string[];
-  bestFor: string[];
-  avoidIf: string[];
-  spaceImpact: "low" | "medium" | "high";
-  styleFit: "utility" | "clean" | "premium";
-}
-
 export interface DiagnosisIssue {
   id: string;
   label: string;
@@ -204,7 +195,8 @@ export interface ScoreImprovement {
 }
 
 export interface MatchedProduct {
-  name: string;
+  key: ProductCatalogKey;
+  product: ProductCatalogEntry;
   fitScore: number;
   reasons: string[];
 }
