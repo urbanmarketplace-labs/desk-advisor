@@ -1,4 +1,4 @@
-import { productCatalog } from "@/data/product-catalog";
+import { productCatalogEntries, type ProductCatalogKey } from "@/lib/productCatalog";
 import type {
   AssessmentInput,
   Confidence,
@@ -10,7 +10,7 @@ import type {
   InferredConstraint,
   InputQuality,
   MatchedProduct,
-  ProductCatalogItem,
+  ProductCategory,
   ResolvedTradeOff,
   ScoreImprovement,
   ScoreKey,
@@ -44,6 +44,12 @@ interface SignalModel {
   moreDetailPrompt: string | null;
 }
 
+interface ProductProfile {
+  category: ProductCategory;
+  spaceImpact: "low" | "medium" | "high";
+  styleFit: "utility" | "clean" | "premium";
+}
+
 const subScoreLabels: Record<ScoreKey, string> = {
   comfort: "Comfort / ergonomics",
   focus: "Focus / visual clarity",
@@ -63,6 +69,67 @@ const signalLabels: Record<SignalKey, string> = {
 };
 
 const structuralOrder: ConstraintKey[] = ["ergonomics", "lighting", "space", "focus", "finish"];
+
+const productProfiles: Record<ProductCatalogKey, ProductProfile> = {
+  lumomist_diffuser: {
+    category: "wellbeing",
+    spaceImpact: "low",
+    styleFit: "premium"
+  },
+  charging_station: {
+    category: "organization",
+    spaceImpact: "low",
+    styleFit: "clean"
+  },
+  leather_desk_mat: {
+    category: "surface",
+    spaceImpact: "medium",
+    styleFit: "premium"
+  },
+  wooden_tablet_stand: {
+    category: "organization",
+    spaceImpact: "low",
+    styleFit: "clean"
+  },
+  monitor_light_bar: {
+    category: "lighting",
+    spaceImpact: "low",
+    styleFit: "clean"
+  },
+  monitor_stand: {
+    category: "ergonomics",
+    spaceImpact: "medium",
+    styleFit: "clean"
+  },
+  adjustable_laptop_stand: {
+    category: "ergonomics",
+    spaceImpact: "low",
+    styleFit: "clean"
+  },
+  wooden_laptop_stand: {
+    category: "ergonomics",
+    spaceImpact: "low",
+    styleFit: "premium"
+  },
+  cable_management: {
+    category: "organization",
+    spaceImpact: "low",
+    styleFit: "utility"
+  },
+  headphone_stand: {
+    category: "organization",
+    spaceImpact: "low",
+    styleFit: "clean"
+  }
+};
+
+const primaryProductBoosts: Record<ConstraintKey, ProductCatalogKey[]> = {
+  ergonomics: ["adjustable_laptop_stand", "wooden_laptop_stand", "monitor_stand"],
+  lighting: ["monitor_light_bar"],
+  space: ["cable_management", "charging_station", "headphone_stand", "monitor_stand"],
+  focus: ["cable_management", "charging_station", "leather_desk_mat", "headphone_stand"],
+  finish: ["leather_desk_mat", "lumomist_diffuser", "wooden_tablet_stand", "wooden_laptop_stand"]
+};
 
 function clamp(value: number, min = 0, max = 1): number {
   return Math.max(min, Math.min(max, value));
@@ -567,7 +634,7 @@ function impactForConstraint(constraint: InferredConstraint): string {
     case "focus":
       return "This chips away at attention before you notice it.";
     case "finish":
-      return "This affects how settled the desk feels, but it is rarely the first fix."
+      return "This affects how settled the desk feels, but it is rarely the first fix.";
   }
 }
 
@@ -610,8 +677,8 @@ function buildDiagnosisTags(constraints: InferredConstraint[], signals: Workspac
   return unique(tags).slice(0, 4);
 }
 
-function categoryForProduct(product: ProductCatalogItem): ConstraintKey | null {
-  switch (product.category) {
+function categoryForProduct(key: ProductCatalogKey): ConstraintKey | null {
+  switch (productProfiles[key].category) {
     case "ergonomics":
       return "ergonomics";
     case "lighting":
@@ -627,20 +694,24 @@ function categoryForProduct(product: ProductCatalogItem): ConstraintKey | null {
   }
 }
 
-function productReason(product: ProductCatalogItem, constraint: InferredConstraint): string {
+function productReason(key: ProductCatalogKey, constraint: InferredConstraint): string {
   switch (constraint.key) {
     case "ergonomics":
-      return `Recommended because it directly reduces ${constraint.label.toLowerCase()}.`;
+      return key === "adjustable_laptop_stand" || key === "wooden_laptop_stand"
+        ? "Helps lift the screen and ease laptop strain."
+        : "Helps make the screen setup more comfortable.";
     case "lighting":
-      return "Recommended because visibility is part of the main constraint.";
+      return "Helps improve lighting where you work.";
     case "space":
-      return "Recommended because surface pressure is limiting the setup.";
+      return key === "cable_management"
+        ? "Helps clear cables off the work surface."
+        : "Helps create more usable desk space.";
     case "focus":
-      return "Recommended because visual noise is affecting focus.";
+      return "Helps reduce what competes for your attention.";
     case "finish":
-      return product.styleFit === "premium"
-        ? "Recommended because the core setup is stable enough to polish."
-        : "Recommended only if it also simplifies the desk.";
+      return key === "lumomist_diffuser"
+        ? "Adds polish once the main setup issues are solved."
+        : "Helps the desk feel more considered without adding clutter.";
   }
 }
 
@@ -653,25 +724,34 @@ function scoreProducts(input: AssessmentInput, constraints: InferredConstraint[]
   const structuralUnresolved = primary.structural && primary.severity > 0.62;
   const limit = model.depth === "deep" ? 3 : 2;
 
-  return productCatalog
+  return productCatalogEntries
     .map((product) => {
-      const related = categoryForProduct(product);
+      const profile = productProfiles[product.key];
+      const related = categoryForProduct(product.key);
       const relatedConstraint = constraints.find((constraint) => constraint.key === related);
       let fitScore = 34;
 
       if (relatedConstraint) fitScore += relatedConstraint.priority * 46;
       if (primary.key === related) fitScore += 18;
+      if (primaryProductBoosts[primary.key].includes(product.key)) fitScore += 16;
       if (input.upgradeIntent === "Free improvements first") fitScore -= 12;
-      if ((input.deskSize === "Very small" || input.deskSize === "Small") && product.spaceImpact === "high") fitScore -= 18;
-      if (structuralUnresolved && product.styleFit === "premium" && related !== primary.key) fitScore -= 28;
-      if (primary.key === "ergonomics" && product.category !== "ergonomics") fitScore -= 8;
-      if (primary.key === "lighting" && product.category !== "lighting" && product.styleFit === "premium") fitScore -= 12;
+      if ((input.deskSize === "Very small" || input.deskSize === "Small") && profile.spaceImpact === "high") fitScore -= 18;
+      if (structuralUnresolved && profile.styleFit === "premium" && related !== primary.key) fitScore -= 28;
+      if (primary.key === "ergonomics" && profile.category !== "ergonomics") fitScore -= 8;
+      if (primary.key === "lighting" && profile.category !== "lighting" && profile.styleFit === "premium") fitScore -= 12;
+      if (primary.key === "space" && ["charging_station", "cable_management", "headphone_stand"].includes(product.key)) fitScore += 10;
+      if (primary.key === "focus" && ["cable_management", "leather_desk_mat"].includes(product.key)) fitScore += 8;
+      if (input.setupType === "Laptop only" && ["adjustable_laptop_stand", "wooden_laptop_stand"].includes(product.key)) fitScore += 10;
+      if (input.frictionSignals.includes("Low light / poor visibility") && product.key === "monitor_light_bar") fitScore += 12;
+      if (input.frictionSignals.includes("Clutter / visual noise") && ["cable_management", "charging_station", "headphone_stand"].includes(product.key)) fitScore += 10;
+      if (input.whatMattersMost === "More premium feel" && ["leather_desk_mat", "wooden_laptop_stand", "lumomist_diffuser"].includes(product.key)) fitScore += 8;
 
       const chosenConstraint = relatedConstraint ?? primary;
       return {
-        name: product.name,
+        key: product.key,
+        product,
         fitScore: Math.round(clamp(fitScore / 100) * 100),
-        reasons: [productReason(product, chosenConstraint), chosenConstraint.why]
+        reasons: [productReason(product.key, chosenConstraint), chosenConstraint.why]
       };
     })
     .filter((product) => product.fitScore >= 58)
@@ -730,9 +810,9 @@ export function diagnoseWorkspace(input: AssessmentInput): DiagnosisResult {
   const issues = buildIssues(constraints, signalModel);
   const actions = constraints.slice(0, signalModel.depth === "short" ? 2 : signalModel.depth === "medium" ? 3 : 4).map((constraint) => actionForConstraint(constraint, input));
   const matchedProducts = scoreProducts(input, constraints, signalModel);
-  const paidUpgradeItems = matchedProducts.map((product) => {
-    const reason = product.reasons[0]?.replace(/\.$/, "") ?? "solves a defined constraint";
-    return `${product.name} -> ${reason.toLowerCase()} -> supports the main diagnosis`;
+  const paidUpgradeItems = matchedProducts.map((match) => {
+    const reason = match.reasons[0]?.replace(/\.$/, "") ?? "solves a defined constraint";
+    return `${match.product.name} -> ${reason.toLowerCase()} -> supports the main diagnosis`;
   });
 
   const reasoning = buildReasoning(signalModel.signals, constraints, tradeOffs, signalModel);
