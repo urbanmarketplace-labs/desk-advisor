@@ -2,12 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { diagnoseWorkspace } from "@/core/diagnose";
-import { productCatalog } from "@/data/product-catalog";
 import { emptyAssessment, getAdaptiveAssessmentSteps } from "@/data/questions";
 import { trackDeskLabEvent } from "@/lib/desklab-events";
 import type { AssessmentInput, DiagnosisResult, FrictionSignal } from "@/types/assessment";
 
-const productReasonMap = new Map(productCatalog.map((product) => [product.name, product]));
 const loadingMessages = [
   "Reading your setup",
   "Finding the main issue",
@@ -57,13 +55,6 @@ function buildSignals(result: DiagnosisResult): string[] {
     .filter((signal) => signal.intensity > 0.48)
     .slice(0, 3)
     .map((signal) => formatSignalLabel(signal.label));
-}
-
-function formatProductCategory(value: string): string {
-  return value
-    .split("-")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
 }
 
 function firstSentence(value: string): string {
@@ -168,14 +159,6 @@ function getGainEstimate(result: DiagnosisResult, scoreLabel: string, index: num
   const multiplier = index === 0 ? 0.22 : index === 1 ? 0.18 : 0.14;
 
   return Math.max(4, Math.min(12, Math.round((100 - subScore) * multiplier)));
-}
-
-function getCompactActionLine(item: DiagnosisResult["scoreImprovements"][number]): string {
-  const actionIcon = getCueIcon(item.action);
-  const effectIcon = getCueIcon(item.effect);
-  const scoreName = getScoreName(item.scoreLabel).toLowerCase();
-
-  return `${actionIcon} ${item.action}  •  ${effectIcon} ${item.effect}  •  ⬆️ improve ${scoreName}`;
 }
 
 function getSimpleProductReason(product: DiagnosisResult["matchedProducts"][number]): string {
@@ -736,29 +719,31 @@ export function DeskAdvisorSite() {
 
                   {matchedProducts.length > 0 ? (
                     <div className="productGrid">
-                      {matchedProducts.slice(0, 3).map((product) => {
-                        const metadata = productReasonMap.get(product.name);
+                      {matchedProducts.slice(0, 3).map((match) => {
+                        const hasProductUrl = Boolean(match.product.url?.trim());
+
                         return (
-                          <article
-                            className="productCard"
-                            key={product.name}
-                            onClick={() => trackDeskLabEvent({ event_name: "product_clicked", product_name: product.name })}
-                            onKeyDown={(event) => {
-                              if (event.key === "Enter" || event.key === " ") {
-                                event.preventDefault();
-                                trackDeskLabEvent({ event_name: "product_clicked", product_name: product.name });
-                              }
-                            }}
-                            role="button"
-                            tabIndex={0}
-                          >
+                          <article className="productCard" key={match.key}>
                             <div className="productTop">
-                              <strong>{product.name}</strong>
+                              <strong>{match.product.name}</strong>
                             </div>
-                            <p>{getSimpleProductReason(product)}</p>
+                            <p>{getSimpleProductReason(match)}</p>
                             <div className="productMeta">
-                              {metadata ? <span>{formatProductCategory(metadata.category)}</span> : null}
+                              <span>{match.fitScore}% match</span>
                             </div>
+                            {hasProductUrl ? (
+                              <a
+                                className="secondaryButton"
+                                href={match.product.url}
+                                rel="noreferrer"
+                                target="_blank"
+                                onClick={() => trackDeskLabEvent({ event_name: "product_clicked", product_name: match.product.name })}
+                              >
+                                Shop this fix
+                              </a>
+                            ) : (
+                              <span className="questionHint">Coming soon</span>
+                            )}
                           </article>
                         );
                       })}
