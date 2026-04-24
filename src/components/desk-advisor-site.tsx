@@ -721,12 +721,25 @@ export function DeskAdvisorSite() {
                     <div className="productGrid">
                       {matchedProducts.slice(0, 3).map((match) => {
                         const hasProductUrl = Boolean(match.product.url?.trim());
+                        const hasProductImage = Boolean(match.product.image?.trim());
 
                         return (
                           <article className="productCard" key={match.key}>
+                            {hasProductImage ? (
+                              <div className="productImageWrap">
+                                <img
+                                  alt={match.product.name}
+                                  className="productImage"
+                                  loading="lazy"
+                                  src={match.product.image}
+                                />
+                              </div>
+                            ) : null}
                             <div className="productTop">
                               <strong>{match.product.name}</strong>
                             </div>
+                            <p className="productIntro">{match.product.intro}</p>
+                            <p className="productDetail">{match.product.details}</p>
                             <p>{getSimpleProductReason(match)}</p>
                             <div className="productMeta">
                               <span>{match.fitScore}% match</span>
