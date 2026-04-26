@@ -40,7 +40,7 @@ function getScoreAccent(score: number): string {
 
 function getConfidenceSupport(result: DiagnosisResult): string {
   if (result.inputQuality === "light") {
-    return "Lower confidence. Add more detail for sharper results.";
+    return "Light diagnosis. A short note about your setup would make this more precise.";
   }
 
   if (result.inputQuality === "moderate") {
@@ -70,7 +70,7 @@ function getCompactDiagnosis(result: DiagnosisResult): string {
     return firstSentence(primary);
   }
 
-  return `${firstSentence(primary)} Secondary issue: ${humanizeConstraint(secondary.label).toLowerCase()}.`;
+  return `${firstSentence(primary)} Next issue: ${humanizeConstraint(secondary.label).toLowerCase()}.`;
 }
 
 function humanizeConstraint(value: string): string {
@@ -122,7 +122,7 @@ function getWhyBlocks(result: DiagnosisResult): Array<{ icon: string; label: str
   return [
     ...blocks,
     {
-      icon: "⚖️",
+      icon: "Priority",
       label: "Priority",
       text: `${humanizeConstraint(result.primaryConstraint)} matters most right now. Fixing it should have the biggest impact.`
     }
@@ -132,14 +132,14 @@ function getWhyBlocks(result: DiagnosisResult): Array<{ icon: string; label: str
 function getCueIcon(value: string): string {
   const text = value.toLowerCase();
 
-  if (text.includes("screen") || text.includes("laptop") || text.includes("monitor")) return "🖥️";
-  if (text.includes("light") || text.includes("shadow")) return "💡";
-  if (text.includes("clutter") || text.includes("clear") || text.includes("cable")) return "🧹";
-  if (text.includes("space") || text.includes("surface") || text.includes("fit")) return "📏";
-  if (text.includes("comfort") || text.includes("strain") || text.includes("neck") || text.includes("shoulder")) return "😌";
-  if (text.includes("focus") || text.includes("visual")) return "🎯";
+  if (text.includes("screen") || text.includes("laptop") || text.includes("monitor")) return "Screen";
+  if (text.includes("light") || text.includes("shadow")) return "Light";
+  if (text.includes("clutter") || text.includes("clear") || text.includes("cable")) return "Clear";
+  if (text.includes("space") || text.includes("surface") || text.includes("fit")) return "Space";
+  if (text.includes("comfort") || text.includes("strain") || text.includes("neck") || text.includes("shoulder")) return "Comfort";
+  if (text.includes("focus") || text.includes("visual")) return "Focus";
 
-  return "⬆️";
+  return "Note";
 }
 
 function getScoreName(scoreLabel: string): string {
@@ -162,6 +162,29 @@ function getGainEstimate(result: DiagnosisResult, scoreLabel: string, index: num
 }
 
 function getSimpleProductReason(product: DiagnosisResult["matchedProducts"][number]): string {
+  switch (product.key) {
+    case "monitor_stand":
+      return "Raises your screen and frees up desk space.";
+    case "adjustable_laptop_stand":
+      return "Helps reduce neck strain during longer sessions.";
+    case "wooden_laptop_stand":
+      return "Lifts your laptop while keeping the setup clean.";
+    case "monitor_light_bar":
+      return "Improves lighting where you actually work.";
+    case "cable_management":
+      return "Clears cables from your main work area.";
+    case "charging_station":
+      return "Keeps everyday charging in one cleaner spot.";
+    case "leather_desk_mat":
+      return "Defines a calmer main work zone.";
+    case "wooden_tablet_stand":
+      return "Moves a second device off the desk surface.";
+    case "headphone_stand":
+      return "Keeps headphones off the desk when not in use.";
+    case "lumomist_diffuser":
+      return "Adds polish once the practical fixes are handled.";
+  }
+
   const reason = product.reasons[0] ?? "Helps improve a real issue in your setup.";
 
   if (/lighting|visibility|light/i.test(reason)) return "Helps improve lighting where you work.";
@@ -201,6 +224,7 @@ export function DeskAdvisorSite() {
   const step = adaptiveSteps[Math.min(stepIndex, adaptiveSteps.length - 1)];
   const totalSteps = adaptiveSteps.length;
   const progress = Math.round(((stepIndex + 1) / totalSteps) * 100);
+  const quickCheckStep = Math.min(5, Math.max(1, Math.ceil(((stepIndex + 1) / totalSteps) * 5)));
 
   const canContinue = useMemo(() => isStepComplete(step.id, assessment[step.id]), [assessment, step.id]);
 
@@ -424,8 +448,9 @@ export function DeskAdvisorSite() {
   const scoreImprovements = result?.scoreImprovements ?? [];
   const compactSummary = result ? getCompactDiagnosis(result) : "";
   const isSummaryTyping = result ? typedSummary.length < compactSummary.length : false;
-  const primaryCtaLabel = phase === "idle" ? "Begin assessment" : "Go to assessment";
-  const heroCtaLabel = phase === "idle" ? "Begin assessment" : phase === "result" ? "View results" : "Continue assessment";
+  const primaryCtaLabel = phase === "idle" ? "Start free check" : "Go to quick check";
+  const heroCtaLabel = phase === "idle" ? "Start free check" : phase === "result" ? "View results" : "Continue check";
+  const progressMessage = quickCheckStep >= 5 ? "One more step to your result." : quickCheckStep >= 4 ? "Nearly there." : quickCheckStep >= 3 ? "Now we can find the main issue." : "Good — that helps narrow it down.";
 
   return (
     <main className="page">
@@ -447,28 +472,29 @@ export function DeskAdvisorSite() {
           <div className="hero">
             <div className="heroContent">
               <div className="heroBadge">DeskLab</div>
-              <h1>Fix your desk in minutes</h1>
+              <h1>Fix your desk in 30 seconds.</h1>
               <p className="heroLead">
-                Find what’s getting in the way, and fix it with clear next steps.
+                Find what’s hurting your focus, comfort, or space — then see what to fix first.
               </p>
+              <p className="heroSupport">Answer a few quick questions and get a personalised desk score.</p>
               <div className="heroActions">
                 <button className="primaryButton lightButton" type="button" onClick={goToAssessment}>
                   {heroCtaLabel}
                 </button>
-                <span className="heroMeta">A clearer workspace starts with the right first fix.</span>
+                <span className="heroMeta">No sign-up. No guesswork. Just clear next steps.</span>
               </div>
               <div className="heroHighlights">
                 <div>
                   <strong>Comfort</strong>
-                  <span>Posture, reach, and daily ease.</span>
+                  <span>Better screen height and daily ease.</span>
                 </div>
                 <div>
                   <strong>Focus</strong>
-                  <span>Visual calm, clutter, and working clarity.</span>
+                  <span>Less clutter and clearer focus.</span>
                 </div>
                 <div>
-                  <strong>Fit</strong>
-                  <span>Desk size, layout discipline, and upgrade suitability.</span>
+                  <strong>Space</strong>
+                  <span>More usable room where you work.</span>
                 </div>
               </div>
             </div>
@@ -476,29 +502,29 @@ export function DeskAdvisorSite() {
             <aside className="heroAside">
               <div className="heroPanel">
                 <span className="panelKicker">What you get</span>
-                <h2 className="heroPanelTitle">A clear score, one main issue, and the fastest ways to improve it.</h2>
+                <h2 className="heroPanelTitle">A desk score, your biggest issue, and what to fix first.</h2>
                 <p className="heroPanelText">
-                  DeskLab keeps the advice practical: fix what changes daily use before adding more to your desk.
+                  Fast, practical advice that shows what is getting in the way and what will help first.
                 </p>
                 <div className="heroEditorial">
                   <div>
-                    <strong>Posture</strong>
-                    <span>Whether screen height, reach, and input position are supporting the way you actually work.</span>
+                    <strong>Comfort</strong>
+                    <span>See if screen height and reach may be making longer sessions harder.</span>
                   </div>
                   <div>
-                    <strong>Visual quality</strong>
-                    <span>How lighting, cable load, and object density affect clarity, calm, and concentration.</span>
+                    <strong>Focus</strong>
+                    <span>Spot the clutter, lighting, or layout issues that can quietly drain attention.</span>
                   </div>
                   <div>
-                    <strong>Upgrade judgement</strong>
-                    <span>Whether a product would meaningfully improve the desk or simply add more to manage.</span>
+                    <strong>Best next step</strong>
+                    <span>Know whether to change the setup first or add something that solves a real issue.</span>
                   </div>
                 </div>
               </div>
 
               <div className="heroFoot">
-                <span className="panelKicker">Beta standard</span>
-                <p>Short assessment. Clear result. No generic desk advice.</p>
+                <span className="panelKicker">Free check</span>
+                <p>Instant result. Clear next steps.</p>
               </div>
             </aside>
           </div>
@@ -509,13 +535,13 @@ export function DeskAdvisorSite() {
         <div className="assessmentFrame" ref={assessmentFrameRef} tabIndex={-1}>
           <div className="assessmentIntroRow">
             <div className="assessmentIntro">
-              <span className="sectionLabel">Assessment</span>
-              <h2>Clear guidance shaped around the desk in front of you.</h2>
-              <p>The path changes as DeskLab learns more about your setup.</p>
+              <span className="sectionLabel">Quick check</span>
+              <h2>Answer a few quick questions and get your desk score.</h2>
+              <p>This takes around 30 seconds.</p>
             </div>
             {phase !== "idle" ? (
               <button className="textButton" type="button" onClick={restart}>
-                Reset assessment
+                Start again
               </button>
             ) : null}
           </div>
@@ -523,12 +549,12 @@ export function DeskAdvisorSite() {
           {phase === "idle" ? (
             <div className="introState">
               <div className="introPoints">
-                <span>Adaptive questions</span>
-                <span>Clear priorities</span>
-                <span>Confidence-aware output</span>
+                <span>Fast questions</span>
+                <span>Clear score</span>
+                <span>What to fix first</span>
               </div>
               <button className="primaryButton wideButton" type="button" onClick={goToAssessment}>
-                Begin assessment
+                Start free check
               </button>
             </div>
           ) : null}
@@ -537,7 +563,7 @@ export function DeskAdvisorSite() {
             <div className="questionShell" ref={livePanelRef} tabIndex={-1}>
               <div className="progressMeta">
                 <span>
-                  Step {stepIndex + 1} of {totalSteps}
+                  Quick check {quickCheckStep} of 5
                 </span>
                 <span>{progress}%</span>
               </div>
@@ -546,9 +572,10 @@ export function DeskAdvisorSite() {
               </div>
 
               <div className="questionArea">
-                <span className="sectionLabel">Live assessment</span>
+                <span className="sectionLabel">This takes around 30 seconds</span>
                 <h2 ref={questionHeadingRef} tabIndex={-1}>{step.title}</h2>
                 <p>{step.description}</p>
+                <span className="questionHint momentumHint">{progressMessage}</span>
                 {step.reason ? <span className="questionHint">{step.reason}</span> : null}
 
                 {step.kind === "text" ? (
@@ -559,7 +586,7 @@ export function DeskAdvisorSite() {
                       value={assessment.extraDetail}
                       onChange={(event) => updateSingle("extraDetail", event.target.value)}
                     />
-                    <span className="questionHint">Optional, but this is the part that makes the diagnosis more specific.</span>
+                    <span className="questionHint">Optional, but this helps make the result more precise.</span>
                   </div>
                 ) : null}
 
@@ -608,7 +635,7 @@ export function DeskAdvisorSite() {
                   Back
                 </button>
                 <button className="primaryButton" type="button" onClick={goNext} disabled={!canContinue}>
-                  {stepIndex === totalSteps - 1 ? "Analyse workspace" : "Continue"}
+                  {stepIndex === totalSteps - 1 ? "Get my desk score" : "Continue"}
                 </button>
               </div>
             </div>
@@ -617,9 +644,9 @@ export function DeskAdvisorSite() {
           {phase === "loading" ? (
             <div className="loadingState" aria-live="polite" ref={livePanelRef} tabIndex={-1}>
               <div className="thinkingOrb" />
-              <span className="sectionLabel">DeskLab is thinking</span>
+              <span className="sectionLabel">DeskLab is checking your setup</span>
               <h2>{loadingMessages[loadingIndex]}</h2>
-              <p>Turning your answers into a clear score and practical next steps.</p>
+              <p>Turning your answers into a clear score and what to fix first.</p>
             </div>
           ) : null}
 
@@ -627,6 +654,7 @@ export function DeskAdvisorSite() {
             <div className="resultShell" ref={livePanelRef} tabIndex={-1}>
               <div className="resultHero">
                 <div className="scoreCard">
+                  <span className="sectionLabel">Your desk score</span>
                   <span className={`scoreTag ${getScoreAccent(result.score)}`}>{getScoreLabel(result.score)}</span>
                   <div className="score">
                     {result.score}
@@ -651,8 +679,8 @@ export function DeskAdvisorSite() {
                 <div className="resultOverview">
                   <div className="overviewTop">
                     <div>
-                      <span className="sectionLabel">Main issue</span>
-                      <h2>⚠️ {humanizeConstraint(result.primaryConstraint)}</h2>
+                      <span className="sectionLabel">Biggest issue</span>
+                      <h2>{humanizeConstraint(result.primaryConstraint)}</h2>
                     </div>
                     <div className="pillStack">
                       <div className={`confidencePill confidence${result.confidence}`}>{result.confidenceLabel}</div>
@@ -671,7 +699,7 @@ export function DeskAdvisorSite() {
                   </div>
 
                   <details className="inputQualityCard">
-                    <summary>Why this result</summary>
+                    <summary>Why this matters</summary>
                     {getWhyBlocks(result).map((block) => (
                       <div key={`${block.label}-${block.text}`}>
                         <strong>{block.icon} {block.label}</strong>
@@ -688,10 +716,10 @@ export function DeskAdvisorSite() {
                   <div className="resultBlock">
                     <span className="blockLabel">Fix this first</span>
                     <ul className="cleanList">
-                      {scoreImprovements.slice(0, 3).map((item) => (
+                      {scoreImprovements.slice(0, 3).map((item, index) => (
                         <li key={`${item.action}-${item.scoreLabel}`}>
-                          <strong>{getCueIcon(item.action)} {humanizeCopy(item.action)}</strong>
-                          <span>→ {humanizeCopy(item.effect)}</span>
+                          <strong>{index === 0 ? "Start here: " : ""}{getCueIcon(item.action)} {humanizeCopy(item.action)}</strong>
+                          <span>Benefit: {humanizeCopy(item.effect)}</span>
                         </li>
                       ))}
                     </ul>
@@ -714,7 +742,7 @@ export function DeskAdvisorSite() {
                 <div className="productsSection revealBlock isVisible">
                   <div className="sectionIntro compactIntro">
                     <span className="sectionLabel">Recommended for your setup</span>
-                    <h2>Each one helps fix a real issue in your setup.</h2>
+                    <h2>Each one helps solve a real issue in your setup.</h2>
                   </div>
 
                   {matchedProducts.length > 0 ? (
@@ -730,7 +758,8 @@ export function DeskAdvisorSite() {
                                 <img
                                   alt={match.product.name}
                                   className="productImage"
-                                  loading="lazy"
+                                  loading="eager"
+                                  decoding="async"
                                   src={match.product.image}
                                 />
                               </div>
@@ -738,8 +767,6 @@ export function DeskAdvisorSite() {
                             <div className="productTop">
                               <strong>{match.product.name}</strong>
                             </div>
-                            <p className="productIntro">{match.product.intro}</p>
-                            <p className="productDetail">{match.product.details}</p>
                             <p>{getSimpleProductReason(match)}</p>
                             <div className="productMeta">
                               <span>{match.fitScore}% match</span>
@@ -763,7 +790,7 @@ export function DeskAdvisorSite() {
                     </div>
                   ) : (
                     <div className="rationalePanel">
-                      <span className="sectionLabel">No product-first fix yet</span>
+                      <span className="sectionLabel">No product needed yet</span>
                       <p>Start with the setup changes above. They should improve the score faster than buying more.</p>
                     </div>
                   )}
