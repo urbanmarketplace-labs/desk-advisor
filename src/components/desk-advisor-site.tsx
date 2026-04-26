@@ -451,6 +451,7 @@ export function DeskAdvisorSite() {
   const primaryCtaLabel = phase === "idle" ? "Start free check" : "Go to quick check";
   const heroCtaLabel = phase === "idle" ? "Start free check" : phase === "result" ? "View results" : "Continue check";
   const progressMessage = quickCheckStep >= 5 ? "One more step to your result." : quickCheckStep >= 4 ? "Nearly there." : quickCheckStep >= 3 ? "Now we can find the main issue." : "Good — that helps narrow it down.";
+  const shouldShowProgressMessage = stepIndex > 0;
 
   return (
     <main className="page">
@@ -575,7 +576,7 @@ export function DeskAdvisorSite() {
                 <span className="sectionLabel">This takes around 30 seconds</span>
                 <h2 ref={questionHeadingRef} tabIndex={-1}>{step.title}</h2>
                 <p>{step.description}</p>
-                <span className="questionHint momentumHint">{progressMessage}</span>
+                {shouldShowProgressMessage ? <span className="questionHint momentumHint">{progressMessage}</span> : null}
                 {step.reason ? <span className="questionHint">{step.reason}</span> : null}
 
                 {step.kind === "text" ? (
