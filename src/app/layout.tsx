@@ -3,8 +3,8 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "DeskLab",
-  description: "DeskLab by Urban Marketplace helps people diagnose workspace friction and take clearer next steps.",
+  title: "DeskLab | Fix your desk in 30 seconds",
+  description: "Find what is hurting your focus, comfort, or space — then see what to fix first.",
   icons: {
     icon: [{ url: "/favicon.ico?v=1", type: "image/x-icon" }],
     shortcut: [{ url: "/favicon.ico?v=1", type: "image/x-icon" }]
