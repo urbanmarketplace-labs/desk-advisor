@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { diagnoseWorkspace } from "@/core/diagnose";
 import { emptyAssessment } from "@/data/questions";
 import { trackDeskLabEvent } from "@/lib/desklab-events";
@@ -125,25 +125,13 @@ function getScoreAccent(score: number): string {
   return "scoreStrong";
 }
 
-function getConfidenceSupport(result: DiagnosisResult): string {
-  if (result.inputQuality === "light") {
-    return "Light result. Add more detail next time for a sharper read.";
-  }
-
-  if (result.inputQuality === "moderate") {
-    return "Good match. The main pattern is clear.";
-  }
-
-  return "Strong match. Based on clear quick-check signals.";
-}
-
 function humanizeConstraint(value: string): string {
   return value
-    .replace("Space and surface pressure", "Not enough usable space")
-    .replace("Lighting reliability", "Lighting could be better")
-    .replace("Focus and visual clarity", "Too much competing for attention")
-    .replace("Comfort and posture", "Screen position and comfort")
-    .replace("Finish and visual polish", "A cleaner overall setup");
+    .replace("Space and surface pressure", "space and layout")
+    .replace("Lighting reliability", "poor visual clarity")
+    .replace("Focus and visual clarity", "attention drag")
+    .replace("Comfort and posture", "screen height and posture load")
+    .replace("Finish and visual polish", "a cleaner overall setup");
 }
 
 function humanizeCopy(value: string): string {
@@ -172,19 +160,6 @@ function firstSentence(value: string): string {
 function getCompactDiagnosis(result: DiagnosisResult): string {
   const primary = humanizeCopy(result.mainIssues[0]?.summary ?? result.summary);
   return firstSentence(primary);
-}
-
-function getCueLabel(value: string): string {
-  const text = value.toLowerCase();
-
-  if (text.includes("screen") || text.includes("laptop") || text.includes("monitor")) return "Screen";
-  if (text.includes("light") || text.includes("shadow")) return "Light";
-  if (text.includes("clutter") || text.includes("cable") || text.includes("clear")) return "Clutter";
-  if (text.includes("space") || text.includes("surface") || text.includes("room")) return "Space";
-  if (text.includes("comfort") || text.includes("strain") || text.includes("neck")) return "Comfort";
-  if (text.includes("focus") || text.includes("visual")) return "Focus";
-
-  return "Fix";
 }
 
 function getSimpleProductReason(product: DiagnosisResult["matchedProducts"][number]): string {
@@ -399,6 +374,196 @@ function createMomentumMessage(stepIndex: number): string {
   return "Now we can find your biggest fix.";
 }
 
+function getScoreExplanation(result: DiagnosisResult): string {
+  if (!result.secondaryConstraint) {
+    return "This suggests your setup has one clear issue and a simple place to start.";
+  }
+
+  if (result.confidence === "high") {
+    return "This suggests your setup has one clear issue and a smaller secondary friction point.";
+  }
+
+  if (result.confidence === "moderate") {
+    return "This suggests your setup has one main issue with a second area worth tightening.";
+  }
+
+  return "This suggests your setup has a likely main issue, with a couple of smaller friction points around it.";
+}
+
+function getPrimaryDiagnosis(result: DiagnosisResult, answers: QuickCheckAnswers): { title: string; text: string } {
+  const primary = result.constraints[0]?.key;
+
+  if (primary === "lighting" || answers.mainIssue === "Poor lighting" || answers.dayBother === "Eye strain") {
+    return {
+      title: "Your main issue is poor visual clarity.",
+      text: "Your answers suggest your work area may not be giving your eyes enough clear, consistent light."
+    };
+  }
+
+  if (primary === "ergonomics" || answers.mainIssue === "Uncomfortable" || answers.dayBother === "Neck or shoulder strain") {
+    return {
+      title: "Your main issue is screen height and posture load.",
+      text: "Your answers suggest your screen position may be forcing your neck and shoulders to compensate."
+    };
+  }
+
+  if (primary === "space" || answers.mainIssue === "Too cluttered" || answers.dayBother === "Not enough space") {
+    return {
+      title: "Your main issue is surface clutter and layout pressure.",
+      text: "Your answers suggest the desk is losing usable room to items, cables, or poor positioning."
+    };
+  }
+
+  if (primary === "focus" || answers.mainIssue === "Hard to focus") {
+    return {
+      title: "Your main issue is attention drag.",
+      text: "Your answers suggest the setup may be making it too easy for your attention to scatter."
+    };
+  }
+
+  return {
+    title: `Your main issue is ${humanizeConstraint(result.primaryConstraint).toLowerCase()}.`,
+    text: humanizeCopy(result.mainIssues[0]?.summary ?? result.summary)
+  };
+}
+
+function getSecondaryInsight(result: DiagnosisResult): { title: string; text: string } | null {
+  if (!result.secondaryConstraint) {
+    return null;
+  }
+
+  const secondary = result.constraints[1];
+  const label = humanizeConstraint(result.secondaryConstraint);
+
+  return {
+    title: `Secondary friction: ${label}.`,
+    text: humanizeCopy(secondary?.why ?? "There is also a second issue making the desk feel less clear and less easy to use.")
+  };
+}
+
+function getPatternSummary(result: DiagnosisResult, answers: QuickCheckAnswers): string {
+  const answerBits = [answers.setupUse, answers.dayBother, answers.deskLook].filter(Boolean).join(", ");
+  const primary = humanizeConstraint(result.primaryConstraint).toLowerCase();
+
+  if (answers.setupUse === "Laptop + monitor" && answers.dayBother === "Eye strain" && answers.deskLook === "A bit busy") {
+    return "Because you selected laptop + monitor, eye strain, and a busy desk, the main pattern is visual load.";
+  }
+
+  if (answers.mainIssue === "Hard to focus" && answers.deskLook === "Cluttered" && answers.preferredFix === "Cleaner look") {
+    return "Because you selected hard to focus, cluttered, and cleaner look, the main pattern is attention drag.";
+  }
+
+  if (answers.mainIssue === "Uncomfortable" && answers.dayBother === "Neck or shoulder strain") {
+    return "Because you selected uncomfortable and neck or shoulder strain, the main pattern is screen height and posture load.";
+  }
+
+  if (answers.mainIssue === "Poor lighting" && answers.dayBother === "Eye strain") {
+    return "Because you selected poor lighting and eye strain, the main pattern is weak visual clarity.";
+  }
+
+  return `Because you selected ${answerBits || "a mixed set of issues"}, the main pattern points to ${primary}.`;
+}
+
+function getConfidenceExplanation(result: DiagnosisResult): string {
+  if (result.confidence === "high") {
+    return "High confidence: your answers point to one clear issue.";
+  }
+
+  if (result.confidence === "moderate") {
+    return "Moderate confidence: your answers show two competing issues.";
+  }
+
+  return "Balanced result: your setup has more than one improvement area.";
+}
+
+function getFixReason(item: DiagnosisResult["scoreImprovements"][number], primaryKey: string | undefined): string {
+  if (primaryKey === "lighting" || item.action.toLowerCase().includes("light")) {
+    return "This reduces eye effort and makes the work area easier to read.";
+  }
+
+  if (primaryKey === "ergonomics" || item.action.toLowerCase().includes("screen") || item.action.toLowerCase().includes("laptop")) {
+    return "This eases the load on your neck and shoulders.";
+  }
+
+  if (primaryKey === "space" || item.action.toLowerCase().includes("clear") || item.action.toLowerCase().includes("surface")) {
+    return "This gives the setup back some usable room.";
+  }
+
+  if (primaryKey === "focus") {
+    return "This removes some of the friction sitting in your line of sight.";
+  }
+
+  return "This improves the desk before you add anything else.";
+}
+
+function getProductSupportLabel(index: number, result: DiagnosisResult, productKey: string): string {
+  const secondary = result.constraints[1]?.key;
+
+  if (index === 0) {
+    return "Best match for your main issue";
+  }
+
+  if (
+    secondary === "space" && ["cable_management", "charging_station", "monitor_stand", "headphone_stand"].includes(productKey)
+  ) {
+    return "Also helps with your secondary issue";
+  }
+
+  if (
+    secondary === "lighting" && productKey === "monitor_light_bar"
+  ) {
+    return "Also helps with your secondary issue";
+  }
+
+  if (
+    secondary === "ergonomics" && ["adjustable_laptop_stand", "wooden_laptop_stand", "monitor_stand"].includes(productKey)
+  ) {
+    return "Also helps with your secondary issue";
+  }
+
+  return "Quickest improvement";
+}
+
+function getProductMatchExplanation(
+  product: DiagnosisResult["matchedProducts"][number],
+  result: DiagnosisResult,
+  answers: QuickCheckAnswers
+): string {
+  const primary = result.constraints[0]?.key;
+
+  if (product.key === "monitor_light_bar") {
+    return answers.dayBother === "Eye strain"
+      ? "Improves lighting directly where you work, which matches your lighting and eye-strain answers."
+      : "Improves lighting directly where you work, which fits the visual clarity issue in your result.";
+  }
+
+  if (product.key === "adjustable_laptop_stand" || product.key === "wooden_laptop_stand") {
+    return answers.dayBother === "Neck or shoulder strain"
+      ? "Raises the screen closer to eye level, which matches the neck and shoulder strain in your answers."
+      : "Raises the screen closer to eye level, which fits the posture load in your result.";
+  }
+
+  if (product.key === "monitor_stand") {
+    return primary === "space"
+      ? "Lifts the screen and gives some desk surface back, which matches your space and layout result."
+      : "Lifts the screen while freeing surface space, so it helps both comfort and layout.";
+  }
+
+  if (product.key === "cable_management") {
+    return "Clears loose cables from the main work area, which fits the clutter and surface-pressure pattern in your answers.";
+  }
+
+  if (product.key === "charging_station") {
+    return "Pulls daily charging into one place, which helps reduce visual clutter around the desk edge.";
+  }
+
+  if (product.key === "leather_desk_mat") {
+    return "Creates a cleaner visual work zone, which helps when the desk feels busy or unfinished.";
+  }
+
+  return getSimpleProductReason(product);
+}
+
 function useSeenTracker(
   phase: QuickCheckPhase,
   instantValueRef: React.RefObject<HTMLElement | null>,
@@ -460,6 +625,7 @@ export function DeskAdvisorSite() {
   const loadingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const typingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const revealTimeoutsRef = useRef<Array<ReturnType<typeof setTimeout>>>([]);
+  const resultTrackedRef = useRef<string | null>(null);
   const instantValueRef = useRef<HTMLElement | null>(null);
   const quickFixesRef = useRef<HTMLElement | null>(null);
   const assessmentFrameRef = useRef<HTMLDivElement | null>(null);
@@ -479,9 +645,12 @@ export function DeskAdvisorSite() {
   const scoreImprovements = result?.scoreImprovements ?? [];
   const compactSummary = result ? getCompactDiagnosis(result) : "";
   const isSummaryTyping = result ? typedSummary.length < compactSummary.length : false;
-  const primaryIssue = result ? humanizeConstraint(result.primaryConstraint) : "";
-  const whyItMatters = result ? humanizeCopy(result.whyThisMatters[0] ?? result.mainIssues[0]?.impact ?? result.summary) : "";
-  const resultCategory = result?.constraints[0]?.key ?? null;
+  const primaryDiagnosis = result ? getPrimaryDiagnosis(result, quickCheck) : null;
+  const secondaryInsight = result ? getSecondaryInsight(result) : null;
+  const patternSummary = result ? getPatternSummary(result, quickCheck) : "";
+  const confidenceExplanation = result ? getConfidenceExplanation(result) : "";
+  const scoreExplanation = result ? getScoreExplanation(result) : "";
+  const resultCategory = result?.constraints[0]?.key ?? undefined;
   const primaryHeaderCta = phase === "landing" ? "See quick fixes" : phase === "result" ? "View my result" : "Go to my check";
 
   useEffect(() => {
@@ -531,6 +700,26 @@ export function DeskAdvisorSite() {
     }
   }, [phase, stepIndex]);
 
+  useEffect(() => {
+    if (phase !== "result" || !result) {
+      return;
+    }
+
+    const signature = `${result.score}-${result.primaryConstraint}-${result.secondaryConstraint ?? "none"}`;
+    if (resultTrackedRef.current === signature) {
+      return;
+    }
+
+    resultTrackedRef.current = signature;
+    trackDeskLabEvent({
+      event_name: "result_viewed",
+      score: result.score,
+      main_issue: humanizeConstraint(result.primaryConstraint),
+      result_category: resultCategory,
+      answer_value: `secondary:${humanizeConstraint(result.secondaryConstraint ?? "none")} | confidence:${result.confidenceLabel} | pattern:${patternSummary}`
+    });
+  }, [patternSummary, phase, result, resultCategory]);
+
   function clearLoadingTimers() {
     if (loadingTimeoutRef.current) {
       clearTimeout(loadingTimeoutRef.current);
@@ -578,6 +767,7 @@ export function DeskAdvisorSite() {
     setStepIndex(0);
     setLoadingIndex(0);
     setPhase("questions");
+    resultTrackedRef.current = null;
     trackDeskLabEvent({ event_name: "check_started" });
     trackDeskLabEvent({ event_name: "assessment_started" });
 
@@ -596,6 +786,7 @@ export function DeskAdvisorSite() {
     setLoadingIndex(0);
     setPhase("landing");
     setStepIndex(0);
+    resultTrackedRef.current = null;
   }
 
   function updateAnswer(key: QuickCheckKey, value: string) {
@@ -637,7 +828,8 @@ export function DeskAdvisorSite() {
           event_name: "check_completed",
           score: diagnosis.score,
           main_issue: humanizeConstraint(diagnosis.primaryConstraint),
-          result_category: diagnosis.constraints[0]?.key ?? undefined
+          result_category: diagnosis.constraints[0]?.key ?? undefined,
+          answer_value: `secondary:${humanizeConstraint(diagnosis.secondaryConstraint ?? "none")} | confidence:${diagnosis.confidenceLabel}`
         });
         trackDeskLabEvent({
           event_name: "assessment_completed",
@@ -769,7 +961,7 @@ export function DeskAdvisorSite() {
 
           {phase === "questions" ? (
             <div className="questionShell" ref={livePanelRef} tabIndex={-1}>
-              <div className="progressMeta">
+              <div className="progressMeta progressMetaStrong">
                 <span>Quick check {stepIndex + 1} of {totalSteps}</span>
                 <span>{progress}%</span>
               </div>
@@ -777,7 +969,7 @@ export function DeskAdvisorSite() {
                 <div className="progressFill" style={{ width: `${progress}%` }} />
               </div>
 
-              <div className="questionArea">
+              <div className="questionArea questionAreaPremium">
                 <span className="sectionLabel">This takes around 30 seconds</span>
                 <h2 ref={questionHeadingRef} tabIndex={-1}>{step.title}</h2>
                 <p>{step.description}</p>
@@ -787,12 +979,12 @@ export function DeskAdvisorSite() {
                     const selected = stepValue === option;
                     return (
                       <button
-                        className={selected ? "optionButton selected" : "optionButton"}
+                        className={selected ? "optionButton selected optionButtonPremium" : "optionButton optionButtonPremium"}
                         key={option}
                         type="button"
                         onClick={() => updateAnswer(step.id, option)}
                       >
-                        {option}
+                        <span>{option}</span>
                       </button>
                     );
                   })}
@@ -819,70 +1011,70 @@ export function DeskAdvisorSite() {
             </div>
           ) : null}
 
-          {phase === "result" && result ? (
+          {phase === "result" && result && primaryDiagnosis ? (
             <div className="resultShell" ref={livePanelRef} tabIndex={-1}>
-              <div className="resultHero">
-                <div className="scoreCard">
+              <div className="resultHero resultHeroPremium">
+                <div className="scoreCard scoreCardPremium">
                   <span className="sectionLabel">Desk score</span>
                   <span className={`scoreTag ${getScoreAccent(result.score)}`}>{getScoreLabel(result.score)}</span>
                   <div className="score">{result.score}</div>
                   <p>out of 100</p>
-                  <div className="confidencePill qualityPill">{getConfidenceSupport(result)}</div>
-                  <div className="subScoreGrid revealBlock isVisible">
-                    {result.subScores.map((subScore) => (
-                      <div className="subScoreCard" key={subScore.key}>
-                        <div className="subScoreTop">
-                          <strong>{subScore.label}</strong>
-                          <span>{subScore.score}</span>
-                        </div>
-                        <div className="miniTrack">
-                          <div className="miniFill" style={{ width: `${subScore.score}%` }} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <p className="scoreExplanation">{scoreExplanation}</p>
+                  <div className="confidencePill qualityPill confidenceSummaryPill">{confidenceExplanation}</div>
                 </div>
 
-                <div className="resultOverview">
-                  <div className="overviewTop">
-                    <div>
-                      <span className="sectionLabel">Biggest issue</span>
-                      <h2>Your biggest issue is {primaryIssue.toLowerCase()}.</h2>
-                    </div>
-                    <div className="pillStack">
-                      <div className={`confidencePill confidence${result.confidence}`}>{result.confidenceLabel}</div>
-                    </div>
+                <div className="resultOverview diagnosisCard">
+                  <div className="overviewTop overviewTopStacked">
+                    <span className="sectionLabel">Primary diagnosis</span>
+                    <div className={`confidencePill confidence${result.confidence}`}>{result.confidenceLabel}</div>
                   </div>
+                  <h2>{primaryDiagnosis.title}</h2>
                   <p className="resultSummary typingSummary" aria-live="polite">
                     {typedSummary}
                     <span className={isSummaryTyping ? "typingCaret" : "typingCaret hidden"} />
                   </p>
-                  <div className="signalRow">
-                    {result.diagnosisTags.slice(0, 3).map((tag) => (
-                      <span className="signalChip" key={tag}>{humanizeConstraint(tag)}</span>
-                    ))}
-                  </div>
+                  <p className="diagnosisSupportText">{primaryDiagnosis.text}</p>
                 </div>
               </div>
 
               {revealStage >= 2 ? (
-                <div className="resultGrid revealBlock isVisible resultGridWide">
-                  <div className="resultBlock">
-                    <span className="blockLabel">Why it matters</span>
-                    <p className="resultBlockText">{whyItMatters}</p>
+                <div className="diagnosticGrid revealBlock isVisible">
+                  <div className="resultBlock insightPanel">
+                    <span className="blockLabel">Pattern summary</span>
+                    <p className="resultBlockText">{patternSummary}</p>
                   </div>
 
-                  <div className="resultBlock">
-                    <span className="blockLabel">Fix this first</span>
-                    <ul className="cleanList cleanListTight">
-                      {scoreImprovements.slice(0, 3).map((item, index) => (
-                        <li key={`${item.action}-${item.scoreLabel}`}>
-                          <strong>{index === 0 ? "Start here: " : ""}{item.action}</strong>
-                          <span>{item.effect}.</span>
-                        </li>
-                      ))}
-                    </ul>
+                  <div className="resultBlock insightPanel">
+                    <span className="blockLabel">Secondary insight</span>
+                    {secondaryInsight ? (
+                      <>
+                        <strong className="insightTitle">{secondaryInsight.title}</strong>
+                        <p className="resultBlockText">{secondaryInsight.text}</p>
+                      </>
+                    ) : (
+                      <p className="resultBlockText">Your answers point more strongly to one main issue than to a second competing one.</p>
+                    )}
                   </div>
+                </div>
+              ) : null}
+
+              {revealStage >= 3 ? (
+                <div className="resultBlock fixOrderPanel revealBlock isVisible">
+                  <div className="fixOrderHeader">
+                    <span className="blockLabel">Fix order</span>
+                    <span className="fixOrderNote">Fix this before buying anything else.</span>
+                  </div>
+                  <ol className="fixOrderList">
+                    {scoreImprovements.slice(0, 3).map((item, index) => (
+                      <li key={`${item.action}-${item.scoreLabel}`}>
+                        <div className="fixOrderNumber">{index + 1}</div>
+                        <div className="fixOrderBody">
+                          <strong>{item.action}</strong>
+                          <span>{getFixReason(item, result.constraints[0]?.key)}</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
                 </div>
               ) : null}
 
@@ -890,17 +1082,19 @@ export function DeskAdvisorSite() {
                 <div className="productsSection revealBlock isVisible">
                   <div className="sectionIntro compactIntro">
                     <span className="sectionLabel">Recommended fixes for your setup</span>
-                    <h2>These help with the issue showing up most strongly.</h2>
+                    <h2>These feel earned because they match the issues in your answers.</h2>
                   </div>
 
                   {matchedProducts.length > 0 ? (
                     <div className="productGrid">
-                      {matchedProducts.slice(0, 3).map((match) => {
+                      {matchedProducts.slice(0, 3).map((match, index) => {
                         const hasProductUrl = Boolean(match.product.url?.trim());
                         const hasProductImage = Boolean(match.product.image?.trim());
+                        const supportLabel = getProductSupportLabel(index, result, match.key);
+                        const matchExplanation = getProductMatchExplanation(match, result, quickCheck);
 
                         return (
-                          <article className="productCard" key={match.key}>
+                          <article className="productCard productCardPremium" key={match.key}>
                             {hasProductImage ? (
                               <div className="productImageWrap">
                                 <img
@@ -912,11 +1106,13 @@ export function DeskAdvisorSite() {
                                 />
                               </div>
                             ) : null}
-                            <div className="productTop">
+                            <div className="productTop productTopStacked">
+                              <span className="fitPill fitPillStrong">{supportLabel}</span>
                               <strong>{match.product.name}</strong>
-                              <span className="fitPill">{match.fitScore}% match</span>
+                              <span className="productMatchMeta">{match.fitScore}% match</span>
                             </div>
                             <p className="productIntro">{getSimpleProductReason(match)}</p>
+                            <p className="productExplain">{matchExplanation}</p>
                             {hasProductUrl ? (
                               <a
                                 className="secondaryButton"
@@ -924,8 +1120,17 @@ export function DeskAdvisorSite() {
                                 rel="noreferrer"
                                 target="_blank"
                                 onClick={() => {
-                                  trackDeskLabEvent({ event_name: "product_fix_clicked", product_name: match.product.name, result_category: resultCategory ?? undefined });
-                                  trackDeskLabEvent({ event_name: "product_clicked", product_name: match.product.name, result_category: resultCategory ?? undefined });
+                                  trackDeskLabEvent({
+                                    event_name: "product_fix_clicked",
+                                    product_name: match.product.name,
+                                    result_category: resultCategory,
+                                    answer_value: `secondary:${humanizeConstraint(result.secondaryConstraint ?? "none")} | confidence:${result.confidenceLabel} | pattern:${patternSummary}`
+                                  });
+                                  trackDeskLabEvent({
+                                    event_name: "product_clicked",
+                                    product_name: match.product.name,
+                                    result_category: resultCategory
+                                  });
                                 }}
                               >
                                 Shop this fix
@@ -950,7 +1155,11 @@ export function DeskAdvisorSite() {
                       href={storeUrl}
                       rel="noreferrer"
                       target="_blank"
-                      onClick={() => trackDeskLabEvent({ event_name: "back_to_store_clicked", result_category: resultCategory ?? undefined })}
+                      onClick={() => trackDeskLabEvent({
+                        event_name: "back_to_store_clicked",
+                        result_category: resultCategory,
+                        main_issue: humanizeConstraint(result.primaryConstraint)
+                      })}
                     >
                       Back to Urban Marketplace
                     </a>
