@@ -2,7 +2,14 @@ type DeskLabEventName =
   | "assessment_started"
   | "question_answered"
   | "assessment_completed"
-  | "product_clicked";
+  | "product_clicked"
+  | "desklab_landing_view"
+  | "instant_value_seen"
+  | "quick_fixes_seen"
+  | "check_started"
+  | "check_completed"
+  | "product_fix_clicked"
+  | "back_to_store_clicked";
 
 interface DeskLabEventPayload {
   event_name: DeskLabEventName;
@@ -11,6 +18,7 @@ interface DeskLabEventPayload {
   score?: number;
   main_issue?: string;
   product_name?: string;
+  result_category?: string;
 }
 
 const sessionStorageKey = "desklab_session_id";
@@ -21,6 +29,30 @@ function createSessionId(): string {
   }
 
   return `desklab_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+}
+
+function getTrackingContext(): string | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const source = new URLSearchParams(window.location.search).get("utm_source") ?? "direct";
+  const referrer = document.referrer ? new URL(document.referrer).hostname : "none";
+  return `source:${source} | referrer:${referrer}`;
+}
+
+function buildAnswerValue(payload: DeskLabEventPayload): string | null {
+  if (payload.event_name === "question_answered") {
+    return payload.answer_value ?? null;
+  }
+
+  const contextParts = [
+    payload.answer_value ?? null,
+    payload.result_category ? `category:${payload.result_category}` : null,
+    getTrackingContext()
+  ].filter(Boolean);
+
+  return contextParts.length > 0 ? contextParts.join(" | ").slice(0, 240) : null;
 }
 
 export function getDeskLabSessionId(): string {
@@ -47,7 +79,7 @@ export function trackDeskLabEvent(payload: DeskLabEventPayload): void {
     session_id: getDeskLabSessionId(),
     event_name: payload.event_name,
     question_id: payload.question_id ?? null,
-    answer_value: payload.answer_value ?? null,
+    answer_value: buildAnswerValue(payload),
     score: payload.score ?? null,
     main_issue: payload.main_issue ?? null,
     product_name: payload.product_name ?? null
