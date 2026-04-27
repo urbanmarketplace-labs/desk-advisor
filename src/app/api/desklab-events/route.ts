@@ -5,7 +5,14 @@ const allowedEventNames = new Set([
   "assessment_started",
   "question_answered",
   "assessment_completed",
-  "product_clicked"
+  "product_clicked",
+  "desklab_landing_view",
+  "instant_value_seen",
+  "quick_fixes_seen",
+  "check_started",
+  "check_completed",
+  "product_fix_clicked",
+  "back_to_store_clicked"
 ]);
 
 type DeskLabEventPayload = {
@@ -31,7 +38,7 @@ function toNullableNumber(value: unknown): number | null {
 function cleanEnvValue(value: string | undefined): string | undefined {
   const cleaned = value
     ?.trim()
-    .replace(/^['"]|['"]$/g, "")
+    .replace(/^['\"]|['\"]$/g, "")
     .replace(/\s+/g, "");
 
   return cleaned && cleaned.length > 0 ? cleaned : undefined;
