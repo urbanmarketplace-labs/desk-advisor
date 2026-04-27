@@ -8,6 +8,7 @@ type DeskLabEventName =
   | "quick_fixes_seen"
   | "check_started"
   | "check_completed"
+  | "result_viewed"
   | "product_fix_clicked"
   | "back_to_store_clicked";
 
