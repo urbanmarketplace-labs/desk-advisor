@@ -1,3 +1,5 @@
+import { getMetaPageContext, trackMetaEvent } from "@/lib/meta-pixel";
+
 type DeskLabEventName =
   | "assessment_started"
   | "question_answered"
@@ -56,6 +58,73 @@ function buildAnswerValue(payload: DeskLabEventPayload): string | null {
   return contextParts.length > 0 ? contextParts.join(" | ").slice(0, 720) : null;
 }
 
+function parseContextParts(value: string | null | undefined): Record<string, string> {
+  if (!value) {
+    return {};
+  }
+
+  return value.split(" | ").reduce<Record<string, string>>((parts, part) => {
+    const separatorIndex = part.indexOf(":");
+    if (separatorIndex === -1) {
+      return parts;
+    }
+
+    const key = part.slice(0, separatorIndex).trim();
+    const parsedValue = part.slice(separatorIndex + 1).trim();
+
+    if (key) {
+      parts[key] = parsedValue;
+    }
+
+    return parts;
+  }, {});
+}
+
+function nullIfMissing(value: string | undefined): string | null {
+  return value && value !== "none" ? value : null;
+}
+
+function fireMetaEvent(payload: DeskLabEventPayload): void {
+  const context = parseContextParts(payload.answer_value);
+
+  if (payload.event_name === "check_started") {
+    trackMetaEvent("DeskLabStart", getMetaPageContext());
+    return;
+  }
+
+  if (payload.event_name === "result_viewed") {
+    trackMetaEvent("DeskLabComplete", {
+      score: payload.score ?? null,
+      primary_issue: payload.main_issue ?? null,
+      secondary_issue: nullIfMissing(context.secondary),
+      confidence_level: nullIfMissing(context.confidence),
+      result_category: payload.result_category ?? nullIfMissing(context.category)
+    });
+    return;
+  }
+
+  if (payload.event_name === "product_fix_clicked") {
+    trackMetaEvent("DeskLabProductClick", {
+      product_name: payload.product_name ?? null,
+      product_url: nullIfMissing(context.url),
+      primary_issue: payload.main_issue ?? null,
+      secondary_issue: nullIfMissing(context.secondary),
+      score: payload.score ?? null,
+      match_label: nullIfMissing(context.label)
+    });
+    return;
+  }
+
+  if (payload.event_name === "back_to_store_clicked") {
+    trackMetaEvent("DeskLabBackToStore", {
+      score: payload.score ?? null,
+      primary_issue: payload.main_issue ?? null,
+      secondary_issue: nullIfMissing(context.secondary),
+      product_url: nullIfMissing(context.url)
+    });
+  }
+}
+
 export function getDeskLabSessionId(): string {
   if (typeof window === "undefined") {
     return "";
@@ -75,6 +144,8 @@ export function trackDeskLabEvent(payload: DeskLabEventPayload): void {
   if (typeof window === "undefined") {
     return;
   }
+
+  fireMetaEvent(payload);
 
   const eventBody = {
     session_id: getDeskLabSessionId(),
