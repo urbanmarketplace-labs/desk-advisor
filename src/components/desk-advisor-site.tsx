@@ -402,21 +402,21 @@ function getPrimaryDiagnosis(result: DiagnosisResult, answers: QuickCheckAnswers
 
   if (primary === "ergonomics" || answers.mainIssue === "Uncomfortable" || answers.dayBother === "Neck or shoulder strain") {
     return {
-      title: "Your main issue is screen height and posture load.",
+      title: "Your setup is creating posture load.",
       text: "Your answers suggest your screen position may be forcing your neck and shoulders to compensate."
     };
   }
 
   if (primary === "space" || answers.mainIssue === "Too cluttered" || answers.dayBother === "Not enough space") {
     return {
-      title: "Your main issue is surface clutter and layout pressure.",
-      text: "Your answers suggest the desk is losing usable room to items, cables, or poor positioning."
+      title: "Your workspace is losing usable surface area.",
+      text: "Your answers suggest the desk is losing usable room to clutter, cables, or poor positioning."
     };
   }
 
   if (primary === "focus" || answers.mainIssue === "Hard to focus") {
     return {
-      title: "Your main issue is attention drag.",
+      title: "Your setup is being held back by attention drag.",
       text: "Your answers suggest the setup may be making it too easy for your attention to scatter."
     };
   }
@@ -461,6 +461,18 @@ function getPatternSummary(result: DiagnosisResult, answers: QuickCheckAnswers):
     return "Because you selected poor lighting and eye strain, the main pattern is weak visual clarity.";
   }
 
+  if (answers.mainIssue === "Too cluttered" && answers.dayBother === "Messy cables") {
+    return "Because you selected clutter and messy cables, your desk is likely losing usable surface area.";
+  }
+
+  if (answers.dayBother === "Messy cables" && answers.deskLook !== "Clean") {
+    return "Because you selected messy cables and a busier desk, the main pattern is surface pressure and visual drag.";
+  }
+
+  if (answers.dayBother === "Not enough space" && answers.deskLook === "Cluttered") {
+    return "Because you selected not enough space and a cluttered desk, your setup is likely losing usable surface area.";
+  }
+
   return `Because you selected ${answerBits || "a mixed set of issues"}, the main pattern points to ${primary}.`;
 }
 
@@ -478,19 +490,19 @@ function getConfidenceExplanation(result: DiagnosisResult): string {
 
 function getFixReason(item: DiagnosisResult["scoreImprovements"][number], primaryKey: string | undefined): string {
   if (primaryKey === "lighting" || item.action.toLowerCase().includes("light")) {
-    return "This reduces eye effort and makes the work area easier to read.";
+    return "This reduces visual effort where you work most.";
   }
 
   if (primaryKey === "ergonomics" || item.action.toLowerCase().includes("screen") || item.action.toLowerCase().includes("laptop")) {
-    return "This eases the load on your neck and shoulders.";
+    return "This takes strain off your neck and shoulders.";
   }
 
   if (primaryKey === "space" || item.action.toLowerCase().includes("clear") || item.action.toLowerCase().includes("surface")) {
-    return "This gives the setup back some usable room.";
+    return "This gives your main task area more usable space.";
   }
 
   if (primaryKey === "focus") {
-    return "This removes some of the friction sitting in your line of sight.";
+    return "This lowers the amount competing for your attention.";
   }
 
   return "This improves the desk before you add anything else.";
@@ -498,6 +510,14 @@ function getFixReason(item: DiagnosisResult["scoreImprovements"][number], primar
 
 function getProductSupportLabel(index: number, result: DiagnosisResult, productKey: string): string {
   const secondary = result.constraints[1]?.key;
+
+  if (result.constraints[0]?.key === "space" && index === 0) {
+    return "Highest impact";
+  }
+
+  if (result.constraints[0]?.key === "finish" && index === 0) {
+    return "Cleaner setup";
+  }
 
   if (index === 0) {
     return "Best match for your main issue";
@@ -521,7 +541,39 @@ function getProductSupportLabel(index: number, result: DiagnosisResult, productK
     return "Also helps with your secondary issue";
   }
 
-  return "Quickest improvement";
+  return "Quickest fix";
+}
+
+function getFixProductConnection(
+  item: DiagnosisResult["scoreImprovements"][number],
+  matchedProducts: DiagnosisResult["matchedProducts"]
+): string | null {
+  const text = `${item.action} ${item.effect}`.toLowerCase();
+  const match = matchedProducts.find((product) => {
+    if (text.includes("light")) {
+      return product.key === "monitor_light_bar";
+    }
+
+    if (text.includes("screen") || text.includes("laptop")) {
+      return product.key === "adjustable_laptop_stand" || product.key === "wooden_laptop_stand" || product.key === "monitor_stand";
+    }
+
+    if (text.includes("cable")) {
+      return product.key === "cable_management" || product.key === "charging_station";
+    }
+
+    if (text.includes("surface") || text.includes("clear") || text.includes("work zone")) {
+      return product.key === "leather_desk_mat" || product.key === "monitor_stand";
+    }
+
+    if (text.includes("organis") || text.includes("organize")) {
+      return product.key === "headphone_stand" || product.key === "charging_station";
+    }
+
+    return false;
+  });
+
+  return match ? `Matched fix: ${match.product.name}` : null;
 }
 
 function getProductMatchExplanation(
@@ -562,6 +614,36 @@ function getProductMatchExplanation(
   }
 
   return getSimpleProductReason(product);
+}
+
+function buildResultContextString(
+  result: DiagnosisResult,
+  answers: QuickCheckAnswers,
+  patternSummary: string
+): string {
+  return [
+    `secondary:${humanizeConstraint(result.secondaryConstraint ?? "none")}`,
+    `confidence:${result.confidenceLabel}`,
+    `pattern:${patternSummary}`,
+    `preference:${answers.preferredFix || "none"}`
+  ].join(" | ");
+}
+
+function buildProductClickContext(
+  result: DiagnosisResult,
+  answers: QuickCheckAnswers,
+  patternSummary: string,
+  supportLabel: string,
+  productUrl: string
+): string {
+  return [
+    `url:${productUrl}`,
+    `secondary:${humanizeConstraint(result.secondaryConstraint ?? "none")}`,
+    `label:${supportLabel}`,
+    `confidence:${result.confidenceLabel}`,
+    `preference:${answers.preferredFix || "none"}`,
+    `pattern:${patternSummary}`
+  ].join(" | ");
 }
 
 function useSeenTracker(
@@ -716,9 +798,9 @@ export function DeskAdvisorSite() {
       score: result.score,
       main_issue: humanizeConstraint(result.primaryConstraint),
       result_category: resultCategory,
-      answer_value: `secondary:${humanizeConstraint(result.secondaryConstraint ?? "none")} | confidence:${result.confidenceLabel} | pattern:${patternSummary}`
+      answer_value: buildResultContextString(result, quickCheck, patternSummary)
     });
-  }, [patternSummary, phase, result, resultCategory]);
+  }, [patternSummary, phase, quickCheck, result, resultCategory]);
 
   function clearLoadingTimers() {
     if (loadingTimeoutRef.current) {
@@ -829,7 +911,7 @@ export function DeskAdvisorSite() {
           score: diagnosis.score,
           main_issue: humanizeConstraint(diagnosis.primaryConstraint),
           result_category: diagnosis.constraints[0]?.key ?? undefined,
-          answer_value: `secondary:${humanizeConstraint(diagnosis.secondaryConstraint ?? "none")} | confidence:${diagnosis.confidenceLabel}`
+          answer_value: buildResultContextString(diagnosis, quickCheck, getPatternSummary(diagnosis, quickCheck))
         });
         trackDeskLabEvent({
           event_name: "assessment_completed",
@@ -900,6 +982,7 @@ export function DeskAdvisorSite() {
         <div className="sectionIntro valueIntro">
           <span className="sectionLabel">Instant value</span>
           <h2>Most desk problems come from 3 things.</h2>
+          <p>Most desk issues come from repeatable patterns. DeskLab starts by looking for the ones that affect focus, comfort, and space.</p>
         </div>
         <div className="valueCardGrid">
           {instantValueCards.map((card) => (
@@ -914,7 +997,8 @@ export function DeskAdvisorSite() {
       <section className="quickWinsSection" ref={quickFixesRef}>
         <div className="sectionIntro valueIntro">
           <span className="sectionLabel">Quick wins</span>
-          <h2>Quick wins that usually make the biggest difference.</h2>
+          <h2>Common first fixes that usually make the biggest difference.</h2>
+          <p>The aim is not a perfect desk. It is the best first fix.</p>
         </div>
         <div className="quickWinsPanel">
           <ul className="quickWinsList">
@@ -937,7 +1021,7 @@ export function DeskAdvisorSite() {
             <div className="assessmentIntro">
               <span className="sectionLabel">Personalised quick check</span>
               <h2>See what matters most for your desk.</h2>
-              <p>Five quick taps. Clear result at the end.</p>
+              <p>Five quick taps. Your result is based on the pattern in your answers.</p>
             </div>
             {phase !== "landing" ? (
               <button className="textButton" type="button" onClick={restart}>
@@ -1034,6 +1118,7 @@ export function DeskAdvisorSite() {
                     <span className={isSummaryTyping ? "typingCaret" : "typingCaret hidden"} />
                   </p>
                   <p className="diagnosisSupportText">{primaryDiagnosis.text}</p>
+                  <p className="questionHint">DeskLab looks for the friction points that affect focus, comfort, and space.</p>
                 </div>
               </div>
 
@@ -1071,6 +1156,7 @@ export function DeskAdvisorSite() {
                         <div className="fixOrderBody">
                           <strong>{item.action}</strong>
                           <span>{getFixReason(item, result.constraints[0]?.key)}</span>
+                          {getFixProductConnection(item, matchedProducts) ? <span>{getFixProductConnection(item, matchedProducts)}</span> : null}
                         </div>
                       </li>
                     ))}
@@ -1082,7 +1168,7 @@ export function DeskAdvisorSite() {
                 <div className="productsSection revealBlock isVisible">
                   <div className="sectionIntro compactIntro">
                     <span className="sectionLabel">Recommended fixes for your setup</span>
-                    <h2>These feel earned because they match the issues in your answers.</h2>
+                    <h2>Start with the advice. These are the fixes most closely matched to it.</h2>
                   </div>
 
                   {matchedProducts.length > 0 ? (
@@ -1123,12 +1209,22 @@ export function DeskAdvisorSite() {
                                   trackDeskLabEvent({
                                     event_name: "product_fix_clicked",
                                     product_name: match.product.name,
+                                    score: result.score,
+                                    main_issue: humanizeConstraint(result.primaryConstraint),
                                     result_category: resultCategory,
-                                    answer_value: `secondary:${humanizeConstraint(result.secondaryConstraint ?? "none")} | confidence:${result.confidenceLabel} | pattern:${patternSummary}`
+                                    answer_value: buildProductClickContext(
+                                      result,
+                                      quickCheck,
+                                      patternSummary,
+                                      supportLabel,
+                                      match.product.url
+                                    )
                                   });
                                   trackDeskLabEvent({
                                     event_name: "product_clicked",
                                     product_name: match.product.name,
+                                    score: result.score,
+                                    main_issue: humanizeConstraint(result.primaryConstraint),
                                     result_category: resultCategory
                                   });
                                 }}
