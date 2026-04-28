@@ -523,13 +523,17 @@ aside {
 
 .quickWinsList li {
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   align-items: start;
   padding: 14px 16px;
   border-radius: 18px;
   background: var(--dl-bg);
   border: 1px solid var(--dl-border);
+}
+
+.quickWinsList li:has(.quickWinsIcon) {
+  grid-template-columns: 34px minmax(0, 1fr);
 }
 
 .quickWinsIcon {
