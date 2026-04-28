@@ -53,7 +53,7 @@ function buildAnswerValue(payload: DeskLabEventPayload): string | null {
     getTrackingContext()
   ].filter(Boolean);
 
-  return contextParts.length > 0 ? contextParts.join(" | ").slice(0, 240) : null;
+  return contextParts.length > 0 ? contextParts.join(" | ").slice(0, 720) : null;
 }
 
 export function getDeskLabSessionId(): string {
