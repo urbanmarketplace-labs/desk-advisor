@@ -6,7 +6,7 @@ import { emptyAssessment } from "@/data/questions";
 import { trackDeskLabEvent } from "@/lib/desklab-events";
 import type { AssessmentInput, DiagnosisResult } from "@/types/assessment";
 
-const storeUrl = "https://urban-market-place.com/";
+const storeUrl = "https://urbanmarket-place.com/";
 const loadingMessages = [
   "Reading your setup",
   "Finding the biggest issue",
